@@ -1,0 +1,149 @@
+{
+  "name": "Ibadah Minggu 20220518",
+  "items": [
+    {
+      "id": "1",
+      "title": "NP 1 Suci, Suci, Suci",
+      "content": [
+        {
+          "text": "#Verse 1",
+          "type": "verse"
+        },
+        {
+          "text": "Suci, suci, suci, Allah Mahatinggi,\nPuji kami naikkan di pagi yang sepi;"
+        },
+        {
+          "text": "Suci, suci, suci, Allah Mahakasih!\nAllah Tritunggal, mulia tak terp'ri."
+        },
+        {
+          "text": "#Verse 2",
+          "type": "verse"
+        },
+        {
+          "text": "Suci, suci, suci, Allah yang dipuja,\nOleh para saleh di surga dan dunia;"
+        },
+        {
+          "text": "Ribuan malaikat sujud menyembah-Nya,\nAllah yang agung s'lama-lamanya."
+        },
+        {
+          "text": "#Verse 3",
+          "type": "verse"
+        },
+        {
+          "text": "Suci, suci, suci, Walau tersembunyi,\nWalau tak terlihat oleh orang keji;"
+        },
+        {
+          "text": "Hanya Tuhan suci, lain tiada lagi,\nKuat sempurna, indah dan murni."
+        },
+        {
+          "text": "#Verse 4",
+          "type": "verse"
+        },
+        {
+          "text": "Suci, suci, suci, Allah Mahatinggi,\nAlam seluruhnya menyanyi tak henti;"
+        },
+        {
+          "text": "Suci, suci, suci, Allah Mahakasih!\nAllah Tritunggal, mulia tak terp'ri. Amin."
+        },
+        {
+          "text": "#End",
+          "type": "end"
+        }
+      ],
+      "note": "Lagu Pembuka"
+    },
+    {
+      "id": "2",
+      "title": "NP 2 Tuhan Yang Mahabesar",
+      "content": [
+        {
+          "text": "#Verse 1",
+          "type": "verse"
+        },
+        {
+          "text": "Tuhan Yang Mahabesar, Yang suci dan benar,\nYang terpuji: KaryaMu yang megah,"
+        },
+        {
+          "text": "NamaMu yang mulia\nDatang bertakhtalah Dalam hati!"
+        },
+        {
+          "text": "#Verse 2",
+          "type": "verse"
+        },
+        {
+          "text": "Allah telah menjelma, Jadi manusia,\nYang disembah: Mohon berkat penuh;"
+        },
+        {
+          "text": "B'ri FirmanMu teguh;\nRahmat, anug'rahMu Sungguh megah!"
+        },
+        {
+          "text": "#Verse 3",
+          "type": "verse"
+        },
+        {
+          "text": "Roh Allah Mahakudus: Kuatkan kami t'rus,\nB'ri kuasaMu; Bangkitkan yang rebah,"
+        },
+        {
+          "text": "Lindungi yang lemah;\nRoh Kudus, diamlah Dalam kalbu!"
+        },
+        {
+          "text": "#Verse 4",
+          "type": "verse"
+        },
+        {
+          "text": "Allah Yang Mahaesa, Roh, Anak, dan Bapa,\nYang Tritunggal, Luhur serta suci,"
+        },
+        {
+          "text": "Sang Raja Surgawi\nYang s'lalu dipuji, Mahakekal! Amin."
+        },
+        {
+          "text": "#End",
+          "type": "end"
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Dialah Allah Yang Menyembuhkan",
+      "content": [
+        {
+          "text": "#Verse 1",
+          "type": "verse"
+        },
+        {
+          "text": "DIALAH ALLAH YANG MENYEMBUHKAN"
+        },
+        {
+          "text": "DIALAH ALLAH YANG MENCUKUPI"
+        },
+        {
+          "text": "DIALAH PANJI KESELAMATAN"
+        },
+        {
+          "text": "DIALAH RAJA DAMAI"
+        },
+        {
+          "text": "#Chorus",
+          "type": "chorus"
+        },
+        {
+          "text": "YEHOVA RAPHA ALLAH YANG MENYEMBUHKAN"
+        },
+        {
+          "text": "YEHOVA JIREH ALLAH YANG MENCUKUPI"
+        },
+        {
+          "text": "YEHOVA NISSI PANJI KESELAMATAN"
+        },
+        {
+          "text": "YEHOVA SHALLOM SANG DAMAI"
+        },
+        {
+          "text": "#End",
+          "type": "end"
+        }
+      ],
+      "note": "Lagu Persembahan"
+    }
+  ]
+}

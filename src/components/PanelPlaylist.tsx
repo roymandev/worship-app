@@ -1,11 +1,21 @@
-import { useAtom } from 'jotai';
-import { playlistNameAtom } from '../stores/playlistStore';
+import { useAtom, useAtomValue } from 'jotai';
+import {
+  playlistItemsAtom,
+  playlistNameAtom,
+  playlistSelectedItemAtom,
+} from '../stores/playlistStore';
 import BaseInput from './BaseInput';
+import BaseList from './BaseList';
 import BasePanel from './BasePanel';
 import BasePanelHeader from './BasePanelHeader';
+import PanelPlaylistItem from './PanelPlaylistItem';
 
 const PanelPlaylist = () => {
   const [playlistName, setPlaylistName] = useAtom(playlistNameAtom);
+  const playlistItems = useAtomValue(playlistItemsAtom);
+  const [playlistSelectedItem, setPlaylistSelectedAtom] = useAtom(
+    playlistSelectedItemAtom,
+  );
 
   return (
     <BasePanel>
@@ -19,6 +29,21 @@ const PanelPlaylist = () => {
           onChange={(e) => setPlaylistName(e.target.value)}
         />
       </BasePanelHeader>
+      <BaseList
+        className="overflow-y-auto"
+        items={playlistItems}
+        selectedItemIndex={playlistItems.findIndex(
+          (item) => item.id === playlistSelectedItem?.id,
+        )}
+        renderItem={(item) => (
+          <PanelPlaylistItem
+            key={item.id}
+            item={item}
+            isSelected={item.id === playlistSelectedItem?.id}
+            onClick={() => setPlaylistSelectedAtom(item)}
+          />
+        )}
+      />
     </BasePanel>
   );
 };

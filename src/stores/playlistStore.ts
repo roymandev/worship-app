@@ -13,4 +13,4 @@ export const playlistItemsAtom = atomWithStorage<PlaylistItem[]>(
   dummyPlaylist.items,
 );
 
-export const playlistSelectedItemIndexAtom = atom(-1);
+export const playlistSelectedItemAtom = atom<PlaylistItem | null>(null);

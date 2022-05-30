@@ -1,3 +1,6 @@
-import { atom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 
-export const playlistNameAtom = atom('Ibadah Minggu 20220530');
+export const playlistNameAtom = atomWithStorage(
+  'playlistName',
+  'Ibadah Minggu 20220530',
+);

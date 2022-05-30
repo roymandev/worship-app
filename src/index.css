@@ -9,8 +9,8 @@
   @apply bg-blue-500;
 }
 .gutter.gutter-horizontal {
-  @apply cursor-col-resize;
+  @apply cursor-ew-resize;
 }
 .gutter.gutter-vertical {
-  @apply cursor-row-resize;
+  @apply cursor-nw-resize;
 }

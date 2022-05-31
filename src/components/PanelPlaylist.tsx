@@ -24,7 +24,7 @@ const PanelPlaylist = () => {
       </BasePanelHeader>
       <BasePanelHeader sub>
         <BaseInput
-          className="flex-1 px-1 mx-1 h-6"
+          className="flex-1 px-1 mx-1 h-7"
           value={playlistName}
           onChange={(e) => setPlaylistName(e.target.value)}
         />

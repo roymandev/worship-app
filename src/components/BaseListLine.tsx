@@ -1,6 +1,7 @@
 import { twMerge } from 'tailwind-merge';
 
-interface BaseListLineProps extends React.ComponentPropsWithoutRef<'li'> {
+export interface BaseListLineProps
+  extends React.ComponentPropsWithoutRef<'li'> {
   isSelected: boolean;
 }
 

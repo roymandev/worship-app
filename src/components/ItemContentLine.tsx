@@ -1,11 +1,9 @@
 import { twMerge } from 'tailwind-merge';
 import { BaseItemContentLine } from '../types/playlistTypes';
-import BaseListLine from './BaseListLine';
+import BaseListLine, { BaseListLineProps } from './BaseListLine';
 
-interface ItemContentLineProps {
+interface ItemContentLineProps extends BaseListLineProps {
   line: BaseItemContentLine;
-  isSelected: boolean;
-  onClick: () => void;
 }
 
 const variantClass: Record<string, string> = {
@@ -18,12 +16,14 @@ const ItemContentLine = ({
   line,
   isSelected,
   onClick,
+  ...rest
 }: ItemContentLineProps) => {
   return (
     <BaseListLine
       className={twMerge('py-1.5 px-1', line.type && variantClass[line.type])}
       isSelected={isSelected}
       onClick={onClick}
+      {...rest}
     >
       {line.text}
     </BaseListLine>

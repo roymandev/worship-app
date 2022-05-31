@@ -6,9 +6,9 @@ import {
 } from '../stores/playlistStore';
 import BaseInput from './BaseInput';
 import BaseList from './BaseList';
+import BaseListLine from './BaseListLine';
 import BasePanel from './BasePanel';
 import BasePanelHeader from './BasePanelHeader';
-import PanelPlaylistItem from './PanelPlaylistItem';
 
 const PanelPlaylist = () => {
   const [playlistName, setPlaylistName] = useAtom(playlistNameAtom);
@@ -36,12 +36,14 @@ const PanelPlaylist = () => {
           (item) => item.id === playlistSelectedItem?.id,
         )}
         renderItem={(item) => (
-          <PanelPlaylistItem
+          <BaseListLine
+            className="py-1 px-2"
             key={item.id}
-            item={item}
             isSelected={item.id === playlistSelectedItem?.id}
             onClick={() => setPlaylistSelectedAtom(item)}
-          />
+          >
+            {item.title}
+          </BaseListLine>
         )}
       />
     </BasePanel>

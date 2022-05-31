@@ -17,7 +17,7 @@ const BaseListLine = ({
         className,
         isSelected
           ? 'bg-blue-300/20 group-focus:bg-blue-300/30 group-focus:border-blue-500/80 border-blue-200'
-          : ' hover:bg-gray-100',
+          : ' hover:bg-slate-100',
       )}
       {...rest}
     >

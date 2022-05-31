@@ -9,8 +9,8 @@ const BasePanelHeader = ({ children, sub = false }: BasePanelHeaderProps) => {
   return (
     <div
       className={twMerge(
-        'flex items-center border-b border-gray-300',
-        sub ? 'h-8 bg-gray-100' : 'h-10',
+        'flex items-center border-b border-slate-300',
+        sub ? 'h-8 bg-slate-100' : 'h-10',
       )}
     >
       {children}

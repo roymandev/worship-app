@@ -5,10 +5,13 @@ import PanelPreview from './PanelPreview';
 
 const AppBody = () => {
   return (
-    <Split className="flex overflow-hidden flex-1" gutterSize={3}>
+    <Split className="flex overflow-hidden flex-1 p-1" gutterSize={4}>
       <PanelPlaylist />
       <PanelPreview />
-      <BasePanel>Live</BasePanel>
+      <Split direction="vertical" gutterSize={4}>
+        <BasePanel>Live Content</BasePanel>
+        <BasePanel>Live Screen</BasePanel>
+      </Split>
     </Split>
   );
 };

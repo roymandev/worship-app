@@ -27,7 +27,11 @@ export const BaseList = <T,>({
   return (
     <ul
       ref={containerRef}
-      className={twMerge('cursor-default group', className, 'relative')}
+      className={twMerge(
+        'cursor-default group outline-none',
+        className,
+        'relative',
+      )}
       tabIndex={selectedItemIndex !== undefined ? 0 : -1}
       onKeyDown={onKeyDown}
       {...rest}

@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 .gutter {
-  @apply bg-gray-300;
+  @apply bg-slate-300;
 }
 .gutter:hover {
   @apply bg-blue-500;
@@ -12,5 +12,5 @@
   @apply cursor-ew-resize;
 }
 .gutter.gutter-vertical {
-  @apply cursor-nw-resize;
+  @apply cursor-ns-resize;
 }

@@ -1,7 +1,6 @@
 import { useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
 import { playlistSelectedItemAtom } from '../stores/playlistStore';
-import { BaseItemContentLine } from '../types/playlistTypes';
 import BaseList from './BaseList';
 import BasePanel from './BasePanel';
 import BasePanelHeader from './BasePanelHeader';
@@ -26,6 +25,7 @@ const PanelPreview = () => {
       <BaseList
         className="leading-4 whitespace-pre-line"
         items={playlistSelectedItem?.content ?? []}
+        scrollToIndex={selectedLineIndex}
         renderItem={(line, index) => (
           <ItemContentLine
             key={index}

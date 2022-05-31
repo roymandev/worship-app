@@ -32,7 +32,7 @@ const PanelPlaylist = () => {
       <BaseList
         className="overflow-y-auto"
         items={playlistItems}
-        selectedItemIndex={playlistItems.findIndex(
+        scrollToIndex={playlistItems.findIndex(
           (item) => item.id === playlistSelectedItem?.id,
         )}
         renderItem={(item) => (

@@ -5,13 +5,13 @@ import { scrollToSelected } from '../lib/scrollToSelected';
 export interface BaseListProps<T> extends React.ComponentPropsWithoutRef<'ul'> {
   items: T[];
   renderItem: (item: T, index: number) => React.ReactNode;
-  selectedItemIndex?: number;
+  scrollToIndex?: number;
 }
 
 export const BaseList = <T,>({
   items,
   renderItem,
-  selectedItemIndex,
+  scrollToIndex,
   className,
   onKeyDown,
   ...rest
@@ -19,20 +19,20 @@ export const BaseList = <T,>({
   const containerRef = useRef<HTMLUListElement | null>(null);
 
   useEffect(() => {
-    if (containerRef.current && selectedItemIndex !== undefined) {
-      scrollToSelected(containerRef.current, selectedItemIndex);
+    if (containerRef.current && scrollToIndex !== undefined) {
+      scrollToSelected(containerRef.current, scrollToIndex);
     }
-  }, [selectedItemIndex]);
+  }, [scrollToIndex]);
 
   return (
     <ul
       ref={containerRef}
       className={twMerge(
-        'cursor-default group outline-none',
+        'cursor-default group outline-none overflow-y-auto',
         className,
         'relative',
       )}
-      tabIndex={selectedItemIndex !== undefined ? 0 : -1}
+      tabIndex={scrollToIndex !== undefined ? 0 : -1}
       onKeyDown={onKeyDown}
       {...rest}
     >

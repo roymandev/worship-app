@@ -1,9 +1,14 @@
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import {
+  liveItemAtom,
+  liveItemSelectedLineIndexAtom,
+} from '../stores/liveStore';
 import {
   playlistItemsAtom,
   playlistNameAtom,
   playlistSelectedItemAtom,
 } from '../stores/playlistStore';
+import { BaseItem } from '../types/playlistTypes';
 import BaseInput from './BaseInput';
 import BaseList from './BaseList';
 import BaseListLine from './BaseListLine';
@@ -16,6 +21,15 @@ const PanelPlaylist = () => {
   const [playlistSelectedItem, setPlaylistSelectedAtom] = useAtom(
     playlistSelectedItemAtom,
   );
+  const setLiveItem = useSetAtom(liveItemAtom);
+  const setLiveItemSelectedLineIndex = useSetAtom(
+    liveItemSelectedLineIndexAtom,
+  );
+
+  const setLiveItemHandler = (item: BaseItem) => {
+    setLiveItem(item);
+    setLiveItemSelectedLineIndex(item.content[0] ? 0 : -1);
+  };
 
   return (
     <BasePanel>
@@ -37,10 +51,11 @@ const PanelPlaylist = () => {
         )}
         renderItem={(item) => (
           <BaseListLine
-            className="py-1 px-2"
+            className="py-1 px-2 select-none"
             key={item.id}
             isSelected={item.id === playlistSelectedItem?.id}
             onClick={() => setPlaylistSelectedAtom(item)}
+            onDoubleClick={() => setLiveItemHandler(item)}
           >
             <h3 className="font-medium">{item.title}</h3>
             {item.note && <p className="text-slate-600">{item.note}</p>}

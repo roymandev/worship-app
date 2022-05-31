@@ -1,15 +1,17 @@
 import { useRef } from 'react';
 import Split from 'react-split';
-import BasePanel from './BasePanel';
+import PanelLive from './PanelLive';
 import PanelPlaylist from './PanelPlaylist';
 import PanelPreview from './PanelPreview';
 import { TextScreenRef } from './TextScreen';
 
 const AppBody = () => {
   const panelPreviewTextScreenRef = useRef<TextScreenRef | null>(null);
+  const panelLiveTextScreenRef = useRef<TextScreenRef | null>(null);
 
   const onDragHandler = () => {
     panelPreviewTextScreenRef.current?.scaleScreen();
+    panelLiveTextScreenRef.current?.scaleScreen();
   };
 
   return (
@@ -20,10 +22,7 @@ const AppBody = () => {
     >
       <PanelPlaylist />
       <PanelPreview ref={panelPreviewTextScreenRef} />
-      <Split direction="vertical" gutterSize={4}>
-        <BasePanel>Live Content</BasePanel>
-        <BasePanel>Live Screen</BasePanel>
-      </Split>
+      <PanelLive ref={panelLiveTextScreenRef} />
     </Split>
   );
 };

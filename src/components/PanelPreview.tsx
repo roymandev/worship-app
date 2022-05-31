@@ -1,4 +1,4 @@
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import {
   forwardRef,
   useEffect,
@@ -7,6 +7,10 @@ import {
   useState,
 } from 'react';
 import Split from 'react-split';
+import {
+  liveItemAtom,
+  liveItemSelectedLineIndexAtom,
+} from '../stores/liveStore';
 import { playlistSelectedItemAtom } from '../stores/playlistStore';
 import BaseList from './BaseList';
 import BasePanel from './BasePanel';
@@ -17,6 +21,18 @@ import TextScreen, { TextScreenRef } from './TextScreen';
 const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
   const playlistSelectedItem = useAtomValue(playlistSelectedItemAtom);
   const [selectedLineIndex, setSelectedLineIndex] = useState(-1);
+  const setLiveItem = useSetAtom(liveItemAtom);
+  const setLiveItemSelectedLineIndex = useSetAtom(
+    liveItemSelectedLineIndexAtom,
+  );
+
+  const setLiveItemHandler = (index: number) => {
+    console.log('a');
+    if (playlistSelectedItem) {
+      setLiveItem(playlistSelectedItem);
+      setLiveItemSelectedLineIndex(index);
+    }
+  };
 
   useEffect(() => {
     setSelectedLineIndex(playlistSelectedItem?.content[0] ? 0 : -1);
@@ -53,6 +69,7 @@ const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
               line={line}
               isSelected={index === selectedLineIndex}
               onClick={() => setSelectedLineIndex(index)}
+              onDoubleClick={() => setLiveItemHandler(index)}
             />
           )}
         />

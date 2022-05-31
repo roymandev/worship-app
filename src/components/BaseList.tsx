@@ -28,7 +28,7 @@ export const BaseList = <T,>({
     <ul
       ref={containerRef}
       className={twMerge(
-        'cursor-default group outline-none overflow-y-auto',
+        'cursor-default group outline-none overflow-y-auto select-none',
         className,
         'relative',
       )}

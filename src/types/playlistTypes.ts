@@ -1,9 +1,11 @@
+export interface BaseItemContentLine {
+  text: string;
+  type?: string;
+}
+
 export interface BaseItem {
   title: string;
-  content: {
-    text: string;
-    type?: string;
-  }[];
+  content: BaseItemContentLine[];
 }
 
 export interface PlaylistItem extends BaseItem {

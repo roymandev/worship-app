@@ -6,7 +6,6 @@ export interface BaseListProps<T> extends React.ComponentPropsWithoutRef<'ul'> {
   items: T[];
   renderItem: (item: T, index: number) => React.ReactNode;
   selectedItemIndex?: number;
-  onKeyDown?: React.KeyboardEventHandler<HTMLUListElement>;
 }
 
 export const BaseList = <T,>({
@@ -28,8 +27,8 @@ export const BaseList = <T,>({
   return (
     <ul
       ref={containerRef}
-      className={twMerge(className, 'relative')}
-      tabIndex={onKeyDown && 0}
+      className={twMerge('cursor-default group', className, 'relative')}
+      tabIndex={selectedItemIndex !== undefined ? 0 : -1}
       onKeyDown={onKeyDown}
       {...rest}
     >

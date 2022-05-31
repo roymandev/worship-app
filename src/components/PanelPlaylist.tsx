@@ -42,7 +42,8 @@ const PanelPlaylist = () => {
             isSelected={item.id === playlistSelectedItem?.id}
             onClick={() => setPlaylistSelectedAtom(item)}
           >
-            {item.title}
+            <h3 className="font-medium">{item.title}</h3>
+            {item.note && <p className="text-slate-600">{item.note}</p>}
           </BaseListLine>
         )}
       />

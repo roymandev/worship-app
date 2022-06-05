@@ -2,9 +2,9 @@ import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import type { BaseItem } from '../types/playlistTypes';
 
-export const liveItemAtom = atomWithStorage<BaseItem | null>('liveItem', null);
+export const atomLiveItem = atomWithStorage<BaseItem | null>('liveItem', null);
 
-export const liveItemSelectedLineIndexAtom = atomWithStorage<number>(
+export const atomLiveItemContentSelectedLineIndex = atomWithStorage<number>(
   'liveItemSelectedLineIndex',
   -1,
 );
@@ -12,5 +12,6 @@ export const liveItemSelectedLineIndexAtom = atomWithStorage<number>(
 // Getter
 export const liveItemSelectedLineAtom = atom(
   (get) =>
-    get(liveItemAtom)?.content[get(liveItemSelectedLineIndexAtom)] ?? null,
+    get(atomLiveItem)?.content[get(atomLiveItemContentSelectedLineIndex)] ??
+    null,
 );

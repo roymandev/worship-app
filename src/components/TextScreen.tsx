@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { scaleStyle } from '../lib/scaleStyle';
-import { screenSettingsAtom, ScreenStyle } from '../stores/screenStore';
+import { atomScreenSettings, ScreenStyle } from '../stores/screenStore';
 import { BaseItemContentLine } from '../types/playlistTypes';
 
 interface TextScreenProps {
@@ -23,7 +23,7 @@ const TextScreen = forwardRef<TextScreenRef, TextScreenProps>(
   ({ line }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const defaultSettings = useAtomValue(screenSettingsAtom);
+    const defaultSettings = useAtomValue(atomScreenSettings);
 
     const [scaledStyle, setScaledStyle] = useState<ScreenStyle>();
 

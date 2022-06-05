@@ -3,13 +3,13 @@ import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 import { listController } from '../lib/listController';
 import {
-  liveItemAtom,
+  atomLiveItem,
   liveItemSelectedLineAtom,
-  liveItemSelectedLineIndexAtom,
+  atomLiveItemContentSelectedLineIndex,
 } from '../stores/liveStore';
 import {
-  playlistShiftSelectedItemDownAtom,
-  playlistShiftSelectedItemUpAtom,
+  atomPlaylistShiftSelectedItemDown,
+  atomPlaylistShiftSelectedItemUp,
 } from '../stores/playlistStore';
 import { BaseItemContentLine } from '../types/playlistTypes';
 import BaseList from './BaseList';
@@ -19,10 +19,10 @@ import ItemContentLine from './ItemContentLine';
 import TextScreen, { TextScreenRef } from './TextScreen';
 
 const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
-  const liveItem = useAtomValue(liveItemAtom);
+  const liveItem = useAtomValue(atomLiveItem);
   const liveItemSelectedLine = useAtomValue(liveItemSelectedLineAtom);
   const [liveItemSelectedLineIndex, setLiveItemSelectedLineIndex] = useAtom(
-    liveItemSelectedLineIndexAtom,
+    atomLiveItemContentSelectedLineIndex,
   );
 
   const contentHandler = listController({
@@ -33,10 +33,10 @@ const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
 
   // playlistStore handler
   const playlistShiftSelectedItemUp = useSetAtom(
-    playlistShiftSelectedItemUpAtom,
+    atomPlaylistShiftSelectedItemUp,
   );
   const playlistShiftSelectedItemDown = useSetAtom(
-    playlistShiftSelectedItemDownAtom,
+    atomPlaylistShiftSelectedItemDown,
   );
 
   // Pass scaleScreen method to parent

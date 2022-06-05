@@ -1,15 +1,15 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
-  playlistItemsAtom,
-  playlistNameAtom,
-  playlistSelectedItemAtom,
-  playlistSelectedItemIndexAtom,
-  playlistShiftSelectedItemDownAtom,
-  playlistShiftSelectedItemUpAtom,
+  atomPlaylistItems,
+  atomPlaylistName,
+  atomPlaylistSelectedItem,
+  atomPlaylistSelectedItemIndex,
+  atomPlaylistShiftSelectedItemDown,
+  atomPlaylistShiftSelectedItemUp,
 } from '../stores/playlistStore';
 import {
-  liveItemAtom,
-  liveItemSelectedLineIndexAtom,
+  atomLiveItem,
+  atomLiveItemContentSelectedLineIndex,
 } from '../stores/liveStore';
 import { BaseItem, PlaylistItem } from '../types/playlistTypes';
 import BaseInput from './BaseInput';
@@ -19,17 +19,17 @@ import BasePanel from './BasePanel';
 import BasePanelHeader from './BasePanelHeader';
 
 const PanelPlaylist = () => {
-  const [playlistName, setPlaylistName] = useAtom(playlistNameAtom);
-  const playlistItems = useAtomValue(playlistItemsAtom);
+  const [playlistName, setPlaylistName] = useAtom(atomPlaylistName);
+  const playlistItems = useAtomValue(atomPlaylistItems);
   const [playlistSelectedItemIndex, setPlaylistSelectedItemIndex] = useAtom(
-    playlistSelectedItemIndexAtom,
+    atomPlaylistSelectedItemIndex,
   );
-  const playlistSelectedItem = useAtomValue(playlistSelectedItemAtom);
+  const playlistSelectedItem = useAtomValue(atomPlaylistSelectedItem);
 
   // liveStore
-  const setLiveItem = useSetAtom(liveItemAtom);
+  const setLiveItem = useSetAtom(atomLiveItem);
   const setLiveItemSelectedLineIndex = useSetAtom(
-    liveItemSelectedLineIndexAtom,
+    atomLiveItemContentSelectedLineIndex,
   );
   const setLiveItemHandler = (item: BaseItem | null) => {
     setLiveItem(item);
@@ -38,10 +38,10 @@ const PanelPlaylist = () => {
 
   // playlistStore actions
   const playlistShiftSelectedItemUp = useSetAtom(
-    playlistShiftSelectedItemUpAtom,
+    atomPlaylistShiftSelectedItemUp,
   );
   const playlistShiftSelectedItemDown = useSetAtom(
-    playlistShiftSelectedItemDownAtom,
+    atomPlaylistShiftSelectedItemDown,
   );
 
   // Render playlist item

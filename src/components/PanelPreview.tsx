@@ -3,10 +3,10 @@ import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import Split from 'react-split';
 import { listController } from '../lib/listController';
 import {
-  liveItemAtom,
-  liveItemSelectedLineIndexAtom,
+  atomLiveItem,
+  atomLiveItemContentSelectedLineIndex,
 } from '../stores/liveStore';
-import { playlistSelectedItemAtom } from '../stores/playlistStore';
+import { atomPlaylistSelectedItem } from '../stores/playlistStore';
 import { BaseItemContentLine } from '../types/playlistTypes';
 import BaseList from './BaseList';
 import BasePanel from './BasePanel';
@@ -15,7 +15,7 @@ import ItemContentLine from './ItemContentLine';
 import TextScreen, { TextScreenRef } from './TextScreen';
 
 const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
-  const playlistSelectedItem = useAtomValue(playlistSelectedItemAtom);
+  const playlistSelectedItem = useAtomValue(atomPlaylistSelectedItem);
   const [contentSelectedLineIndex, setContentSelectedLineIndex] = useState(
     playlistSelectedItem?.content[0] ? 0 : -1,
   );
@@ -27,9 +27,9 @@ const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
   });
 
   // liveStore handler
-  const setLiveItem = useSetAtom(liveItemAtom);
+  const setLiveItem = useSetAtom(atomLiveItem);
   const setLiveItemSelectedLineIndex = useSetAtom(
-    liveItemSelectedLineIndexAtom,
+    atomLiveItemContentSelectedLineIndex,
   );
   const setLiveItemHandler = (index: number) => {
     if (playlistSelectedItem) {

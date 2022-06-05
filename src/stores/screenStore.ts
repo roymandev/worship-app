@@ -11,7 +11,7 @@ const baseScreenSettings = {
   lineHeight: 80,
 } as const;
 
-export const screenSettingsAtom = atomWithStorage<ScreenSettings>(
+export const atomScreenSettings = atomWithStorage<ScreenSettings>(
   'screenSettings',
   baseScreenSettings,
 );

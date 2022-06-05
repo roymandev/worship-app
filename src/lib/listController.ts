@@ -1,32 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-interface ListControllerOptions<Item> {
+interface ListControllerBaseOptions<Item> {
   items: Item[];
   selectedItemIndex: number;
-  setItems?: (items: Item[]) => void;
   setSelectedItemIndex: (index: number) => void;
+  setItems?: (items: Item[]) => void;
 }
 
-interface ListControllerReturns<Item> {
+interface ListControllerBaseReturns<Item> {
   selectedItem: () => Item | null;
   canShiftSelectedItemUp: () => boolean;
   canShiftSelectedItemDown: () => boolean;
   shiftSelectedItemUp: () => void;
   shiftSelectedItemDown: () => void;
+}
+
+interface ListControllerWithSetItemsReturns<Item>
+  extends ListControllerBaseReturns<Item> {
   moveSelectedItemUp: () => void;
   moveSelectedItemDown: () => void;
+  removeSelectedItem: () => void;
 }
 
 interface ListControllerOverload {
   <Item>(
-    options: Required<ListControllerOptions<Item>>,
-  ): ListControllerReturns<Item>;
-  <Item>(options: ListControllerOptions<Item>): Omit<
-    ListControllerReturns<Item>,
-    'moveSelectedItemUp' | 'moveSelectedItemDown'
-  >;
+    options: Required<ListControllerBaseOptions<Item>>,
+  ): ListControllerWithSetItemsReturns<Item>;
+  <Item>(
+    options: ListControllerBaseOptions<Item>,
+  ): ListControllerBaseReturns<Item>;
 }
 
-export const listController: ListControllerOverload = (options: any): any => {
+export const listController: ListControllerOverload = (options): any => {
   const { items, selectedItemIndex, setSelectedItemIndex } = options;
   // Getter
   const selectedItem = () =>
@@ -72,6 +76,15 @@ export const listController: ListControllerOverload = (options: any): any => {
         shiftSelectedItemDown();
       }
     };
+
+    const removeSelectedItem = () => {
+      if (selectedItem()) {
+        items.splice(selectedItemIndex, 1);
+        setItems([...items]);
+      }
+      if (canShiftSelectedItemUp() || !items.length) shiftSelectedItemUp();
+    };
+
     return {
       selectedItem,
       canShiftSelectedItemUp,
@@ -80,6 +93,7 @@ export const listController: ListControllerOverload = (options: any): any => {
       shiftSelectedItemDown,
       moveSelectedItemUp,
       moveSelectedItemDown,
+      removeSelectedItem,
     };
   }
   return {

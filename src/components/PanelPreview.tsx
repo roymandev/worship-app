@@ -1,5 +1,11 @@
 import { useAtomValue, useSetAtom } from 'jotai';
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import Split from 'react-split';
 import { listController } from '../lib/listController';
 import {
@@ -16,8 +22,11 @@ import TextScreen, { TextScreenRef } from './TextScreen';
 
 const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
   const playlistSelectedItem = useAtomValue(atomPlaylistSelectedItem);
-  const [contentSelectedLineIndex, setContentSelectedLineIndex] = useState(
-    playlistSelectedItem?.content[0] ? 0 : -1,
+  const [contentSelectedLineIndex, setContentSelectedLineIndex] = useState(-1);
+  useEffect(
+    () =>
+      setContentSelectedLineIndex(playlistSelectedItem?.content[0] ? 0 : -1),
+    [playlistSelectedItem],
   );
 
   const contentHandler = listController({

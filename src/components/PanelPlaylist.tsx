@@ -34,7 +34,9 @@ const PanelPlaylist = () => {
         </BaseButton>
       </BasePanelHeader>
       {panelBody === 'list' && <PanelPlaylistList />}
-      {panelBody === 'import' && <PanelPlaylistImport />}
+      {panelBody === 'import' && (
+        <PanelPlaylistImport close={() => setPanelBody('list')} />
+      )}
     </BasePanel>
   );
 };

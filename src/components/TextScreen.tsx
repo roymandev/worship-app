@@ -12,7 +12,7 @@ import { screenSettingsAtom, ScreenStyle } from '../stores/screenStore';
 import { BaseItemContentLine } from '../types/playlistTypes';
 
 interface TextScreenProps {
-  line?: BaseItemContentLine;
+  line: BaseItemContentLine | null;
 }
 
 export interface TextScreenRef {

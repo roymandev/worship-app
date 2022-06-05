@@ -8,6 +8,9 @@ export interface BaseListProps<T> extends React.ComponentPropsWithoutRef<'ul'> {
   scrollToIndex: number;
   onKeyDownArrowDown?: () => void;
   onKeyDownArrowUp?: () => void;
+  onKeyDownArrowLeft?: () => void;
+  onKeyDownArrowRight?: () => void;
+  onKeyDownEnter?: () => void;
 }
 
 export const BaseList = <T,>({
@@ -18,6 +21,9 @@ export const BaseList = <T,>({
   onKeyDown,
   onKeyDownArrowDown,
   onKeyDownArrowUp,
+  onKeyDownArrowLeft,
+  onKeyDownArrowRight,
+  onKeyDownEnter,
   ...rest
 }: BaseListProps<T>) => {
   const containerRef = useRef<HTMLUListElement | null>(null);
@@ -29,16 +35,27 @@ export const BaseList = <T,>({
   }, [scrollToIndex]);
 
   const onKeyDownHandler = (event: React.KeyboardEvent<HTMLUListElement>) => {
-    switch (event.key) {
-      case 'ArrowDown':
-        event.preventDefault();
-        onKeyDownArrowDown?.();
-        break;
-      case 'ArrowUp':
-        event.preventDefault();
-        onKeyDownArrowUp?.();
-        break;
+    if (event.key === 'ArrowUp' && onKeyDownArrowUp) {
+      event.preventDefault();
+      onKeyDownArrowUp();
     }
+    if (event.key === 'ArrowDown' && onKeyDownArrowDown) {
+      event.preventDefault();
+      onKeyDownArrowDown();
+    }
+    if (event.key === 'ArrowLeft' && onKeyDownArrowLeft) {
+      event.preventDefault();
+      onKeyDownArrowLeft();
+    }
+    if (event.key === 'ArrowRight' && onKeyDownArrowRight) {
+      event.preventDefault();
+      onKeyDownArrowRight();
+    }
+    if (event.key === 'Enter' && onKeyDownEnter) {
+      event.preventDefault();
+      onKeyDownEnter();
+    }
+
     onKeyDown?.(event);
   };
 

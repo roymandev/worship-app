@@ -51,17 +51,10 @@ const PanelPlaylistHeader = ({
 
       <BaseButton
         variant="default"
-        className={twMerge(
-          'flex gap-1 items-center pr-3 pl-2 mr-1 h-7',
-          panelBody === 'export' && 'border-slate-400 bg-slate-300',
-        )}
+        className="flex gap-1 items-center pr-3 pl-2 mr-1 h-7"
         onClick={playlistExportHandler}
       >
-        {panelBody === 'export' ? (
-          <RiCloseFill className="w-4 h-4" />
-        ) : (
-          <RiDownloadLine className="w-4 h-4" />
-        )}
+        <RiDownloadLine className="w-4 h-4" />
         Export
       </BaseButton>
     </BasePanelHeader>

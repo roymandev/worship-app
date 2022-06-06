@@ -85,7 +85,7 @@ const PanelPlaylistList = () => {
         <div className="flex flex-col gap-1 p-1">
           <BaseButton
             variant="default"
-            className="p-1"
+            className="p-1.5"
             onClick={listHandler.moveSelectedItemUp}
             disabled={!listHandler.canShiftSelectedItemUp()}
           >
@@ -93,7 +93,7 @@ const PanelPlaylistList = () => {
           </BaseButton>
           <BaseButton
             variant="default"
-            className="p-1"
+            className="p-1.5"
             onClick={listHandler.moveSelectedItemDown}
             disabled={!listHandler.canShiftSelectedItemDown()}
           >
@@ -102,7 +102,7 @@ const PanelPlaylistList = () => {
           <hr />
           <BaseButton
             variant="default"
-            className="p-1"
+            className="p-1.5"
             onClick={listHandler.removeSelectedItem}
             disabled={!listHandler.selectedItem()}
           >

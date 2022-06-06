@@ -3,6 +3,7 @@ import {
   RiArrowDownLine,
   RiArrowUpLine,
   RiDeleteBin2Line,
+  RiPencilLine,
 } from 'react-icons/ri';
 import {
   atomPlaylistItems,
@@ -21,8 +22,13 @@ import BaseListLine from './BaseListLine';
 import BasePanelHeader from './BasePanelHeader';
 import BaseButton from './BaseButton';
 import { listController } from '../lib/listController';
+import { PanelPlaylistBody } from './PanelPlaylist';
 
-const PanelPlaylistList = () => {
+interface PanelPlaylistListProps {
+  setPanelBody: (panelName: PanelPlaylistBody) => void;
+}
+
+const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
   const [playlistName, setPlaylistName] = useAtom(atomPlaylistName);
   const [playlistItems, setPlaylistItems] = useAtom(atomPlaylistItems);
   const playlistSelectedItem = useAtomValue(atomPlaylistSelectedItem);
@@ -100,6 +106,14 @@ const PanelPlaylistList = () => {
             <RiArrowDownLine className="w-4 h-4" />
           </BaseButton>
           <hr />
+          <BaseButton
+            variant="default"
+            className="p-1.5"
+            onClick={() => setPanelBody('itemEditor')}
+            disabled={!listHandler.selectedItem()}
+          >
+            <RiPencilLine className="w-4 h-4" />
+          </BaseButton>
           <BaseButton
             variant="default"
             className="p-1.5"

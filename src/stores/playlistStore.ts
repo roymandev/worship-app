@@ -16,8 +16,16 @@ export const atomPlaylistItems = atomWithStorage<PlaylistItem[]>(
 export const atomPlaylistSelectedItemIndex = atom(-1);
 
 // Getter
-export const atomPlaylistSelectedItem = atom<PlaylistItem | null>(
+export const atomPlaylistSelectedItem = atom<PlaylistItem | null, PlaylistItem>(
   (get) => get(atomPlaylistItems)[get(atomPlaylistSelectedItemIndex)] ?? null,
+  (get, set, update) => {
+    set(
+      atomPlaylistItems,
+      get(atomPlaylistItems).map((item, index) =>
+        index === get(atomPlaylistSelectedItemIndex) ? update : item,
+      ),
+    );
+  },
 );
 
 // Playlist store actions

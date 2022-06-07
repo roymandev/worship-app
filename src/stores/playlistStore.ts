@@ -28,6 +28,14 @@ export const atomPlaylistSelectedItem = atom<PlaylistItem | null, PlaylistItem>(
   },
 );
 
+// Setter
+export const atomPlaylistAddItem = atom(
+  null,
+  (get, set, item: PlaylistItem) => {
+    set(atomPlaylistItems, [...get(atomPlaylistItems), item]);
+  },
+);
+
 // Playlist store actions
 const playlistItemsHandler = (get: Getter, set: Setter) => {
   const playlistItems = get(atomPlaylistItems);

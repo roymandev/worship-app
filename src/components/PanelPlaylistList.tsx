@@ -1,5 +1,6 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
+  RiAddLine,
   RiArrowDownLine,
   RiArrowUpLine,
   RiDeleteBin2Line,
@@ -89,6 +90,14 @@ const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
         />
 
         <div className="flex flex-col gap-1 p-1">
+          <BaseButton
+            variant="default"
+            className="p-1.5"
+            onClick={() => setPanelBody('addItem')}
+          >
+            <RiAddLine className="w-4 h-4" />
+          </BaseButton>
+          <hr />
           <BaseButton
             variant="default"
             className="p-1.5"

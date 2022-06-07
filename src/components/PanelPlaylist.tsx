@@ -5,7 +5,7 @@ import PanelPlaylistImport from './PanelPlaylistImport';
 import PanelPlaylistHeader from './PanelPlaylistHeader';
 import PanelPlaylistItemEditor from './PanelPlaylistItemEditor';
 
-export type PanelPlaylistBody = 'list' | 'import' | 'itemEditor';
+export type PanelPlaylistBody = 'list' | 'import' | 'itemEditor' | 'addItem';
 
 const PanelPlaylist = () => {
   const [panelBody, setPanelBody] = useState<PanelPlaylistBody>('list');
@@ -21,6 +21,9 @@ const PanelPlaylist = () => {
       )}
       {panelBody === 'itemEditor' && (
         <PanelPlaylistItemEditor setPanelBody={setPanelBody} />
+      )}
+      {panelBody === 'addItem' && (
+        <PanelPlaylistItemEditor setPanelBody={setPanelBody} addItem />
       )}
     </BasePanel>
   );

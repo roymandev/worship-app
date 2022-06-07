@@ -37,6 +37,7 @@ const PanelPlaylistItemEditor = ({
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [note, setNote] = useState('');
 
   // set current title & content to playlist selected item
   useEffect(() => {
@@ -45,6 +46,7 @@ const PanelPlaylistItemEditor = ({
       setContent(
         playlistSelectedItem?.content.map((line) => line.text).join('\n\n'),
       );
+      setNote(playlistSelectedItem.note ?? '');
     }
   }, [playlistSelectedItem]);
 
@@ -79,6 +81,7 @@ const PanelPlaylistItemEditor = ({
     const newItem = {
       title: title ? title : 'Untitled',
       content: parseContent(content, true),
+      note: note,
     };
     if (addItem) {
       setPlaylistAddItem({ ...newItem, id: nanoid() });
@@ -95,6 +98,7 @@ const PanelPlaylistItemEditor = ({
 
   const closeEditor = () => setPanelBody('list');
   const titleId = useId();
+  const noteId = useId();
 
   return (
     <>
@@ -104,12 +108,26 @@ const PanelPlaylistItemEditor = ({
 
       <div className="flex flex-col flex-1 gap-1 p-1">
         <div className="flex gap-2 items-center pl-1">
-          <label htmlFor={titleId}>Title</label>
+          <label htmlFor={titleId} className="w-10">
+            Title
+          </label>
           <BaseInput
             className="flex-1 px-1 h-7"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             id={titleId}
+          />
+        </div>
+
+        <div className="flex gap-2 items-center pl-1">
+          <label htmlFor={noteId} className="w-10">
+            Note
+          </label>
+          <BaseInput
+            className="flex-1 px-1 h-7"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            id={noteId}
           />
         </div>
 

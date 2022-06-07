@@ -1,11 +1,5 @@
-import { useAtomValue, useSetAtom } from 'jotai';
-import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 import { listController } from '../lib/listController';
 import {
@@ -13,6 +7,10 @@ import {
   atomLiveItemContentSelectedLineIndex,
 } from '../stores/liveStore';
 import { atomPlaylistSelectedItem } from '../stores/playlistStore';
+import {
+  atomPreviewItem,
+  atomPreviewItemContentSelectedLineIndex,
+} from '../stores/previewStore';
 import { BaseItemContentLine } from '../types/playlistTypes';
 import BaseList from './BaseList';
 import BasePanel from './BasePanel';
@@ -22,18 +20,22 @@ import TextScreen, { TextScreenRef } from './TextScreen';
 
 const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
   const playlistSelectedItem = useAtomValue(atomPlaylistSelectedItem);
-  const [contentSelectedLineIndex, setContentSelectedLineIndex] = useState(-1);
-  useEffect(
-    () =>
-      setContentSelectedLineIndex(playlistSelectedItem?.content[0] ? 0 : -1),
-    [playlistSelectedItem],
+  const [previewItem, setPreviewItem] = useAtom(atomPreviewItem);
+  const [contentSelectedLineIndex, setContentSelectedLineIndex] = useAtom(
+    atomPreviewItemContentSelectedLineIndex,
   );
 
   const contentHandler = listController({
-    items: playlistSelectedItem?.content ?? [],
+    items: previewItem?.content ?? [],
     selectedItemIndex: contentSelectedLineIndex,
     setSelectedItemIndex: (index) => setContentSelectedLineIndex(index),
   });
+
+  // Watch playlist selected item
+  useEffect(() => {
+    setPreviewItem(playlistSelectedItem);
+    setContentSelectedLineIndex(playlistSelectedItem?.content[0] ? 0 : -1);
+  }, [playlistSelectedItem]);
 
   // liveStore handler
   const setLiveItem = useSetAtom(atomLiveItem);
@@ -41,8 +43,8 @@ const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
     atomLiveItemContentSelectedLineIndex,
   );
   const setLiveItemHandler = (index: number) => {
-    if (playlistSelectedItem) {
-      setLiveItem(playlistSelectedItem);
+    if (previewItem) {
+      setLiveItem(previewItem);
       setLiveItemSelectedLineIndex(index);
     }
   };
@@ -77,12 +79,12 @@ const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
         </BasePanelHeader>
 
         <BasePanelHeader sub>
-          <h2 className="px-2">{playlistSelectedItem?.title}</h2>
+          <h2 className="px-2">{previewItem?.title}</h2>
         </BasePanelHeader>
 
         <BaseList
           className="leading-4 whitespace-pre-line"
-          items={playlistSelectedItem?.content ?? []}
+          items={previewItem?.content ?? []}
           scrollToIndex={contentSelectedLineIndex}
           onKeyDownArrowUp={contentHandler.shiftSelectedItemUp}
           onKeyDownArrowDown={contentHandler.shiftSelectedItemDown}

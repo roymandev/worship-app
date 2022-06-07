@@ -114,7 +114,7 @@ const PanelPlaylistItemEditor = ({
         </div>
 
         <textarea
-          className="flex-1 p-1 rounded border border-slate-300 focus:border-blue-400 outline-none resize-none"
+          className="flex-1 p-1 rounded border border-slate-300 focus:border-blue-600 outline-none resize-none"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyUp={onTextAreaCursorMove}

@@ -73,6 +73,7 @@ const PanelPlaylistImport = ({ close }: PanelPlaylistImportProps) => {
         <input
           type="file"
           className="file:py-1 file:px-2 w-full file:text-inherit file:bg-slate-200 hover:file:bg-slate-300 file:rounded file:border file:border-slate-300 hover:file:border-slate-400 file:border-solid file:outline-none file:cursor-pointer"
+          accept=".WORSHIP"
           onChange={onChangeHandler}
         />
         {errorMsg && <div className="text-red-500">{errorMsg}</div>}

@@ -19,7 +19,7 @@ const PanelPlaylistHeader = ({
 }: PanelPlaylistHeaderProps) => {
   const playlistExportHandler = useAtomCallback(
     useCallback((get) => {
-      const playlistName = get(atomPlaylistName);
+      const playlistName = get(atomPlaylistName) || 'Untitled';
       const playlistItems = get(atomPlaylistItems);
 
       downloadObject(

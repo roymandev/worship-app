@@ -10,7 +10,7 @@ export const atomLiveItemContentSelectedLineIndex = atomWithStorage<number>(
 );
 
 // Getter
-export const liveItemSelectedLineAtom = atom(
+export const atomLiveItemSelectedLine = atom(
   (get) =>
     get(atomLiveItem)?.content[get(atomLiveItemContentSelectedLineIndex)] ??
     null,

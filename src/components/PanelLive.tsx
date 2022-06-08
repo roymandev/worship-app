@@ -4,7 +4,7 @@ import Split from 'react-split';
 import { listController } from '../lib/listController';
 import {
   atomLiveItem,
-  liveItemSelectedLineAtom,
+  atomLiveItemSelectedLine,
   atomLiveItemContentSelectedLineIndex,
 } from '../stores/liveStore';
 import {
@@ -20,7 +20,7 @@ import TextScreen, { TextScreenRef } from './TextScreen';
 
 const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
   const liveItem = useAtomValue(atomLiveItem);
-  const liveItemSelectedLine = useAtomValue(liveItemSelectedLineAtom);
+  const liveItemSelectedLine = useAtomValue(atomLiveItemSelectedLine);
   const [liveItemSelectedLineIndex, setLiveItemSelectedLineIndex] = useAtom(
     atomLiveItemContentSelectedLineIndex,
   );

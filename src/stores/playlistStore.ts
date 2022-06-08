@@ -1,17 +1,13 @@
 import { atom, Getter, Setter } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import dummyPlaylist from '../dummyPlaylist.json';
 import { listController } from '../lib/listController';
 import { PlaylistItem } from '../types/playlistTypes';
 
 // State
-export const atomPlaylistName = atomWithStorage(
-  'playlistName',
-  'Ibadah Minggu 20220530',
-);
+export const atomPlaylistName = atomWithStorage('playlistName', 'Untitled');
 export const atomPlaylistItems = atomWithStorage<PlaylistItem[]>(
   'playlistItems',
-  dummyPlaylist.items,
+  [],
 );
 export const atomPlaylistSelectedItemIndex = atom(-1);
 

@@ -1,4 +1,4 @@
-import { useAtomValue } from 'jotai';
+import { useAtom } from 'jotai';
 import {
   forwardRef,
   useCallback,
@@ -13,6 +13,7 @@ import { BaseItemContentLine } from '../types/playlistTypes';
 
 interface TextScreenProps {
   line: BaseItemContentLine | null;
+  mainScreen?: boolean;
 }
 
 export interface TextScreenRef {
@@ -20,10 +21,10 @@ export interface TextScreenRef {
 }
 
 const TextScreen = forwardRef<TextScreenRef, TextScreenProps>(
-  ({ line }, ref) => {
+  ({ line, mainScreen }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const defaultSettings = useAtomValue(atomScreenSettings);
+    const [defaultSettings, setDefaultSettings] = useAtom(atomScreenSettings);
 
     const [scaledStyle, setScaledStyle] = useState<ScreenStyle>();
 
@@ -33,11 +34,22 @@ const TextScreen = forwardRef<TextScreenRef, TextScreenProps>(
       }
     }, [defaultSettings]);
 
+    const scaleToMainScreen = () => {
+      setDefaultSettings({
+        ...defaultSettings,
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
     useEffect(() => {
       scaleScreen();
-      window.addEventListener('resize', scaleScreen);
-      return () => window.removeEventListener('resize', scaleScreen);
-    }, [scaleScreen]);
+
+      if (mainScreen) {
+        window.addEventListener('resize', scaleToMainScreen);
+        return () => window.removeEventListener('resize', scaleToMainScreen);
+      }
+    }, [defaultSettings]);
 
     useImperativeHandle(ref, () => ({
       scaleScreen,

@@ -78,7 +78,7 @@ const PanelPlaylistImport = ({ close }: PanelPlaylistImportProps) => {
         />
         {errorMsg && <div className="text-red-500">{errorMsg}</div>}
         <BaseButton
-          variant="default"
+          variant="primary"
           className="py-1 px-2"
           disabled={errorMsg !== null || !selectedFile}
           onClick={importHandler}

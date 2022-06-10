@@ -57,5 +57,6 @@ module.exports = {
     ],
     'no-nested-ternary': 'off',
     'import/prefer-default-export': 'off',
+    'react-hooks/exhaustive-deps': 0,
   },
 };

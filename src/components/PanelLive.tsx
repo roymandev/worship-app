@@ -14,7 +14,6 @@ import {
 import BaseList from './BaseList';
 import BasePanel from './BasePanel';
 import BasePanelHeader from './BasePanelHeader';
-import ClientOnly from './ClientOnly';
 import ItemContentLine from './ItemContentLine';
 import TextScreen, { TextScreenRef } from './TextScreen';
 
@@ -57,35 +56,31 @@ const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
           <h2 className="px-2">Preview</h2>
         </BasePanelHeader>
 
-        <ClientOnly>
-          <BasePanelHeader sub>
-            <h2 className="px-2">{liveItem?.title}</h2>
-          </BasePanelHeader>
+        <BasePanelHeader sub>
+          <h2 className="px-2">{liveItem?.title}</h2>
+        </BasePanelHeader>
 
-          <BaseList
-            className="leading-4 whitespace-pre-line"
-            scrollToIndex={liveItemSelectedLineIndex}
-            onKeyDownArrowUp={contentHandler.shiftSelectedItemUp}
-            onKeyDownArrowDown={contentHandler.shiftSelectedItemDown}
-            onKeyDownArrowLeft={playlistShiftSelectedItemUp}
-            onKeyDownArrowRight={playlistShiftSelectedItemDown}
-          >
-            {liveItem?.content.map((line, index) => (
-              <ItemContentLine
-                key={index}
-                line={line}
-                isSelected={index === liveItemSelectedLineIndex}
-                onClick={() => setLiveItemSelectedLineIndex(index)}
-              />
-            ))}
-          </BaseList>
-        </ClientOnly>
+        <BaseList
+          className="leading-4 whitespace-pre-line"
+          scrollToIndex={liveItemSelectedLineIndex}
+          onKeyDownArrowUp={contentHandler.shiftSelectedItemUp}
+          onKeyDownArrowDown={contentHandler.shiftSelectedItemDown}
+          onKeyDownArrowLeft={playlistShiftSelectedItemUp}
+          onKeyDownArrowRight={playlistShiftSelectedItemDown}
+        >
+          {liveItem?.content.map((line, index) => (
+            <ItemContentLine
+              key={index}
+              line={line}
+              isSelected={index === liveItemSelectedLineIndex}
+              onClick={() => setLiveItemSelectedLineIndex(index)}
+            />
+          ))}
+        </BaseList>
       </BasePanel>
 
       <BasePanel>
-        <ClientOnly>
-          <TextScreen ref={textScreenRef} line={liveItemSelectedLine} />
-        </ClientOnly>
+        <TextScreen ref={textScreenRef} line={liveItemSelectedLine} />
       </BasePanel>
     </Split>
   );

@@ -32,11 +32,11 @@ const Screen: NextPage = () => {
       <Head>
         <title>Screen - Worship App</title>
       </Head>
-      <div className="h-screen">
-        <ClientOnly>
+      <ClientOnly>
+        <div className="h-screen">
           <TextScreen line={liveItemContentSelectedLine} />
-        </ClientOnly>
-      </div>
+        </div>
+      </ClientOnly>
     </>
   );
 };

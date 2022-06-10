@@ -24,7 +24,6 @@ import BasePanelHeader from './BasePanelHeader';
 import BaseButton from './BaseButton';
 import { listController } from '../lib/listController';
 import { PanelPlaylistBody } from './PanelPlaylist';
-import ClientOnly from './ClientOnly';
 
 interface PanelPlaylistListProps {
   setPanelBody: (panelName: PanelPlaylistBody) => void;
@@ -66,28 +65,26 @@ const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
       </BasePanelHeader>
 
       <div className="flex flex-1 divide-x divide-slate-300">
-        <ClientOnly>
-          <BaseList
-            className="overflow-y-auto flex-1"
-            scrollToIndex={playlistSelectedItemIndex}
-            onKeyDownArrowUp={listHandler.shiftSelectedItemUp}
-            onKeyDownArrowDown={listHandler.shiftSelectedItemDown}
-            onKeyDownEnter={() => setLiveItemHandler(playlistSelectedItem)}
-          >
-            {playlistItems.map((item, index) => (
-              <BaseListLine
-                className="py-1 px-2 select-none"
-                key={item.id}
-                isSelected={index === playlistSelectedItemIndex}
-                onClick={() => setPlaylistSelectedItemIndex(index)}
-                onDoubleClick={() => setLiveItemHandler(item)}
-              >
-                <h3 className="font-medium">{item.title}</h3>
-                {item.note && <p className="text-slate-600">{item.note}</p>}
-              </BaseListLine>
-            ))}
-          </BaseList>
-        </ClientOnly>
+        <BaseList
+          className="overflow-y-auto flex-1"
+          scrollToIndex={playlistSelectedItemIndex}
+          onKeyDownArrowUp={listHandler.shiftSelectedItemUp}
+          onKeyDownArrowDown={listHandler.shiftSelectedItemDown}
+          onKeyDownEnter={() => setLiveItemHandler(playlistSelectedItem)}
+        >
+          {playlistItems.map((item, index) => (
+            <BaseListLine
+              className="py-1 px-2 select-none"
+              key={item.id}
+              isSelected={index === playlistSelectedItemIndex}
+              onClick={() => setPlaylistSelectedItemIndex(index)}
+              onDoubleClick={() => setLiveItemHandler(item)}
+            >
+              <h3 className="font-medium">{item.title}</h3>
+              {item.note && <p className="text-slate-600">{item.note}</p>}
+            </BaseListLine>
+          ))}
+        </BaseList>
 
         <div className="flex flex-col gap-1 p-1">
           <BaseButton

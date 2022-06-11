@@ -88,6 +88,7 @@ const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
 
         <div className="flex flex-col gap-1 p-1">
           <BaseButton
+            tabIndex={-1}
             variant="default"
             className="p-1.5"
             onClick={() => setPanelBody('addItem')}
@@ -96,6 +97,7 @@ const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
           </BaseButton>
           <hr />
           <BaseButton
+            tabIndex={-1}
             variant="default"
             className="p-1.5"
             onClick={listHandler.moveSelectedItemUp}
@@ -104,6 +106,7 @@ const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
             <RiArrowUpLine className="w-4 h-4" />
           </BaseButton>
           <BaseButton
+            tabIndex={-1}
             variant="default"
             className="p-1.5"
             onClick={listHandler.moveSelectedItemDown}
@@ -113,6 +116,7 @@ const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
           </BaseButton>
           <hr />
           <BaseButton
+            tabIndex={-1}
             variant="default"
             className="p-1.5"
             onClick={() => setPanelBody('itemEditor')}
@@ -121,6 +125,7 @@ const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
             <RiPencilLine className="w-4 h-4" />
           </BaseButton>
           <BaseButton
+            tabIndex={-1}
             variant="default"
             className="p-1.5"
             onClick={listHandler.removeSelectedItem}

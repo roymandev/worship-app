@@ -1,4 +1,4 @@
-import { useAtomValue } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import {
   forwardRef,
   useEffect,
@@ -6,37 +6,64 @@ import {
   useRef,
   useState,
 } from 'react';
-import { scaleStyle } from '../lib/scaleStyle';
-import { atomScreenSettings, ScreenStyle } from '../stores/screenStore';
+import { scaleScreenSize } from '../lib/scaleScreenSize';
+import {
+  atomBaseScreenSize,
+  atomMainScreenSize,
+  ScreenStyle,
+} from '../stores/screenStore';
 import { BaseItemContentLine } from '../types/playlistTypes';
 
 interface TextScreenProps {
   line: BaseItemContentLine | null;
+  mainScreen?: boolean;
 }
 
 export interface TextScreenRef {
   scaleScreen: () => void;
+  scaleMainScreen?: () => void;
 }
 
 const TextScreen = forwardRef<TextScreenRef, TextScreenProps>(
-  ({ line }, ref) => {
+  ({ line, mainScreen = false }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const defaultSettings = useAtomValue(atomScreenSettings);
+    const baseScreenSize = useAtomValue(atomBaseScreenSize);
+    const [mainScreenSize, setMainScreenSize] = useAtom(atomMainScreenSize);
+    const [screenStyle, setScreenStyle] = useState<ScreenStyle>();
 
-    const [scaledStyle, setScaledStyle] = useState<ScreenStyle>();
-
+    // Scale current screen based on mainScreenSize
     const scaleScreen = () => {
-      if (containerRef.current) {
-        setScaledStyle(scaleStyle(containerRef.current, defaultSettings));
-      }
-    };
+      if (!containerRef.current) return;
 
-    useEffect(() => {
-      scaleScreen();
-    }, [defaultSettings]);
+      const scaledScreenSize = scaleScreenSize(
+        containerRef.current,
+        mainScreenSize,
+      );
+      const scaledScreenStyle = {} as ScreenStyle;
+      let key: keyof ScreenStyle;
+      for (key in scaledScreenSize) {
+        scaledScreenStyle[key] = scaledScreenSize[key] + 'px';
+      }
+      setScreenStyle(scaledScreenStyle);
+    };
+    useEffect(scaleScreen, [mainScreenSize]);
+
+    // Scale main screen based on baseScreenSize
+    const scaleMainScreen = () => {
+      if (!containerRef.current || !mainScreen) return;
+
+      setMainScreenSize({
+        ...scaleScreenSize(containerRef.current, baseScreenSize),
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+      console.log('a');
+    };
+    useEffect(scaleMainScreen, [baseScreenSize]);
 
     useImperativeHandle(ref, () => ({
       scaleScreen,
+      scaleMainScreen,
     }));
 
     return (
@@ -46,7 +73,7 @@ const TextScreen = forwardRef<TextScreenRef, TextScreenProps>(
       >
         <div
           className="grid place-items-center whitespace-pre-line bg-gray-800"
-          style={scaledStyle}
+          style={screenStyle}
         >
           {!line?.type && line?.text}
         </div>

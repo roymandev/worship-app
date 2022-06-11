@@ -1,40 +1,37 @@
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import ClientOnly from '../components/ClientOnly';
-import TextScreen from '../components/TextScreen';
+import TextScreen, { TextScreenRef } from '../components/TextScreen';
 import { atomLiveItemContentSelectedLine } from '../stores/liveStore';
-import { atomUpdateScreenSettings } from '../stores/screenStore';
 
 const Screen: NextPage = () => {
   const liveItemContentSelectedLine = useAtomValue(
     atomLiveItemContentSelectedLine,
   );
-  const setScreenSettings = useSetAtom(atomUpdateScreenSettings);
 
-  const resizeScreen = () => {
-    setScreenSettings({
-      width: window.innerWidth,
-      height: window.innerHeight,
-    });
-  };
+  const textScreenRef = useRef<TextScreenRef | null>(null);
+
+  const scaleMainScreen = () => textScreenRef.current?.scaleMainScreen?.();
 
   useEffect(() => {
-    resizeScreen();
-
-    window.addEventListener('resize', resizeScreen);
-    return () => window.removeEventListener('resize', resizeScreen);
-  }, []);
+    window.addEventListener('resize', scaleMainScreen);
+    return () => window.removeEventListener('resize', scaleMainScreen);
+  }, [scaleMainScreen]);
 
   return (
     <>
       <Head>
-        <title>Screen - Worship App</title>
+        <title>Main Screen - Worship App</title>
       </Head>
       <ClientOnly>
         <div className="h-screen">
-          <TextScreen line={liveItemContentSelectedLine} />
+          <TextScreen
+            ref={textScreenRef}
+            line={liveItemContentSelectedLine}
+            mainScreen
+          />
         </div>
       </ClientOnly>
     </>

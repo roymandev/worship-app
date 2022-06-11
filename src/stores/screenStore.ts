@@ -1,24 +1,22 @@
-import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 
-export type ScreenSettings = Record<keyof typeof baseScreenSettings, number>;
-export type ScreenStyle = Record<keyof typeof baseScreenSettings, string>;
+export type ScreenSize = typeof baseScreenSize;
+export type ScreenStyle = Record<keyof ScreenSize, string>;
 
-const baseScreenSettings = {
-  width: 848,
+const baseScreenSize = {
+  width: 480,
   height: 480,
-  padding: 24,
-  fontSize: 64,
-  lineHeight: 80,
-} as const;
+  padding: 12,
+  fontSize: 40,
+  lineHeight: 60,
+};
 
-export const atomScreenSettings = atomWithStorage<ScreenSettings>(
-  'screenSettings',
-  baseScreenSettings,
+export const atomBaseScreenSize = atomWithStorage(
+  'baseScreenSize',
+  baseScreenSize,
 );
 
-export const atomUpdateScreenSettings = atom(
-  null,
-  (get, set, updateSettings: Partial<ScreenSettings>) =>
-    set(atomScreenSettings, { ...get(atomScreenSettings), ...updateSettings }),
+export const atomMainScreenSize = atomWithStorage(
+  'mainScreenSize',
+  baseScreenSize,
 );

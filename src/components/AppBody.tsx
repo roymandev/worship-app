@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Split from 'react-split';
 import PanelLive from './PanelLive';
-import PanelPlaylist from './PanelPlaylist';
+import PanelPlaylist from './PanelPlaylist/PanelPlaylist';
 import PanelPreview from './PanelPreview';
 import { TextScreenRef } from './TextScreen';
 

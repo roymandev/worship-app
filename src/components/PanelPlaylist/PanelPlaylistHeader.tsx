@@ -1,12 +1,15 @@
 import { RiCloseFill, RiDownloadLine, RiUploadLine } from 'react-icons/ri';
-import BasePanelHeader from './BasePanelHeader';
+import BasePanelHeader from '../BasePanelHeader';
 import { twMerge } from 'tailwind-merge';
-import BaseButton from './BaseButton';
+import BaseButton from '../BaseButton';
 import type { PanelPlaylistBody } from './PanelPlaylist';
 import { useAtomCallback } from 'jotai/utils';
 import { useCallback } from 'react';
-import { atomPlaylistItems, atomPlaylistName } from '../stores/playlistStore';
-import { downloadObject } from '../lib/downloadObject';
+import {
+  atomPlaylistItems,
+  atomPlaylistName,
+} from '../../stores/playlistStore';
+import { downloadObject } from '../../lib/downloadObject';
 
 interface PanelPlaylistHeaderProps {
   panelBody: PanelPlaylistBody;

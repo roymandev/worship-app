@@ -1,10 +1,13 @@
 import { useSetAtom } from 'jotai';
 import { useState } from 'react';
-import { validatePlaylist } from '../lib/validatePlaylist';
-import { atomPlaylistItems, atomPlaylistName } from '../stores/playlistStore';
-import { PlaylistItem } from '../types/playlistTypes';
-import BaseButton from './BaseButton';
-import BasePanelHeader from './BasePanelHeader';
+import { validatePlaylist } from '../../lib/validatePlaylist';
+import {
+  atomPlaylistItems,
+  atomPlaylistName,
+} from '../../stores/playlistStore';
+import { PlaylistItem } from '../../types/playlistTypes';
+import BaseButton from '../BaseButton';
+import BasePanelHeader from '../BasePanelHeader';
 
 const ERROR_UNKNOWN_FILE = 'Unknown file, please upload .WORSHIP file';
 

@@ -11,18 +11,18 @@ import {
   atomPlaylistName,
   atomPlaylistSelectedItem,
   atomPlaylistSelectedItemIndex,
-} from '../stores/playlistStore';
+} from '../../stores/playlistStore';
 import {
   atomLiveItem,
   atomLiveItemContentSelectedLineIndex,
-} from '../stores/liveStore';
-import { BaseItem } from '../types/playlistTypes';
-import BaseInput from './BaseInput';
-import BaseList from './BaseList';
-import BaseListLine from './BaseListLine';
-import BasePanelHeader from './BasePanelHeader';
-import BaseButton from './BaseButton';
-import { listController } from '../lib/listController';
+} from '../../stores/liveStore';
+import { BaseItem } from '../../types/playlistTypes';
+import BaseInput from '../BaseInput';
+import BaseList from '../BaseList';
+import BaseListLine from '../BaseListLine';
+import BasePanelHeader from '../BasePanelHeader';
+import BaseButton from '../BaseButton';
+import { listController } from '../../lib/listController';
 import { PanelPlaylistBody } from './PanelPlaylist';
 
 interface PanelPlaylistListProps {

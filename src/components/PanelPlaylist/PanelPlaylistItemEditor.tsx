@@ -2,20 +2,20 @@ import { useEffect, useId, useState } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { nanoid } from 'nanoid';
 
-import { parseContent } from '../lib/parseContent';
+import { parseContent } from '../../lib/parseContent';
 import {
   atomPlaylistAddItem,
   atomPlaylistSelectedItem,
-} from '../stores/playlistStore';
+} from '../../stores/playlistStore';
 import {
   atomPreviewItem,
   atomPreviewItemContentSelectedLineIndex,
-} from '../stores/previewStore';
+} from '../../stores/previewStore';
 
 import type { PanelPlaylistBody } from './PanelPlaylist';
-import BasePanelHeader from './BasePanelHeader';
-import BaseInput from './BaseInput';
-import BaseButton from './BaseButton';
+import BasePanelHeader from '../BasePanelHeader';
+import BaseInput from '../BaseInput';
+import BaseButton from '../BaseButton';
 
 interface PanelPlaylistItemEditorProps {
   setPanelBody: (panelName: PanelPlaylistBody) => void;

@@ -24,12 +24,18 @@ import BasePanelHeader from '../BasePanelHeader';
 import BaseButton from '../BaseButton';
 import { listController } from '../../lib/listController';
 import { PanelPlaylistBody } from './PanelPlaylist';
+import {
+  atomContextMenuActive,
+  atomContextMenuPos,
+} from '../../stores/contextMenuStore';
 
 interface PanelPlaylistListProps {
   setPanelBody: (panelName: PanelPlaylistBody) => void;
 }
 
 const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
+  const setContextMenuActive = useSetAtom(atomContextMenuActive);
+  const setContextMenuPos = useSetAtom(atomContextMenuPos);
   const [playlistName, setPlaylistName] = useAtom(atomPlaylistName);
   const [playlistItems, setPlaylistItems] = useAtom(atomPlaylistItems);
   const playlistSelectedItem = useAtomValue(atomPlaylistSelectedItem);
@@ -79,6 +85,15 @@ const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
               isSelected={index === playlistSelectedItemIndex}
               onClick={() => setPlaylistSelectedItemIndex(index)}
               onDoubleClick={() => setLiveItemHandler(item)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setPlaylistSelectedItemIndex(index);
+                setContextMenuPos({
+                  left: e.clientX,
+                  top: e.clientY,
+                });
+                setContextMenuActive('playlistItem');
+              }}
             >
               <h3 className="font-medium">{item.title}</h3>
               {item.note && <p className="text-slate-600">{item.note}</p>}

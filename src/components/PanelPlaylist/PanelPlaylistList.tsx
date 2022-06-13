@@ -101,7 +101,7 @@ const PanelPlaylistList = () => {
         <div className="flex flex-col gap-1 p-1">
           <BaseButton
             tabIndex={-1}
-            variant="default"
+            variant="primary"
             className="p-1.5"
             onClick={() => setPlaylistPanelContent('addItem')}
           >
@@ -138,7 +138,7 @@ const PanelPlaylistList = () => {
           </BaseButton>
           <BaseButton
             tabIndex={-1}
-            variant="default"
+            variant="red"
             className="p-1.5"
             onClick={listHandler.removeSelectedItem}
             disabled={!listHandler.selectedItem()}

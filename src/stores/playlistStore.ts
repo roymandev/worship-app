@@ -11,7 +11,7 @@ export const atomPlaylistItems = atomWithStorage<PlaylistItem[]>(
 );
 export const atomPlaylistSelectedItemIndex = atom(-1);
 export const atomPlaylistPanelContent = atom<
-  'list' | 'import' | 'itemEditor' | 'addItem'
+  'list' | 'import' | 'export' | 'itemEditor' | 'addItem'
 >('list');
 
 // Getter

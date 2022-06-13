@@ -55,3 +55,7 @@ export const atomPlaylistShiftSelectedItemDown = atom(null, (get, set) => {
   const listHanlder = playlistItemsHandler(get, set);
   listHanlder.shiftSelectedItemDown();
 });
+export const atomPlaylistRemoveSelectedItem = atom(null, (get, set) => {
+  const listHanlder = playlistItemsHandler(get, set);
+  listHanlder.removeSelectedItem();
+});

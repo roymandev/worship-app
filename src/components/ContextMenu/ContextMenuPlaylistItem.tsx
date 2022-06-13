@@ -47,7 +47,7 @@ const ContextMenuPlaylistItem = () => {
   return (
     <>
       <BaseButton
-        variant="primary"
+        variant="softPrimary"
         className="py-1 text-left px-3"
         onClick={handleGoLive}
       >
@@ -55,14 +55,14 @@ const ContextMenuPlaylistItem = () => {
       </BaseButton>
       <hr />
       <BaseButton
-        variant="default"
+        variant="softDefault"
         className="py-1 text-left px-3"
         onClick={handleEdit}
       >
         Edit
       </BaseButton>
       <BaseButton
-        variant="default"
+        variant="softDefault"
         className="py-1 text-left px-3"
         onClick={hanldeRemove}
       >
@@ -70,7 +70,7 @@ const ContextMenuPlaylistItem = () => {
       </BaseButton>
       <hr />
       <BaseButton
-        variant="red"
+        variant="softRed"
         className="py-1 text-left px-3"
         onClick={handleAdd}
       >

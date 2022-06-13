@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid';
 import { parseContent } from '../../lib/parseContent';
 import {
   atomPlaylistAddItem,
+  atomPlaylistPanelContent,
   atomPlaylistSelectedItem,
 } from '../../stores/playlistStore';
 import {
@@ -12,20 +13,16 @@ import {
   atomPreviewItemContentSelectedLineIndex,
 } from '../../stores/previewStore';
 
-import type { PanelPlaylistBody } from './PanelPlaylist';
 import BasePanelHeader from '../BasePanelHeader';
 import BaseInput from '../BaseInput';
 import BaseButton from '../BaseButton';
 
 interface PanelPlaylistItemEditorProps {
-  setPanelBody: (panelName: PanelPlaylistBody) => void;
   addItem?: boolean;
 }
 
-const PanelPlaylistItemEditor = ({
-  setPanelBody,
-  addItem,
-}: PanelPlaylistItemEditorProps) => {
+const PanelPlaylistItemEditor = ({ addItem }: PanelPlaylistItemEditorProps) => {
+  const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
   const setPlaylistAddItem = useSetAtom(atomPlaylistAddItem);
   const [playlistSelectedItem, setPlaylistSelectedItem] = useAtom(
     atomPlaylistSelectedItem,
@@ -96,7 +93,7 @@ const PanelPlaylistItemEditor = ({
     closeEditor();
   };
 
-  const closeEditor = () => setPanelBody('list');
+  const closeEditor = () => setPlaylistPanelContent('list');
   const titleId = useId();
   const noteId = useId();
 

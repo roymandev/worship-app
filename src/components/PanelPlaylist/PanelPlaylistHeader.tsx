@@ -2,24 +2,21 @@ import { RiCloseFill, RiDownloadLine, RiUploadLine } from 'react-icons/ri';
 import BasePanelHeader from '../BasePanelHeader';
 import { twMerge } from 'tailwind-merge';
 import BaseButton from '../BaseButton';
-import type { PanelPlaylistBody } from './PanelPlaylist';
 import { useAtomCallback } from 'jotai/utils';
 import { useCallback } from 'react';
 import {
   atomPlaylistItems,
   atomPlaylistName,
+  atomPlaylistPanelContent,
 } from '../../stores/playlistStore';
 import { downloadObject } from '../../lib/downloadObject';
+import { useAtom } from 'jotai';
 
-interface PanelPlaylistHeaderProps {
-  panelBody: PanelPlaylistBody;
-  setPanelBody: (panelName: PanelPlaylistBody) => void;
-}
+const PanelPlaylistHeader = ({}) => {
+  const [playlistPanelContent, setPlaylistPanelContent] = useAtom(
+    atomPlaylistPanelContent,
+  );
 
-const PanelPlaylistHeader = ({
-  panelBody,
-  setPanelBody,
-}: PanelPlaylistHeaderProps) => {
   const playlistExportHandler = useAtomCallback(
     useCallback((get) => {
       const playlistName = get(atomPlaylistName) || 'Untitled';
@@ -40,11 +37,15 @@ const PanelPlaylistHeader = ({
         variant="default"
         className={twMerge(
           'flex gap-1 items-center pr-3 pl-2 mr-1 ml-auto h-7',
-          panelBody === 'import' && 'border-slate-400 bg-slate-300',
+          playlistPanelContent === 'import' && 'border-slate-400 bg-slate-300',
         )}
-        onClick={() => setPanelBody(panelBody === 'import' ? 'list' : 'import')}
+        onClick={() =>
+          setPlaylistPanelContent(
+            playlistPanelContent === 'import' ? 'list' : 'import',
+          )
+        }
       >
-        {panelBody === 'import' ? (
+        {playlistPanelContent === 'import' ? (
           <RiCloseFill className="w-4 h-4" />
         ) : (
           <RiUploadLine className="w-4 h-4" />

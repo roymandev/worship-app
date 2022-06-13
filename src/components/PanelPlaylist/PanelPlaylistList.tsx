@@ -9,6 +9,7 @@ import {
 import {
   atomPlaylistItems,
   atomPlaylistName,
+  atomPlaylistPanelContent,
   atomPlaylistSelectedItem,
   atomPlaylistSelectedItemIndex,
 } from '../../stores/playlistStore';
@@ -23,17 +24,13 @@ import BaseListLine from '../BaseListLine';
 import BasePanelHeader from '../BasePanelHeader';
 import BaseButton from '../BaseButton';
 import { listController } from '../../lib/listController';
-import { PanelPlaylistBody } from './PanelPlaylist';
 import {
   atomContextMenuActive,
   atomContextMenuPos,
 } from '../../stores/contextMenuStore';
 
-interface PanelPlaylistListProps {
-  setPanelBody: (panelName: PanelPlaylistBody) => void;
-}
-
-const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
+const PanelPlaylistList = () => {
+  const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
   const setContextMenuActive = useSetAtom(atomContextMenuActive);
   const setContextMenuPos = useSetAtom(atomContextMenuPos);
   const [playlistName, setPlaylistName] = useAtom(atomPlaylistName);
@@ -106,7 +103,7 @@ const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
             tabIndex={-1}
             variant="default"
             className="p-1.5"
-            onClick={() => setPanelBody('addItem')}
+            onClick={() => setPlaylistPanelContent('addItem')}
           >
             <RiAddLine className="w-4 h-4" />
           </BaseButton>
@@ -134,7 +131,7 @@ const PanelPlaylistList = ({ setPanelBody }: PanelPlaylistListProps) => {
             tabIndex={-1}
             variant="default"
             className="p-1.5"
-            onClick={() => setPanelBody('itemEditor')}
+            onClick={() => setPlaylistPanelContent('itemEditor')}
             disabled={!listHandler.selectedItem()}
           >
             <RiPencilLine className="w-4 h-4" />

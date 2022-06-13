@@ -4,6 +4,7 @@ import { validatePlaylist } from '../../lib/validatePlaylist';
 import {
   atomPlaylistItems,
   atomPlaylistName,
+  atomPlaylistPanelContent,
 } from '../../stores/playlistStore';
 import { PlaylistItem } from '../../types/playlistTypes';
 import BaseButton from '../BaseButton';
@@ -11,10 +12,8 @@ import BasePanelHeader from '../BasePanelHeader';
 
 const ERROR_UNKNOWN_FILE = 'Unknown file, please upload .WORSHIP file';
 
-interface PanelPlaylistImportProps {
-  close: () => void;
-}
-const PanelPlaylistImport = ({ close }: PanelPlaylistImportProps) => {
+const PanelPlaylistImport = () => {
+  const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const setPlaylistName = useSetAtom(atomPlaylistName);
   const setPlaylistItems = useSetAtom(atomPlaylistItems);
@@ -61,7 +60,7 @@ const PanelPlaylistImport = ({ close }: PanelPlaylistImportProps) => {
   const importHandler = () => {
     setPlaylistName(newPlaylistName);
     setPlaylistItems(newPlaylistItems);
-    close();
+    setPlaylistPanelContent('list');
   };
 
   return (

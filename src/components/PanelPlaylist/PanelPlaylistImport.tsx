@@ -74,18 +74,25 @@ const PanelPlaylistImport = () => {
         </p>
         <input
           type="file"
-          className="file:py-1 file:px-2 w-full file:text-inherit file:bg-slate-200 hover:file:bg-slate-300 file:rounded file:border file:border-slate-300 hover:file:border-slate-400 file:border-solid file:outline-none file:cursor-pointer"
+          className="file:py-1 file:px-3 w-full file:text-inherit file:bg-slate-200 hover:file:bg-slate-300 file:rounded file:border file:border-slate-300 hover:file:border-slate-400 file:border-solid file:outline-none file:cursor-pointer"
           accept=".WORSHIP"
           onChange={onChangeHandler}
         />
         {errorMsg && <div className="text-red-500">{errorMsg}</div>}
         <BaseButton
           variant="primary"
-          className="py-1 px-2"
+          className="py-1 px-3"
           disabled={errorMsg !== null || !selectedFile}
           onClick={importHandler}
         >
           Import Selected File
+        </BaseButton>
+        <BaseButton
+          variant="default"
+          className="py-1 px-3 ml-1"
+          onClick={() => setPlaylistPanelContent('list')}
+        >
+          Cancel
         </BaseButton>
       </div>
     </>

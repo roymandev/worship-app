@@ -7,8 +7,8 @@ import {
   atomPlaylistPanelContent,
 } from '../../stores/playlistStore';
 import { PlaylistItem } from '../../types/playlistTypes';
-import BaseButton from '../BaseButton';
 import BasePanelHeader from '../BasePanelHeader';
+import ButtonDefault from '../Buttons/ButtonDefault';
 
 const ERROR_UNKNOWN_FILE = 'Unknown file, please upload .WORSHIP file';
 
@@ -79,21 +79,21 @@ const PanelPlaylistImport = () => {
           onChange={onChangeHandler}
         />
         {errorMsg && <div className="text-red-500">{errorMsg}</div>}
-        <BaseButton
-          variant="primary"
-          className="py-1 px-3"
+
+        <ButtonDefault
+          color="blue"
           disabled={errorMsg !== null || !selectedFile}
           onClick={importHandler}
         >
           Import Selected File
-        </BaseButton>
-        <BaseButton
-          variant="default"
-          className="py-1 px-3 ml-1"
+        </ButtonDefault>
+        <ButtonDefault
+          color="gray"
+          className="ml-1"
           onClick={() => setPlaylistPanelContent('list')}
         >
           Cancel
-        </BaseButton>
+        </ButtonDefault>
       </div>
     </>
   );

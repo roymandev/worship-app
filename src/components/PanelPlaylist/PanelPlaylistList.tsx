@@ -22,12 +22,12 @@ import BaseInput from '../BaseInput';
 import BaseList from '../BaseList';
 import BaseListLine from '../BaseListLine';
 import BasePanelHeader from '../BasePanelHeader';
-import BaseButton from '../BaseButton';
 import { listController } from '../../lib/listController';
 import {
   atomContextMenuActive,
   atomContextMenuPos,
 } from '../../stores/contextMenuStore';
+import ButtonDefault from '../Buttons/ButtonDefault';
 
 const PanelPlaylistList = () => {
   const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
@@ -99,52 +99,52 @@ const PanelPlaylistList = () => {
         </BaseList>
 
         <div className="flex flex-col gap-1 p-1">
-          <BaseButton
+          <ButtonDefault
             tabIndex={-1}
-            variant="primary"
+            color="blue"
             className="p-1.5"
             onClick={() => setPlaylistPanelContent('addItem')}
           >
             <RiAddLine className="w-4 h-4" />
-          </BaseButton>
+          </ButtonDefault>
           <hr />
-          <BaseButton
+          <ButtonDefault
             tabIndex={-1}
-            variant="default"
+            color="gray"
             className="p-1.5"
             onClick={listHandler.moveSelectedItemUp}
             disabled={!listHandler.canShiftSelectedItemUp()}
           >
             <RiArrowUpLine className="w-4 h-4" />
-          </BaseButton>
-          <BaseButton
+          </ButtonDefault>
+          <ButtonDefault
             tabIndex={-1}
-            variant="default"
+            color="gray"
             className="p-1.5"
             onClick={listHandler.moveSelectedItemDown}
             disabled={!listHandler.canShiftSelectedItemDown()}
           >
             <RiArrowDownLine className="w-4 h-4" />
-          </BaseButton>
+          </ButtonDefault>
           <hr />
-          <BaseButton
+          <ButtonDefault
             tabIndex={-1}
-            variant="default"
+            color="gray"
             className="p-1.5"
             onClick={() => setPlaylistPanelContent('itemEditor')}
             disabled={!listHandler.selectedItem()}
           >
             <RiPencilLine className="w-4 h-4" />
-          </BaseButton>
-          <BaseButton
+          </ButtonDefault>
+          <ButtonDefault
             tabIndex={-1}
-            variant="red"
+            color="red"
             className="p-1.5"
             onClick={listHandler.removeSelectedItem}
             disabled={!listHandler.selectedItem()}
           >
             <RiDeleteBin2Line className="w-4 h-4" />
-          </BaseButton>
+          </ButtonDefault>
         </div>
       </div>
     </>

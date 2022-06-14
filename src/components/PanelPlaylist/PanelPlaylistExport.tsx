@@ -7,8 +7,8 @@ import {
   atomPlaylistName,
   atomPlaylistPanelContent,
 } from '../../stores/playlistStore';
-import BaseButton from '../BaseButton';
 import BasePanelHeader from '../BasePanelHeader';
+import ButtonDefault from '../Buttons/ButtonDefault';
 
 const PanelPlaylistExport = () => {
   const playlistName = useAtomValue(atomPlaylistName) || 'Untitled';
@@ -37,21 +37,17 @@ const PanelPlaylistExport = () => {
           Download &quot;<b>{playlistName}.WORSHIP</b>&quot; playlist.
         </p>
 
-        <BaseButton
-          variant="primary"
-          className="px-3 py-1"
-          onClick={handleDownload}
-        >
+        <ButtonDefault color="blue" onClick={handleDownload}>
           Download
-        </BaseButton>
+        </ButtonDefault>
 
-        <BaseButton
-          variant="default"
-          className="py-1 px-3 ml-1"
+        <ButtonDefault
+          color="gray"
+          className="ml-1"
           onClick={() => setPlaylistPanelContent('list')}
         >
           Cancel
-        </BaseButton>
+        </ButtonDefault>
       </div>
     </>
   );

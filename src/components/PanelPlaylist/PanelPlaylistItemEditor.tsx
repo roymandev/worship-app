@@ -15,7 +15,7 @@ import {
 
 import BasePanelHeader from '../BasePanelHeader';
 import BaseInput from '../BaseInput';
-import BaseButton from '../BaseButton';
+import ButtonDefault from '../Buttons/ButtonDefault';
 
 interface PanelPlaylistItemEditorProps {
   addItem?: boolean;
@@ -138,21 +138,13 @@ const PanelPlaylistItemEditor = ({ addItem }: PanelPlaylistItemEditorProps) => {
         />
 
         <div className="flex gap-1">
-          <BaseButton
-            variant="primary"
-            className="py-1 px-3 ml-auto"
-            onClick={saveHandler}
-          >
+          <ButtonDefault color="blue" className="ml-auto" onClick={saveHandler}>
             Save
-          </BaseButton>
+          </ButtonDefault>
 
-          <BaseButton
-            variant="default"
-            className="py-1 px-3"
-            onClick={closeEditor}
-          >
+          <ButtonDefault color="gray" onClick={closeEditor}>
             Cancel
-          </BaseButton>
+          </ButtonDefault>
         </div>
       </div>
     </>

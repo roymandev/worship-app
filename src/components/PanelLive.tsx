@@ -53,7 +53,7 @@ const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
     <Split direction="vertical" gutterSize={4} onDrag={onDragHandler}>
       <BasePanel>
         <BasePanelHeader>
-          <h2 className="px-2">Preview</h2>
+          <h2 className="px-2">Live</h2>
         </BasePanelHeader>
 
         <BasePanelHeader sub>

@@ -1,4 +1,10 @@
 import { useAtomValue, useSetAtom } from 'jotai';
+import {
+  RiAddLine,
+  RiDeleteBin2Line,
+  RiPencilFill,
+  RiPlayFill,
+} from 'react-icons/ri';
 import { atomContextMenuActive } from '../../stores/contextMenuStore';
 import {
   atomLiveItem,
@@ -9,7 +15,7 @@ import {
   atomPlaylistRemoveSelectedItem,
   atomPlaylistSelectedItem,
 } from '../../stores/playlistStore';
-import BaseButton from '../BaseButton';
+import ButtonContextMenu from '../Buttons/ButtonContextMenu';
 
 const ContextMenuPlaylistItem = () => {
   const setContextMenuActive = useSetAtom(atomContextMenuActive);
@@ -46,36 +52,24 @@ const ContextMenuPlaylistItem = () => {
 
   return (
     <>
-      <BaseButton
-        variant="softPrimary"
-        className="py-1 text-left px-3"
-        onClick={handleGoLive}
-      >
+      <ButtonContextMenu color="blue" onClick={handleGoLive}>
         Go Live
-      </BaseButton>
-      <hr />
-      <BaseButton
-        variant="softDefault"
-        className="py-1 text-left px-3"
-        onClick={handleEdit}
-      >
+        <RiPlayFill className="h-4 w-4" />
+      </ButtonContextMenu>
+      <hr className="my-1" />
+      <ButtonContextMenu color="gray" onClick={handleEdit}>
         Edit
-      </BaseButton>
-      <BaseButton
-        variant="softDefault"
-        className="py-1 text-left px-3"
-        onClick={hanldeRemove}
-      >
+        <RiPencilFill className="h-4 w-4" />
+      </ButtonContextMenu>
+      <ButtonContextMenu color="red" onClick={hanldeRemove}>
         Remove
-      </BaseButton>
-      <hr />
-      <BaseButton
-        variant="softRed"
-        className="py-1 text-left px-3"
-        onClick={handleAdd}
-      >
+        <RiDeleteBin2Line className="h-4 w-4" />
+      </ButtonContextMenu>
+      <hr className="my-1" />
+      <ButtonContextMenu color="gray" onClick={handleAdd}>
         Add Item
-      </BaseButton>
+        <RiAddLine className="h-4 w-4" />
+      </ButtonContextMenu>
     </>
   );
 };

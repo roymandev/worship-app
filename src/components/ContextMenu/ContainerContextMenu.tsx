@@ -17,7 +17,7 @@ const ContainerContextMenu = () => {
     contextMenuActive && (
       <div
         ref={onClickOutside}
-        className="rounded shadow-lg border border-slate-300 w-48 fixed flex flex-col bg-white p-1 gap-1"
+        className="rounded shadow-lg border border-slate-300 w-48 fixed flex flex-col bg-white py-1"
         style={contextMenuPos}
       >
         {contextMenuActive === 'playlistItem' && <ContextMenuPlaylistItem />}

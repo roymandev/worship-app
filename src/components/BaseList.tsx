@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { scrollToSelected } from '../lib/scrollToSelected';
 
 export interface BaseListProps extends React.ComponentPropsWithoutRef<'ul'> {
   children: React.ReactNode;
@@ -28,7 +27,9 @@ export const BaseList = ({
 
   useEffect(() => {
     if (containerRef.current && scrollToIndex !== undefined) {
-      scrollToSelected(containerRef.current, scrollToIndex);
+      containerRef.current.children[scrollToIndex]?.scrollIntoView({
+        block: 'nearest',
+      });
     }
   }, [scrollToIndex]);
 

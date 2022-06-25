@@ -36,6 +36,11 @@ const PanelPlaylistList = () => {
     atomPlaylistSelectedItemIndex,
   );
 
+  // Select first item on mounted
+  useEffect(() => {
+    playlistItems[0] && setPlaylistSelectedItemIndex(0);
+  }, []);
+
   // Show Item Preview
   const setPreviewItem = useSetAtom(atomPreviewItem);
   const setPreviewContentSelectedLineIndex = useSetAtom(

@@ -1,15 +1,7 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
-  RiAddLine,
-  RiArrowDownLine,
-  RiArrowUpLine,
-  RiDeleteBin2Line,
-  RiPencilLine,
-} from 'react-icons/ri';
-import {
   atomPlaylistItems,
   atomPlaylistName,
-  atomPlaylistPanelContent,
   atomPlaylistSelectedItem,
   atomPlaylistSelectedItemIndex,
 } from '../../stores/playlistStore';
@@ -27,10 +19,14 @@ import {
   atomContextMenuActive,
   atomContextMenuPos,
 } from '../../stores/contextMenuStore';
-import ButtonDefault from '../Buttons/ButtonDefault';
+import { useEffect } from 'react';
+import {
+  atomPreviewItem,
+  atomPreviewItemContentSelectedLineIndex,
+} from '../../stores/previewStore';
+import PanelPlaylistListController from './PanelPlaylistListController';
 
 const PanelPlaylistList = () => {
-  const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
   const setContextMenuActive = useSetAtom(atomContextMenuActive);
   const setContextMenuPos = useSetAtom(atomContextMenuPos);
   const [playlistName, setPlaylistName] = useAtom(atomPlaylistName);
@@ -39,6 +35,19 @@ const PanelPlaylistList = () => {
   const [playlistSelectedItemIndex, setPlaylistSelectedItemIndex] = useAtom(
     atomPlaylistSelectedItemIndex,
   );
+
+  // Show Item Preview
+  const setPreviewItem = useSetAtom(atomPreviewItem);
+  const setPreviewContentSelectedLineIndex = useSetAtom(
+    atomPreviewItemContentSelectedLineIndex,
+  );
+  const showPreviewHandler = () => {
+    setPreviewItem(playlistSelectedItem);
+    setPreviewContentSelectedLineIndex(
+      playlistSelectedItem?.content[0] ? 0 : -1,
+    );
+  };
+  useEffect(showPreviewHandler, [playlistSelectedItem]);
 
   const listHandler = listController({
     items: playlistItems,
@@ -74,6 +83,7 @@ const PanelPlaylistList = () => {
           onKeyDownArrowUp={listHandler.shiftSelectedItemUp}
           onKeyDownArrowDown={listHandler.shiftSelectedItemDown}
           onKeyDownEnter={() => setLiveItemHandler(playlistSelectedItem)}
+          onFocus={showPreviewHandler}
         >
           {playlistItems.map((item, index) => (
             <BaseListLine
@@ -98,54 +108,7 @@ const PanelPlaylistList = () => {
           ))}
         </BaseList>
 
-        <div className="flex flex-col gap-1 p-1">
-          <ButtonDefault
-            tabIndex={-1}
-            color="blue"
-            className="p-1.5"
-            onClick={() => setPlaylistPanelContent('addItem')}
-          >
-            <RiAddLine className="w-4 h-4" />
-          </ButtonDefault>
-          <hr />
-          <ButtonDefault
-            tabIndex={-1}
-            color="gray"
-            className="p-1.5"
-            onClick={listHandler.moveSelectedItemUp}
-            disabled={!listHandler.canShiftSelectedItemUp()}
-          >
-            <RiArrowUpLine className="w-4 h-4" />
-          </ButtonDefault>
-          <ButtonDefault
-            tabIndex={-1}
-            color="gray"
-            className="p-1.5"
-            onClick={listHandler.moveSelectedItemDown}
-            disabled={!listHandler.canShiftSelectedItemDown()}
-          >
-            <RiArrowDownLine className="w-4 h-4" />
-          </ButtonDefault>
-          <hr />
-          <ButtonDefault
-            tabIndex={-1}
-            color="gray"
-            className="p-1.5"
-            onClick={() => setPlaylistPanelContent('itemEditor')}
-            disabled={!listHandler.selectedItem()}
-          >
-            <RiPencilLine className="w-4 h-4" />
-          </ButtonDefault>
-          <ButtonDefault
-            tabIndex={-1}
-            color="red"
-            className="p-1.5"
-            onClick={listHandler.removeSelectedItem}
-            disabled={!listHandler.selectedItem()}
-          >
-            <RiDeleteBin2Line className="w-4 h-4" />
-          </ButtonDefault>
-        </div>
+        <PanelPlaylistListController listHandler={listHandler} />
       </div>
     </>
   );

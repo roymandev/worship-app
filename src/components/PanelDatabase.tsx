@@ -2,6 +2,7 @@ import { useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { RiPlayListAddFill } from 'react-icons/ri';
 import { listController } from '../lib/listController';
+import { parseContent } from '../lib/parseContent';
 import { atomPlaylistAddItem } from '../stores/playlistStore';
 import {
   atomPreviewItem,
@@ -18,12 +19,12 @@ const dummyLyrics: DatabaseItem[] = [
   {
     id: '1',
     title: 'NP 1 Suci, Suci, Suci',
-    content: [],
+    content: '',
   },
   {
     id: '2',
     title: 'NP 2 Tuhan Yang Mahabesar',
-    content: [],
+    content: '',
   },
 ];
 
@@ -35,10 +36,17 @@ const PanelDatabase = () => {
   const selectedDatabaseItemIndex = databaseItems.findIndex(
     (item) => item.id === selectedDatabaseItem?.id,
   );
+  const parsedSelectedDatabaseItem = selectedDatabaseItem
+    ? {
+        ...selectedDatabaseItem,
+        content: parseContent(selectedDatabaseItem.content, true),
+      }
+    : null;
 
   const addPlaylistItemHandler = () => {
-    const item = databaseItems[selectedDatabaseItemIndex];
-    item && setPlaylistAddItem(item);
+    if (parsedSelectedDatabaseItem) {
+      setPlaylistAddItem(parsedSelectedDatabaseItem);
+    }
   };
 
   const itemListHandler = listController({
@@ -55,10 +63,12 @@ const PanelDatabase = () => {
     atomPreviewItemContentSelectedLineIndex,
   );
   const showPreviewHandler = () => {
-    setPreviewItem(selectedDatabaseItem);
-    setPreviewContentSelectedLineIndex(
-      selectedDatabaseItem?.content[0] ? 0 : -1,
-    );
+    if (selectedDatabaseItem) {
+      setPreviewItem(parsedSelectedDatabaseItem);
+      setPreviewContentSelectedLineIndex(
+        selectedDatabaseItem.content[0] ? 0 : -1,
+      );
+    }
   };
   useEffect(showPreviewHandler, [selectedDatabaseItem]);
 

@@ -8,10 +8,12 @@ export interface BaseItem {
   content: BaseItemContentLine[];
 }
 
-export interface DatabaseItem extends BaseItem {
+export interface DatabaseItem extends Omit<BaseItem, 'content'> {
   id: string;
+  content: string;
 }
 
-export interface PlaylistItem extends DatabaseItem {
+export interface PlaylistItem extends BaseItem {
+  id: string;
   note?: string;
 }

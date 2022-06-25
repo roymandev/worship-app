@@ -9,6 +9,9 @@ export const atomLiveItemContentSelectedLineIndex = atomWithStorage<number>(
   -1,
 );
 
+export const atomLiveHideText = atomWithStorage('liveHideText', false);
+export const atomLiveHideScreen = atomWithStorage('liveHideScreen', false);
+
 // Getter
 export const atomLiveItemContentSelectedLine = atom(
   (get) =>

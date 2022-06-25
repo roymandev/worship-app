@@ -3,6 +3,8 @@ import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 import { listController } from '../lib/listController';
 import {
+  atomLiveHideScreen,
+  atomLiveHideText,
   atomLiveItem,
   atomLiveItemContentSelectedLine,
   atomLiveItemContentSelectedLineIndex,
@@ -14,10 +16,13 @@ import {
 import BaseList from './BaseList';
 import BasePanel from './BasePanel';
 import BasePanelHeader from './BasePanelHeader';
+import ButtonDefault from './Buttons/ButtonDefault';
 import ItemContentLine from './ItemContentLine';
 import TextScreen, { TextScreenRef } from './TextScreen';
 
 const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
+  const [liveHideScreen, setLiveHideScreen] = useAtom(atomLiveHideScreen);
+  const [liveHideText, setLiveHideText] = useAtom(atomLiveHideText);
   const liveItem = useAtomValue(atomLiveItem);
   const liveItemSelectedLine = useAtomValue(atomLiveItemContentSelectedLine);
   const [liveItemSelectedLineIndex, setLiveItemSelectedLineIndex] = useAtom(
@@ -54,6 +59,23 @@ const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
       <BasePanel>
         <BasePanelHeader>
           <h2 className="px-2">Live</h2>
+
+          <ButtonDefault
+            className="h-7 ml-auto mr-1"
+            color={liveHideScreen ? 'red' : 'gray'}
+            tabIndex={-1}
+            onClick={() => setLiveHideScreen((prev) => !prev)}
+          >
+            Hide Screen
+          </ButtonDefault>
+          <ButtonDefault
+            className="h-7 mr-1"
+            color={liveHideText ? 'yellow' : 'gray'}
+            tabIndex={-1}
+            onClick={() => setLiveHideText((prev) => !prev)}
+          >
+            Hide Text
+          </ButtonDefault>
         </BasePanelHeader>
 
         <BasePanelHeader sub>
@@ -80,7 +102,11 @@ const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
       </BasePanel>
 
       <BasePanel>
-        <TextScreen ref={textScreenRef} line={liveItemSelectedLine} />
+        <TextScreen
+          ref={textScreenRef}
+          line={liveHideText ? null : liveItemSelectedLine}
+          hideScreen={liveHideScreen}
+        />
       </BasePanel>
     </Split>
   );

@@ -4,9 +4,15 @@ import Head from 'next/head';
 import { useEffect, useRef } from 'react';
 import ClientOnly from '../components/ClientOnly';
 import TextScreen, { TextScreenRef } from '../components/TextScreen';
-import { atomLiveItemContentSelectedLine } from '../stores/liveStore';
+import {
+  atomLiveHideScreen,
+  atomLiveHideText,
+  atomLiveItemContentSelectedLine,
+} from '../stores/liveStore';
 
 const Screen: NextPage = () => {
+  const liveHideScreen = useAtomValue(atomLiveHideScreen);
+  const liveHideText = useAtomValue(atomLiveHideText);
   const liveItemContentSelectedLine = useAtomValue(
     atomLiveItemContentSelectedLine,
   );
@@ -29,7 +35,8 @@ const Screen: NextPage = () => {
         <div className="h-screen">
           <TextScreen
             ref={textScreenRef}
-            line={liveItemContentSelectedLine}
+            line={liveHideText ? null : liveItemContentSelectedLine}
+            hideScreen={liveHideScreen}
             mainScreen
           />
         </div>

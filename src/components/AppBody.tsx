@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Split from 'react-split';
+import PanelLeft from './PanelLeft';
 import PanelLive from './PanelLive';
-import PanelPlaylist from './PanelPlaylist/PanelPlaylist';
 import PanelPreview from './PanelPreview';
 import { TextScreenRef } from './TextScreen';
 
@@ -25,7 +25,7 @@ const AppBody = () => {
       gutterSize={4}
       onDrag={resizeScreenHandler}
     >
-      <PanelPlaylist />
+      <PanelLeft />
       <PanelPreview ref={panelPreviewTextScreenRef} />
       <PanelLive ref={panelLiveTextScreenRef} />
     </Split>

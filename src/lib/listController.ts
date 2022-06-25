@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-interface ListControllerBaseOptions<Item> {
+export interface ListControllerBaseOptions<Item> {
   items: Item[];
   selectedItemIndex: number;
   setSelectedItemIndex: (index: number) => void;
   setItems?: (items: Item[]) => void;
 }
 
-interface ListControllerBaseReturns<Item> {
+export interface ListControllerBaseReturns<Item> {
   selectedItem: () => Item | null;
   canShiftSelectedItemUp: () => boolean;
   canShiftSelectedItemDown: () => boolean;
@@ -14,7 +14,7 @@ interface ListControllerBaseReturns<Item> {
   shiftSelectedItemDown: () => void;
 }
 
-interface ListControllerWithSetItemsReturns<Item>
+export interface ListControllerWithSetItemsReturns<Item>
   extends ListControllerBaseReturns<Item> {
   moveSelectedItemUp: () => void;
   moveSelectedItemDown: () => void;

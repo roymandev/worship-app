@@ -8,7 +8,10 @@ export interface BaseItem {
   content: BaseItemContentLine[];
 }
 
-export interface PlaylistItem extends BaseItem {
+export interface DatabaseItem extends BaseItem {
   id: string;
+}
+
+export interface PlaylistItem extends DatabaseItem {
   note?: string;
 }

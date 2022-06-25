@@ -17,6 +17,7 @@ import { BaseItemContentLine } from '../types/playlistTypes';
 interface TextScreenProps {
   line: BaseItemContentLine | null;
   mainScreen?: boolean;
+  hideScreen?: boolean;
 }
 
 export interface TextScreenRef {
@@ -25,7 +26,7 @@ export interface TextScreenRef {
 }
 
 const TextScreen = forwardRef<TextScreenRef, TextScreenProps>(
-  ({ line, mainScreen = false }, ref) => {
+  ({ line, mainScreen = false, hideScreen = false }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const baseScreenSize = useAtomValue(atomBaseScreenSize);
     const [mainScreenSize, setMainScreenSize] = useAtom(atomMainScreenSize);
@@ -71,12 +72,14 @@ const TextScreen = forwardRef<TextScreenRef, TextScreenProps>(
         ref={containerRef}
         className="grid overflow-hidden place-items-center w-full h-full font-bold text-center text-white uppercase bg-black"
       >
-        <div
-          className="grid place-items-center whitespace-pre-line bg-gray-800"
-          style={screenStyle}
-        >
-          {!line?.type && line?.text}
-        </div>
+        {!hideScreen && (
+          <div
+            className="grid place-items-center whitespace-pre-line bg-gray-800"
+            style={screenStyle}
+          >
+            {!line?.type && line?.text}
+          </div>
+        )}
       </div>
     );
   },

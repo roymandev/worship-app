@@ -1,7 +1,7 @@
 import { atom, Getter, Setter } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { listController } from '../lib/listController';
-import { PlaylistItem } from '../types/playlistTypes';
+import { PlaylistItem } from '../types/itemTypes';
 
 // State
 export const atomPlaylistName = atomWithStorage('playlistName', 'Untitled');

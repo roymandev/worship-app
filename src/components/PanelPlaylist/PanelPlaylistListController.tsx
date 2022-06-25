@@ -8,7 +8,7 @@ import {
 } from 'react-icons/ri';
 import { ListControllerWithSetItemsReturns } from '../../lib/listController';
 import { atomPlaylistPanelContent } from '../../stores/playlistStore';
-import { PlaylistItem } from '../../types/playlistTypes';
+import { PlaylistItem } from '../../types/itemTypes';
 import ButtonDefault from '../Buttons/ButtonDefault';
 
 export interface PanelPlaylistListControllerProps {

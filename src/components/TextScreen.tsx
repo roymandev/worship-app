@@ -12,7 +12,7 @@ import {
   atomMainScreenSize,
   ScreenStyle,
 } from '../stores/screenStore';
-import { BaseItemContentLine } from '../types/playlistTypes';
+import { BaseItemContentLine } from '../types/itemTypes';
 
 interface TextScreenProps {
   line: BaseItemContentLine | null;

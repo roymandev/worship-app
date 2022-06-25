@@ -9,7 +9,7 @@ import {
   atomLiveItem,
   atomLiveItemContentSelectedLineIndex,
 } from '../../stores/liveStore';
-import { BaseItem } from '../../types/playlistTypes';
+import { BaseItem } from '../../types/itemTypes';
 import BaseInput from '../BaseInput';
 import BaseList from '../BaseList';
 import BaseListLine from '../BaseListLine';

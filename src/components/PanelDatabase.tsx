@@ -7,7 +7,7 @@ import {
   atomPreviewItem,
   atomPreviewItemContentSelectedLineIndex,
 } from '../stores/previewStore';
-import { DatabaseItem } from '../types/playlistTypes';
+import { DatabaseItem } from '../types/itemTypes';
 import BaseList from './BaseList';
 import BaseListLine from './BaseListLine';
 import BasePanel from './BasePanel';

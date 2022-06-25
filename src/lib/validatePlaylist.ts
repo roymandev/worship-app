@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { PlaylistItem } from '../types/playlistTypes';
+import { PlaylistItem } from '../types/itemTypes';
 
 export const validatePlaylistContent = (content: PlaylistItem['content']) => {
   const validatedContent: typeof content = [];

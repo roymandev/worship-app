@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import type { BaseItem } from '../types/playlistTypes';
+import type { BaseItem } from '../types/itemTypes';
 
 export const atomLiveItem = atomWithStorage<BaseItem | null>('liveItem', null);
 

@@ -1,5 +1,5 @@
 import { twMerge } from 'tailwind-merge';
-import { BaseItemContentLine } from '../types/playlistTypes';
+import { BaseItemContentLine } from '../types/itemTypes';
 import BaseListLine, { BaseListLineProps } from './BaseListLine';
 
 interface ItemContentLineProps extends BaseListLineProps {

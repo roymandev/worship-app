@@ -1,4 +1,4 @@
-import { BaseItemContentLine } from '../types/playlistTypes';
+import { BaseItemContentLine } from '../types/itemTypes';
 
 export interface ParsedContentLine extends BaseItemContentLine {
   indexs?: Array<number>;

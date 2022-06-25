@@ -6,7 +6,7 @@ import {
   atomPlaylistName,
   atomPlaylistPanelContent,
 } from '../../stores/playlistStore';
-import { PlaylistItem } from '../../types/playlistTypes';
+import { PlaylistItem } from '../../types/itemTypes';
 import BasePanelHeader from '../BasePanelHeader';
 import ButtonDefault from '../Buttons/ButtonDefault';
 

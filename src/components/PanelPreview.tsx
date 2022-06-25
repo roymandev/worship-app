@@ -1,12 +1,11 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 import { listController } from '../lib/listController';
 import {
   atomLiveItem,
   atomLiveItemContentSelectedLineIndex,
 } from '../stores/liveStore';
-import { atomPlaylistSelectedItem } from '../stores/playlistStore';
 import {
   atomPreviewItem,
   atomPreviewItemContentSelectedLineIndex,
@@ -18,8 +17,7 @@ import ItemContentLine from './ItemContentLine';
 import TextScreen, { TextScreenRef } from './TextScreen';
 
 const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
-  const playlistSelectedItem = useAtomValue(atomPlaylistSelectedItem);
-  const [previewItem, setPreviewItem] = useAtom(atomPreviewItem);
+  const previewItem = useAtomValue(atomPreviewItem);
   const [contentSelectedLineIndex, setContentSelectedLineIndex] = useAtom(
     atomPreviewItemContentSelectedLineIndex,
   );
@@ -30,13 +28,7 @@ const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
     setSelectedItemIndex: (index) => setContentSelectedLineIndex(index),
   });
 
-  // Watch playlist selected item
-  useEffect(() => {
-    setPreviewItem(playlistSelectedItem);
-    setContentSelectedLineIndex(playlistSelectedItem?.content[0] ? 0 : -1);
-  }, [playlistSelectedItem]);
-
-  // liveStore handler
+  // Set Live Item
   const setLiveItem = useSetAtom(atomLiveItem);
   const setLiveItemSelectedLineIndex = useSetAtom(
     atomLiveItemContentSelectedLineIndex,

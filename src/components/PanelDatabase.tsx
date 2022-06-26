@@ -1,6 +1,7 @@
 import { useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { RiPlayListAddFill } from 'react-icons/ri';
+import { useDebounce } from '../hooks/useDebounce';
 import { listController } from '../lib/listController';
 import { parseContent } from '../lib/parseContent';
 import { atomPlaylistAddItem } from '../stores/playlistStore';
@@ -9,6 +10,7 @@ import {
   atomPreviewItemContentSelectedLineIndex,
 } from '../stores/previewStore';
 import { DatabaseItem } from '../types/itemTypes';
+import BaseInput from './BaseInput';
 import BaseList from './BaseList';
 import BaseListLine from './BaseListLine';
 import BasePanel from './BasePanel';
@@ -29,24 +31,20 @@ const dummyLyrics: DatabaseItem[] = [
 ];
 
 const PanelDatabase = () => {
-  const setPlaylistAddItem = useSetAtom(atomPlaylistAddItem);
-  const [databaseItems] = useState(dummyLyrics);
+  const [databaseItems, setDatabaseItems] = useState(dummyLyrics);
   const [selectedDatabaseItem, setSelectedDatabaseItem] =
     useState<DatabaseItem | null>(null);
   const selectedDatabaseItemIndex = databaseItems.findIndex(
     (item) => item.id === selectedDatabaseItem?.id,
   );
-  const parsedSelectedDatabaseItem = selectedDatabaseItem
-    ? {
+  const getParsedSelectedItem = () => {
+    if (selectedDatabaseItem) {
+      return {
         ...selectedDatabaseItem,
         content: parseContent(selectedDatabaseItem.content, true),
-      }
-    : null;
-
-  const addPlaylistItemHandler = () => {
-    if (parsedSelectedDatabaseItem) {
-      setPlaylistAddItem(parsedSelectedDatabaseItem);
+      };
     }
+    return null;
   };
 
   const itemListHandler = listController({
@@ -57,17 +55,37 @@ const PanelDatabase = () => {
     },
   });
 
+  // Search
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchQueryDebounced = useDebounce(searchQuery, 500);
+  useEffect(() => {
+    const result = dummyLyrics.filter(
+      (item) =>
+        item.title
+          .toLocaleLowerCase()
+          .search(searchQueryDebounced.toLocaleLowerCase()) !== -1 && item,
+    );
+    setDatabaseItems(result);
+    if (searchQueryDebounced && result[0]) setSelectedDatabaseItem(result[0]);
+  }, [searchQueryDebounced]);
+
+  // Add Playlist Item
+  const setPlaylistAddItem = useSetAtom(atomPlaylistAddItem);
+  const addPlaylistItemHandler = () => {
+    const parsedItem = getParsedSelectedItem();
+    parsedItem && setPlaylistAddItem(parsedItem);
+  };
+
   // Show Item Preview
   const setPreviewItem = useSetAtom(atomPreviewItem);
   const setPreviewContentSelectedLineIndex = useSetAtom(
     atomPreviewItemContentSelectedLineIndex,
   );
   const showPreviewHandler = () => {
-    if (selectedDatabaseItem) {
-      setPreviewItem(parsedSelectedDatabaseItem);
-      setPreviewContentSelectedLineIndex(
-        selectedDatabaseItem.content[0] ? 0 : -1,
-      );
+    const parsedItem = getParsedSelectedItem();
+    if (parsedItem) {
+      setPreviewItem(parsedItem);
+      setPreviewContentSelectedLineIndex(parsedItem.content[0] ? 0 : -1);
     }
   };
   useEffect(showPreviewHandler, [selectedDatabaseItem]);
@@ -77,6 +95,15 @@ const PanelDatabase = () => {
       <BasePanelHeader>
         <h2 className="px-2">Database</h2>
       </BasePanelHeader>
+
+      <BasePanelHeader sub className="p-1 gap-1">
+        <BaseInput
+          className="flex-1 px-1 h-7"
+          placeholder="Search song title"
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </BasePanelHeader>
+
       <div className="flex flex-1 divide-x divide-slate-300">
         <BaseList
           className="flex-1"

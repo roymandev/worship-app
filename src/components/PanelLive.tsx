@@ -89,6 +89,7 @@ const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
           onKeyDownArrowDown={contentHandler.shiftSelectedItemDown}
           onKeyDownArrowLeft={playlistShiftSelectedItemUp}
           onKeyDownArrowRight={playlistShiftSelectedItemDown}
+          tabIndex={liveItem?.content.length ? 0 : -1}
         >
           {liveItem?.content.map((line, index) => (
             <ItemContentLine

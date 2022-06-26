@@ -89,6 +89,7 @@ const PanelPlaylistList = () => {
           onKeyDownArrowDown={listHandler.shiftSelectedItemDown}
           onKeyDownEnter={() => setLiveItemHandler(playlistSelectedItem)}
           onFocus={showPreviewHandler}
+          tabIndex={playlistItems.length ? 0 : -1}
         >
           {playlistItems.map((item, index) => (
             <BaseListLine

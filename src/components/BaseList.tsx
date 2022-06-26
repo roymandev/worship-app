@@ -66,7 +66,6 @@ export const BaseList = ({
         className,
         'relative',
       )}
-      tabIndex={scrollToIndex !== undefined ? 0 : -1}
       onKeyDown={onKeyDownHandler}
       {...rest}
     >

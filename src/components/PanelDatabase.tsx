@@ -111,6 +111,7 @@ const PanelDatabase = () => {
           onKeyDownArrowUp={itemListHandler.shiftSelectedItemUp}
           onKeyDownArrowDown={itemListHandler.shiftSelectedItemDown}
           onFocus={showPreviewHandler}
+          tabIndex={databaseItems.length ? 0 : -1}
         >
           {databaseItems.map((item) => (
             <BaseListLine

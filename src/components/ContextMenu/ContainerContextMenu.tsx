@@ -4,6 +4,7 @@ import {
   atomContextMenuActive,
   atomContextMenuPos,
 } from '../../stores/contextMenuStore';
+import ContextMenuDatabaseItem from './ContextMenuDatabaseItem';
 import ContextMenuPlaylistItem from './ContextMenuPlaylistItem';
 
 const ContainerContextMenu = () => {
@@ -21,6 +22,7 @@ const ContainerContextMenu = () => {
         style={contextMenuPos}
       >
         {contextMenuActive === 'playlistItem' && <ContextMenuPlaylistItem />}
+        {contextMenuActive === 'databaseItem' && <ContextMenuDatabaseItem />}
       </div>
     )
   );

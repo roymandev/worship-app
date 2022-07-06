@@ -44,7 +44,7 @@ const PanelPlaylistList = () => {
 
   // Select first item on mounted
   useEffect(() => {
-    items[0] && setSelectedItemIndex(0);
+    if (items[0] && selectedItemIndex === -1) setSelectedItemIndex(0);
   }, []);
 
   // Show Item Preview

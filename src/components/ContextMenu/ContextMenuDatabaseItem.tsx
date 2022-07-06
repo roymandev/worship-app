@@ -42,7 +42,7 @@ const ContextMenuDatabaseItem = () => {
         Go Live
         <RiPlayFill className="h-4 w-4" />
       </ButtonContextMenu>
-      <hr />
+      <hr className="my-1" />
       <ButtonContextMenu color="gray" onClick={handleAddToPlaylist}>
         Add to playlist
         <RiPlayListAddFill className="h-4 w-4" />

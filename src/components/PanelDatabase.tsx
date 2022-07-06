@@ -1,15 +1,22 @@
-import { useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { RiPlayListAddFill } from 'react-icons/ri';
 import { useDebounce } from '../hooks/useDebounce';
 import { listController } from '../lib/listController';
-import { parseContent } from '../lib/parseContent';
+import {
+  atomContextMenuActive,
+  atomContextMenuPos,
+} from '../stores/contextMenuStore';
+import {
+  atomDatabaseItems,
+  atomDatabaseParsedSelectedItem,
+  atomDatabaseSelectedItemIndex,
+} from '../stores/databaseStore';
 import { atomPlaylistAddItem } from '../stores/playlistStore';
 import {
   atomPreviewItem,
   atomPreviewItemContentSelectedLineIndex,
 } from '../stores/previewStore';
-import { DatabaseItem } from '../types/itemTypes';
 import BaseInput from './BaseInput';
 import BaseList from './BaseList';
 import BaseListLine from './BaseListLine';
@@ -17,62 +24,36 @@ import BasePanel from './BasePanel';
 import BasePanelHeader from './BasePanelHeader';
 import ButtonDefault from './Buttons/ButtonDefault';
 
-const dummyLyrics: DatabaseItem[] = [
-  {
-    id: '1',
-    title: 'NP 1 Suci, Suci, Suci',
-    content: '',
-  },
-  {
-    id: '2',
-    title: 'NP 2 Tuhan Yang Mahabesar',
-    content: '',
-  },
-];
-
 const PanelDatabase = () => {
-  const [databaseItems, setDatabaseItems] = useState(dummyLyrics);
-  const [selectedDatabaseItem, setSelectedDatabaseItem] =
-    useState<DatabaseItem | null>(null);
-  const selectedDatabaseItemIndex = databaseItems.findIndex(
-    (item) => item.id === selectedDatabaseItem?.id,
+  const [items, setItems] = useAtom(atomDatabaseItems);
+  const [selectedItemIndex, setSelectedItemIndex] = useAtom(
+    atomDatabaseSelectedItemIndex,
   );
-  const getParsedSelectedItem = () => {
-    if (selectedDatabaseItem) {
-      return {
-        ...selectedDatabaseItem,
-        content: parseContent(selectedDatabaseItem.content, true),
-      };
-    }
-    return null;
-  };
-
-  const itemListHandler = listController({
-    items: databaseItems,
-    selectedItemIndex: selectedDatabaseItemIndex,
-    setSelectedItemIndex: (index) => {
-      setSelectedDatabaseItem(databaseItems[index]);
-    },
+  const parsedSelectedItem = useAtomValue(atomDatabaseParsedSelectedItem);
+  const itemsHandler = listController({
+    items,
+    selectedItemIndex,
+    setSelectedItemIndex,
   });
 
   // Search
   const [searchQuery, setSearchQuery] = useState('');
   const searchQueryDebounced = useDebounce(searchQuery, 500);
   useEffect(() => {
-    const result = dummyLyrics.filter(
+    const result = items.filter(
       (item) =>
         item.title
           .toLocaleLowerCase()
           .search(searchQueryDebounced.toLocaleLowerCase()) !== -1 && item,
     );
-    setDatabaseItems(result);
-    if (searchQueryDebounced && result[0]) setSelectedDatabaseItem(result[0]);
+    setItems(result);
+    if (searchQueryDebounced && result[0]) setSelectedItemIndex(0);
   }, [searchQueryDebounced]);
 
   // Add Playlist Item
   const setPlaylistAddItem = useSetAtom(atomPlaylistAddItem);
   const addPlaylistItemHandler = () => {
-    const parsedItem = getParsedSelectedItem();
+    const parsedItem = parsedSelectedItem;
     parsedItem && setPlaylistAddItem(parsedItem);
   };
 
@@ -82,13 +63,17 @@ const PanelDatabase = () => {
     atomPreviewItemContentSelectedLineIndex,
   );
   const showPreviewHandler = () => {
-    const parsedItem = getParsedSelectedItem();
+    const parsedItem = parsedSelectedItem;
     if (parsedItem) {
       setPreviewItem(parsedItem);
       setPreviewContentSelectedLineIndex(parsedItem.content[0] ? 0 : -1);
     }
   };
-  useEffect(showPreviewHandler, [selectedDatabaseItem]);
+  useEffect(showPreviewHandler, [selectedItemIndex]);
+
+  // Context Menu
+  const setContextMenuActive = useSetAtom(atomContextMenuActive);
+  const setContextMenuPos = useSetAtom(atomContextMenuPos);
 
   return (
     <BasePanel>
@@ -107,18 +92,27 @@ const PanelDatabase = () => {
       <div className="flex flex-1 divide-x divide-slate-300">
         <BaseList
           className="flex-1"
-          scrollToIndex={selectedDatabaseItemIndex}
-          onKeyDownArrowUp={itemListHandler.shiftSelectedItemUp}
-          onKeyDownArrowDown={itemListHandler.shiftSelectedItemDown}
+          scrollToIndex={selectedItemIndex}
+          onKeyDownArrowUp={itemsHandler.shiftSelectedItemUp}
+          onKeyDownArrowDown={itemsHandler.shiftSelectedItemDown}
           onFocus={showPreviewHandler}
-          tabIndex={databaseItems.length ? 0 : -1}
+          tabIndex={items.length ? 0 : -1}
         >
-          {databaseItems.map((item) => (
+          {items.map((item, index) => (
             <BaseListLine
               className="py-1 px-2 select-none"
               key={item.id}
-              isSelected={item.id === selectedDatabaseItem?.id}
-              onClick={() => setSelectedDatabaseItem(item)}
+              isSelected={item.id === parsedSelectedItem?.id}
+              onClick={() => setSelectedItemIndex(index)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setSelectedItemIndex(index);
+                setContextMenuPos({
+                  left: e.clientX,
+                  top: e.clientY,
+                });
+                setContextMenuActive('databaseItem');
+              }}
             >
               {item.title}
             </BaseListLine>

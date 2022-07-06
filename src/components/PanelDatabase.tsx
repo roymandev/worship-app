@@ -1,6 +1,6 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
-import { RiPlayListAddFill } from 'react-icons/ri';
+import { RiPlayFill, RiPlayListAddFill } from 'react-icons/ri';
 import { useDebounce } from '../hooks/useDebounce';
 import { listController } from '../lib/listController';
 import {
@@ -143,6 +143,15 @@ const PanelDatabase = () => {
           <ButtonDefault
             tabIndex={-1}
             color="blue"
+            className="p-1.5"
+            onClick={handleGoLive}
+          >
+            <RiPlayFill className="w-4 h-4" />
+          </ButtonDefault>
+          <hr />
+          <ButtonDefault
+            tabIndex={-1}
+            color="gray"
             className="p-1.5"
             onClick={addPlaylistItemHandler}
           >

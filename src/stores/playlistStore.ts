@@ -32,6 +32,7 @@ export const atomPlaylistAddItem = atom(
   null,
   (get, set, item: PlaylistItem) => {
     set(atomPlaylistItems, [...get(atomPlaylistItems), item]);
+    set(atomPlaylistSelectedItemIndex, get(atomPlaylistItems).length - 1);
   },
 );
 

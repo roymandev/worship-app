@@ -48,7 +48,6 @@ const PanelPlaylistImport = () => {
             if (newPlaylist) {
               if (newPlaylist.name) setNewName(newPlaylist.name);
               setNewItems(validatePlaylist(newPlaylist.items));
-              console.log(validatePlaylist(newPlaylist.items));
             } else setErrorMsg(ERROR_UNKNOWN_FILE);
           }
         };

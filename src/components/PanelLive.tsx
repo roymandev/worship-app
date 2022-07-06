@@ -21,18 +21,18 @@ import ItemContentLine from './ItemContentLine';
 import TextScreen, { TextScreenRef } from './TextScreen';
 
 const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
-  const [liveHideScreen, setLiveHideScreen] = useAtom(atomLiveHideScreen);
-  const [liveHideText, setLiveHideText] = useAtom(atomLiveHideText);
-  const liveItem = useAtomValue(atomLiveItem);
-  const liveItemSelectedLine = useAtomValue(atomLiveItemContentSelectedLine);
-  const [liveItemSelectedLineIndex, setLiveItemSelectedLineIndex] = useAtom(
+  const [hideScreen, setHideScreen] = useAtom(atomLiveHideScreen);
+  const [hideText, setHideText] = useAtom(atomLiveHideText);
+  const item = useAtomValue(atomLiveItem);
+  const itemSelectedLine = useAtomValue(atomLiveItemContentSelectedLine);
+  const [itemSelectedLineIndex, setItemSelectedLineIndex] = useAtom(
     atomLiveItemContentSelectedLineIndex,
   );
 
   const contentHandler = listController({
-    items: liveItem?.content ?? [],
-    selectedItemIndex: liveItemSelectedLineIndex,
-    setSelectedItemIndex: (index) => setLiveItemSelectedLineIndex(index),
+    items: item?.content ?? [],
+    selectedItemIndex: itemSelectedLineIndex,
+    setSelectedItemIndex: (index) => setItemSelectedLineIndex(index),
   });
 
   // playlistStore handler
@@ -62,41 +62,41 @@ const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
 
           <ButtonDefault
             className="h-7 ml-auto mr-1"
-            color={liveHideScreen ? 'red' : 'gray'}
+            color={hideScreen ? 'red' : 'gray'}
             tabIndex={-1}
-            onClick={() => setLiveHideScreen((prev) => !prev)}
+            onClick={() => setHideScreen((prev) => !prev)}
           >
             Hide Screen
           </ButtonDefault>
           <ButtonDefault
             className="h-7 mr-1"
-            color={liveHideText ? 'yellow' : 'gray'}
+            color={hideText ? 'yellow' : 'gray'}
             tabIndex={-1}
-            onClick={() => setLiveHideText((prev) => !prev)}
+            onClick={() => setHideText((prev) => !prev)}
           >
             Hide Text
           </ButtonDefault>
         </BasePanelHeader>
 
         <BasePanelHeader sub>
-          <h2 className="px-2">{liveItem?.title}</h2>
+          <h2 className="px-2">{item?.title}</h2>
         </BasePanelHeader>
 
         <BaseList
           className="leading-4 whitespace-pre-line"
-          scrollToIndex={liveItemSelectedLineIndex}
+          scrollToIndex={itemSelectedLineIndex}
           onKeyDownArrowUp={contentHandler.shiftSelectedItemUp}
           onKeyDownArrowDown={contentHandler.shiftSelectedItemDown}
           onKeyDownArrowLeft={playlistShiftSelectedItemUp}
           onKeyDownArrowRight={playlistShiftSelectedItemDown}
-          tabIndex={liveItem?.content.length ? 0 : -1}
+          tabIndex={item?.content.length ? 0 : -1}
         >
-          {liveItem?.content.map((line, index) => (
+          {item?.content.map((line, index) => (
             <ItemContentLine
               key={index}
               line={line}
-              isSelected={index === liveItemSelectedLineIndex}
-              onClick={() => setLiveItemSelectedLineIndex(index)}
+              isSelected={index === itemSelectedLineIndex}
+              onClick={() => setItemSelectedLineIndex(index)}
             />
           ))}
         </BaseList>
@@ -105,8 +105,8 @@ const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
       <BasePanel>
         <TextScreen
           ref={textScreenRef}
-          line={liveHideText ? null : liveItemSelectedLine}
-          hideScreen={liveHideScreen}
+          line={hideText ? null : itemSelectedLine}
+          hideScreen={hideScreen}
         />
       </BasePanel>
     </Split>

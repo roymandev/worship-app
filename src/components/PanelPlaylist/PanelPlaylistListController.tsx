@@ -18,7 +18,7 @@ export interface PanelPlaylistListControllerProps {
 const PanelPlaylistListController = ({
   listHandler,
 }: PanelPlaylistListControllerProps) => {
-  const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
+  const setPanelContent = useSetAtom(atomPlaylistPanelContent);
 
   return (
     <div className="flex flex-col gap-1 p-1">
@@ -26,7 +26,7 @@ const PanelPlaylistListController = ({
         tabIndex={-1}
         color="blue"
         className="p-1.5"
-        onClick={() => setPlaylistPanelContent('addItem')}
+        onClick={() => setPanelContent('addItem')}
       >
         <RiAddLine className="w-4 h-4" />
       </ButtonDefault>
@@ -54,7 +54,7 @@ const PanelPlaylistListController = ({
         tabIndex={-1}
         color="gray"
         className="p-1.5"
-        onClick={() => setPlaylistPanelContent('itemEditor')}
+        onClick={() => setPanelContent('itemEditor')}
         disabled={!listHandler.selectedItem()}
       >
         <RiPencilLine className="w-4 h-4" />

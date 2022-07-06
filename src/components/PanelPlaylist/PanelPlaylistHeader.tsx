@@ -5,7 +5,7 @@ import { useSetAtom } from 'jotai';
 import ButtonDefault from '../Buttons/ButtonDefault';
 
 const PanelPlaylistHeader = ({}) => {
-  const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
+  const setPanelContent = useSetAtom(atomPlaylistPanelContent);
 
   return (
     <BasePanelHeader>
@@ -15,7 +15,7 @@ const PanelPlaylistHeader = ({}) => {
         color="gray"
         withIcon="left"
         className="ml-auto h-7"
-        onClick={() => setPlaylistPanelContent('import')}
+        onClick={() => setPanelContent('import')}
       >
         <RiUploadLine className="w-4 h-4" />
         Import
@@ -25,7 +25,7 @@ const PanelPlaylistHeader = ({}) => {
         color="gray"
         withIcon="left"
         className="mx-1 h-7"
-        onClick={() => setPlaylistPanelContent('export')}
+        onClick={() => setPanelContent('export')}
       >
         <RiDownloadLine className="w-4 h-4" />
         Export

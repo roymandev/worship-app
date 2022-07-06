@@ -8,17 +8,15 @@ import { atomPlaylistPanelContent } from '../../stores/playlistStore';
 import PanelPlaylistExport from './PanelPlaylistExport';
 
 const PanelPlaylist = () => {
-  const playlistPanelContent = useAtomValue(atomPlaylistPanelContent);
+  const panelContent = useAtomValue(atomPlaylistPanelContent);
   return (
     <BasePanel>
       <PanelPlaylistHeader />
-      {playlistPanelContent === 'list' && <PanelPlaylistList />}
-      {playlistPanelContent === 'import' && <PanelPlaylistImport />}
-      {playlistPanelContent === 'export' && <PanelPlaylistExport />}
-      {playlistPanelContent === 'itemEditor' && <PanelPlaylistItemEditor />}
-      {playlistPanelContent === 'addItem' && (
-        <PanelPlaylistItemEditor addItem />
-      )}
+      {panelContent === 'list' && <PanelPlaylistList />}
+      {panelContent === 'import' && <PanelPlaylistImport />}
+      {panelContent === 'export' && <PanelPlaylistExport />}
+      {panelContent === 'itemEditor' && <PanelPlaylistItemEditor />}
+      {panelContent === 'addItem' && <PanelPlaylistItemEditor addItem />}
     </BasePanel>
   );
 };

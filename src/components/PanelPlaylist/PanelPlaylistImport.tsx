@@ -13,12 +13,12 @@ import ButtonDefault from '../Buttons/ButtonDefault';
 const ERROR_UNKNOWN_FILE = 'Unknown file, please upload .WORSHIP file';
 
 const PanelPlaylistImport = () => {
-  const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
+  const setPanelContent = useSetAtom(atomPlaylistPanelContent);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const setPlaylistName = useSetAtom(atomPlaylistName);
-  const setPlaylistItems = useSetAtom(atomPlaylistItems);
-  const [newPlaylistName, setNewPlaylistName] = useState('');
-  const [newPlaylistItems, setNewPlaylistItems] = useState<PlaylistItem[]>([]);
+  const setName = useSetAtom(atomPlaylistName);
+  const setItems = useSetAtom(atomPlaylistItems);
+  const [newName, setNewName] = useState('');
+  const [newItems, setNewItems] = useState<PlaylistItem[]>([]);
   const [selectedFile, setSelectedFile] = useState<File>();
 
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,8 +46,8 @@ const PanelPlaylistImport = () => {
             })();
 
             if (newPlaylist) {
-              if (newPlaylist.name) setNewPlaylistName(newPlaylist.name);
-              setNewPlaylistItems(validatePlaylist(newPlaylist.items));
+              if (newPlaylist.name) setNewName(newPlaylist.name);
+              setNewItems(validatePlaylist(newPlaylist.items));
               console.log(validatePlaylist(newPlaylist.items));
             } else setErrorMsg(ERROR_UNKNOWN_FILE);
           }
@@ -58,9 +58,9 @@ const PanelPlaylistImport = () => {
   };
 
   const importHandler = () => {
-    setPlaylistName(newPlaylistName);
-    setPlaylistItems(newPlaylistItems);
-    setPlaylistPanelContent('list');
+    setName(newName);
+    setItems(newItems);
+    setPanelContent('list');
   };
 
   return (
@@ -90,7 +90,7 @@ const PanelPlaylistImport = () => {
         <ButtonDefault
           color="gray"
           className="ml-1"
-          onClick={() => setPlaylistPanelContent('list')}
+          onClick={() => setPanelContent('list')}
         >
           Cancel
         </ButtonDefault>

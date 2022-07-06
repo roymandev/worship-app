@@ -22,11 +22,9 @@ interface PanelPlaylistItemEditorProps {
 }
 
 const PanelPlaylistItemEditor = ({ addItem }: PanelPlaylistItemEditorProps) => {
-  const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
-  const setPlaylistAddItem = useSetAtom(atomPlaylistAddItem);
-  const [playlistSelectedItem, setPlaylistSelectedItem] = useAtom(
-    atomPlaylistSelectedItem,
-  );
+  const setPanelContent = useSetAtom(atomPlaylistPanelContent);
+  const setAddItem = useSetAtom(atomPlaylistAddItem);
+  const [selectedItem, setSelectedItem] = useAtom(atomPlaylistSelectedItem);
   const setPreviewItem = useSetAtom(atomPreviewItem);
   const setPreviewContentSelectedLineIndex = useSetAtom(
     atomPreviewItemContentSelectedLineIndex,
@@ -38,16 +36,14 @@ const PanelPlaylistItemEditor = ({ addItem }: PanelPlaylistItemEditorProps) => {
 
   // set current title & content to playlist selected item
   useEffect(() => {
-    if (playlistSelectedItem && !addItem) {
-      setTitle(playlistSelectedItem.title);
-      setContent(
-        playlistSelectedItem?.content.map((line) => line.text).join('\n\n'),
-      );
-      setNote(playlistSelectedItem.note ?? '');
+    if (selectedItem && !addItem) {
+      setTitle(selectedItem.title);
+      setContent(selectedItem?.content.map((line) => line.text).join('\n\n'));
+      setNote(selectedItem.note ?? '');
     }
-  }, [playlistSelectedItem]);
+  }, [selectedItem]);
 
-  // Set Preview
+  // Show Preview
   useEffect(() => {
     setPreviewItem({
       title,
@@ -55,7 +51,7 @@ const PanelPlaylistItemEditor = ({ addItem }: PanelPlaylistItemEditorProps) => {
     });
   }, [title, content]);
 
-  // Set preview content selected line index when textarea cursor move
+  // Show preview content selected line index when textarea cursor move
   const onTextAreaCursorMove = (
     event:
       | React.MouseEvent<HTMLTextAreaElement, MouseEvent>
@@ -81,11 +77,11 @@ const PanelPlaylistItemEditor = ({ addItem }: PanelPlaylistItemEditorProps) => {
       note: note,
     };
     if (addItem) {
-      setPlaylistAddItem({ ...newItem, id: nanoid() });
+      setAddItem({ ...newItem, id: nanoid() });
     } else {
-      if (playlistSelectedItem) {
-        setPlaylistSelectedItem({
-          ...playlistSelectedItem,
+      if (selectedItem) {
+        setSelectedItem({
+          ...selectedItem,
           ...newItem,
         });
       }
@@ -93,7 +89,7 @@ const PanelPlaylistItemEditor = ({ addItem }: PanelPlaylistItemEditorProps) => {
     closeEditor();
   };
 
-  const closeEditor = () => setPlaylistPanelContent('list');
+  const closeEditor = () => setPanelContent('list');
   const titleId = useId();
   const noteId = useId();
 

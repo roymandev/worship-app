@@ -11,18 +11,15 @@ import BasePanelHeader from '../BasePanelHeader';
 import ButtonDefault from '../Buttons/ButtonDefault';
 
 const PanelPlaylistExport = () => {
-  const playlistName = useAtomValue(atomPlaylistName) || 'Untitled';
-  const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
+  const name = useAtomValue(atomPlaylistName) || 'Untitled';
+  const setPanelContent = useSetAtom(atomPlaylistPanelContent);
 
   const handleDownload = useAtomCallback(
     useCallback((get) => {
-      const playlistItems = get(atomPlaylistItems);
+      const items = get(atomPlaylistItems);
 
-      downloadObject(
-        { name: playlistName, items: playlistItems },
-        playlistName + '.WORSHIP',
-      );
-      setPlaylistPanelContent('list');
+      downloadObject({ name, items }, name + '.WORSHIP');
+      setPanelContent('list');
     }, []),
   );
 
@@ -34,7 +31,7 @@ const PanelPlaylistExport = () => {
 
       <div className="p-3 space-y-3">
         <p>
-          Download &quot;<b>{playlistName}.WORSHIP</b>&quot; playlist.
+          Download &quot;<b>{name}.WORSHIP</b>&quot; playlist.
         </p>
 
         <ButtonDefault color="blue" onClick={handleDownload}>
@@ -44,7 +41,7 @@ const PanelPlaylistExport = () => {
         <ButtonDefault
           color="gray"
           className="ml-1"
-          onClick={() => setPlaylistPanelContent('list')}
+          onClick={() => setPanelContent('list')}
         >
           Cancel
         </ButtonDefault>

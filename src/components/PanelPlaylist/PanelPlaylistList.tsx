@@ -29,16 +29,22 @@ import PanelPlaylistListController from './PanelPlaylistListController';
 const PanelPlaylistList = () => {
   const setContextMenuActive = useSetAtom(atomContextMenuActive);
   const setContextMenuPos = useSetAtom(atomContextMenuPos);
-  const [playlistName, setPlaylistName] = useAtom(atomPlaylistName);
-  const [playlistItems, setPlaylistItems] = useAtom(atomPlaylistItems);
-  const playlistSelectedItem = useAtomValue(atomPlaylistSelectedItem);
-  const [playlistSelectedItemIndex, setPlaylistSelectedItemIndex] = useAtom(
+  const [name, setPlaylistName] = useAtom(atomPlaylistName);
+  const [items, setItems] = useAtom(atomPlaylistItems);
+  const selectedItem = useAtomValue(atomPlaylistSelectedItem);
+  const [selectedItemIndex, setSelectedItemIndex] = useAtom(
     atomPlaylistSelectedItemIndex,
   );
+  const itemsHandler = listController({
+    items,
+    selectedItemIndex,
+    setItems,
+    setSelectedItemIndex,
+  });
 
   // Select first item on mounted
   useEffect(() => {
-    playlistItems[0] && setPlaylistSelectedItemIndex(0);
+    items[0] && setSelectedItemIndex(0);
   }, []);
 
   // Show Item Preview
@@ -47,19 +53,10 @@ const PanelPlaylistList = () => {
     atomPreviewItemContentSelectedLineIndex,
   );
   const showPreviewHandler = () => {
-    setPreviewItem(playlistSelectedItem);
-    setPreviewContentSelectedLineIndex(
-      playlistSelectedItem?.content[0] ? 0 : -1,
-    );
+    setPreviewItem(selectedItem);
+    setPreviewContentSelectedLineIndex(selectedItem?.content[0] ? 0 : -1);
   };
-  useEffect(showPreviewHandler, [playlistSelectedItem]);
-
-  const listHandler = listController({
-    items: playlistItems,
-    selectedItemIndex: playlistSelectedItemIndex,
-    setItems: (items) => setPlaylistItems(items),
-    setSelectedItemIndex: (index) => setPlaylistSelectedItemIndex(index),
-  });
+  useEffect(showPreviewHandler, [selectedItem]);
 
   // liveStore
   const setLiveItem = useSetAtom(atomLiveItem);
@@ -76,7 +73,7 @@ const PanelPlaylistList = () => {
       <BasePanelHeader sub>
         <BaseInput
           className="flex-1 px-1 mx-1 h-7"
-          value={playlistName}
+          value={name}
           onChange={(e) => setPlaylistName(e.target.value)}
         />
       </BasePanelHeader>
@@ -84,23 +81,23 @@ const PanelPlaylistList = () => {
       <div className="flex flex-1 divide-x divide-slate-300">
         <BaseList
           className="overflow-y-auto flex-1"
-          scrollToIndex={playlistSelectedItemIndex}
-          onKeyDownArrowUp={listHandler.shiftSelectedItemUp}
-          onKeyDownArrowDown={listHandler.shiftSelectedItemDown}
-          onKeyDownEnter={() => setLiveItemHandler(playlistSelectedItem)}
+          scrollToIndex={selectedItemIndex}
+          onKeyDownArrowUp={itemsHandler.shiftSelectedItemUp}
+          onKeyDownArrowDown={itemsHandler.shiftSelectedItemDown}
+          onKeyDownEnter={() => setLiveItemHandler(selectedItem)}
           onFocus={showPreviewHandler}
-          tabIndex={playlistItems.length ? 0 : -1}
+          tabIndex={items.length ? 0 : -1}
         >
-          {playlistItems.map((item, index) => (
+          {items.map((item, index) => (
             <BaseListLine
               className="py-1 px-2 select-none"
               key={item.id}
-              isSelected={index === playlistSelectedItemIndex}
-              onClick={() => setPlaylistSelectedItemIndex(index)}
+              isSelected={index === selectedItemIndex}
+              onClick={() => setSelectedItemIndex(index)}
               onDoubleClick={() => setLiveItemHandler(item)}
               onContextMenu={(e) => {
                 e.preventDefault();
-                setPlaylistSelectedItemIndex(index);
+                setSelectedItemIndex(index);
                 setContextMenuPos({
                   left: e.clientX,
                   top: e.clientY,
@@ -114,7 +111,7 @@ const PanelPlaylistList = () => {
           ))}
         </BaseList>
 
-        <PanelPlaylistListController listHandler={listHandler} />
+        <PanelPlaylistListController listHandler={itemsHandler} />
       </div>
     </>
   );

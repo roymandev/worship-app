@@ -17,13 +17,13 @@ import ItemContentLine from './ItemContentLine';
 import TextScreen, { TextScreenRef } from './TextScreen';
 
 const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
-  const previewItem = useAtomValue(atomPreviewItem);
+  const item = useAtomValue(atomPreviewItem);
   const [contentSelectedLineIndex, setContentSelectedLineIndex] = useAtom(
     atomPreviewItemContentSelectedLineIndex,
   );
 
   const contentHandler = listController({
-    items: previewItem?.content ?? [],
+    items: item?.content ?? [],
     selectedItemIndex: contentSelectedLineIndex,
     setSelectedItemIndex: (index) => setContentSelectedLineIndex(index),
   });
@@ -34,8 +34,8 @@ const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
     atomLiveItemContentSelectedLineIndex,
   );
   const setLiveItemHandler = (index: number) => {
-    if (previewItem) {
-      setLiveItem(previewItem);
+    if (item) {
+      setLiveItem(item);
       setLiveItemSelectedLineIndex(index);
     }
   };
@@ -59,7 +59,7 @@ const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
         </BasePanelHeader>
 
         <BasePanelHeader sub>
-          <h2 className="px-2">{previewItem?.title}</h2>
+          <h2 className="px-2">{item?.title}</h2>
         </BasePanelHeader>
 
         <BaseList
@@ -68,9 +68,9 @@ const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
           onKeyDownArrowUp={contentHandler.shiftSelectedItemUp}
           onKeyDownArrowDown={contentHandler.shiftSelectedItemDown}
           onKeyDownEnter={() => setLiveItemHandler(contentSelectedLineIndex)}
-          tabIndex={previewItem?.content.length ? 0 : -1}
+          tabIndex={item?.content.length ? 0 : -1}
         >
-          {previewItem?.content.map((line, index) => (
+          {item?.content.map((line, index) => (
             <ItemContentLine
               key={index}
               line={line}

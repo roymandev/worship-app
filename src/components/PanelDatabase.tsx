@@ -12,6 +12,10 @@ import {
   atomDatabaseParsedSelectedItem,
   atomDatabaseSelectedItemIndex,
 } from '../stores/databaseStore';
+import {
+  atomLiveItem,
+  atomLiveItemContentSelectedLineIndex,
+} from '../stores/liveStore';
 import { atomPlaylistAddItem } from '../stores/playlistStore';
 import {
   atomPreviewItem,
@@ -71,6 +75,18 @@ const PanelDatabase = () => {
   };
   useEffect(showPreviewHandler, [selectedItemIndex]);
 
+  // Go live hanlder
+  const setLiveItem = useSetAtom(atomLiveItem);
+  const setLiveItemContentSelectedLineIndex = useSetAtom(
+    atomLiveItemContentSelectedLineIndex,
+  );
+  const handleGoLive = () => {
+    setLiveItem(parsedSelectedItem);
+    setLiveItemContentSelectedLineIndex(
+      parsedSelectedItem?.content[0] ? 0 : -1,
+    );
+  };
+
   // Context Menu
   const setContextMenuActive = useSetAtom(atomContextMenuActive);
   const setContextMenuPos = useSetAtom(atomContextMenuPos);
@@ -95,6 +111,7 @@ const PanelDatabase = () => {
           scrollToIndex={selectedItemIndex}
           onKeyDownArrowUp={itemsHandler.shiftSelectedItemUp}
           onKeyDownArrowDown={itemsHandler.shiftSelectedItemDown}
+          onKeyDownEnter={handleGoLive}
           onFocus={showPreviewHandler}
           tabIndex={items.length ? 0 : -1}
         >
@@ -104,6 +121,7 @@ const PanelDatabase = () => {
               key={item.id}
               isSelected={item.id === parsedSelectedItem?.id}
               onClick={() => setSelectedItemIndex(index)}
+              onDoubleClick={handleGoLive}
               onContextMenu={(e) => {
                 e.preventDefault();
                 setSelectedItemIndex(index);

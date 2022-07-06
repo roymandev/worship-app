@@ -12,6 +12,8 @@ export interface ListControllerBaseReturns<Item> {
   canShiftSelectedItemDown: () => boolean;
   shiftSelectedItemUp: () => void;
   shiftSelectedItemDown: () => void;
+  selectFirstItem: () => void;
+  selectLastItem: () => void;
 }
 
 export interface ListControllerWithSetItemsReturns<Item>
@@ -53,6 +55,11 @@ export const listController: ListControllerOverload = (options): any => {
     } else if (!selectedItem() && items.length) setSelectedItemIndex(0);
   };
 
+  const selectFirstItem = () => items[0] && setSelectedItemIndex(0);
+
+  const selectLastItem = () =>
+    items[items.length - 1] && setSelectedItemIndex(items.length - 1);
+
   if (options.setItems) {
     const { setItems } = options;
     const moveSelectedItemUp = () => {
@@ -89,6 +96,8 @@ export const listController: ListControllerOverload = (options): any => {
       selectedItem,
       canShiftSelectedItemUp,
       canShiftSelectedItemDown,
+      selectFirstItem,
+      selectLastItem,
       shiftSelectedItemUp,
       shiftSelectedItemDown,
       moveSelectedItemUp,
@@ -100,6 +109,8 @@ export const listController: ListControllerOverload = (options): any => {
     selectedItem,
     canShiftSelectedItemUp,
     canShiftSelectedItemDown,
+    selectFirstItem,
+    selectLastItem,
     shiftSelectedItemUp,
     shiftSelectedItemDown,
   };

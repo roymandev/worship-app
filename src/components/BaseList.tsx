@@ -9,6 +9,8 @@ export interface BaseListProps extends React.ComponentPropsWithoutRef<'ul'> {
   onKeyDownArrowLeft?: () => void;
   onKeyDownArrowRight?: () => void;
   onKeyDownEnter?: () => void;
+  onKeyDownHome?: () => void;
+  onKeyDownEnd?: () => void;
 }
 
 export const BaseList = ({
@@ -21,6 +23,8 @@ export const BaseList = ({
   onKeyDownArrowLeft,
   onKeyDownArrowRight,
   onKeyDownEnter,
+  onKeyDownHome,
+  onKeyDownEnd,
   ...rest
 }: BaseListProps) => {
   const containerRef = useRef<HTMLUListElement | null>(null);
@@ -53,6 +57,14 @@ export const BaseList = ({
     if (event.key === 'Enter' && onKeyDownEnter) {
       event.preventDefault();
       onKeyDownEnter();
+    }
+    if (event.key === 'Home' && onKeyDownHome) {
+      event.preventDefault();
+      onKeyDownHome();
+    }
+    if (event.key === 'End' && onKeyDownEnd) {
+      event.preventDefault();
+      onKeyDownEnd();
     }
 
     onKeyDown?.(event);

@@ -67,6 +67,8 @@ const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
           scrollToIndex={contentSelectedLineIndex}
           onKeyDownArrowUp={contentHandler.shiftSelectedItemUp}
           onKeyDownArrowDown={contentHandler.shiftSelectedItemDown}
+          onKeyDownHome={contentHandler.selectFirstItem}
+          onKeyDownEnd={contentHandler.selectLastItem}
           onKeyDownEnter={() => setLiveItemHandler(contentSelectedLineIndex)}
           tabIndex={item?.content.length ? 0 : -1}
         >

@@ -111,6 +111,8 @@ const PanelDatabase = () => {
           scrollToIndex={selectedItemIndex}
           onKeyDownArrowUp={itemsHandler.shiftSelectedItemUp}
           onKeyDownArrowDown={itemsHandler.shiftSelectedItemDown}
+          onKeyDownHome={itemsHandler.selectFirstItem}
+          onKeyDownEnd={itemsHandler.selectLastItem}
           onKeyDownEnter={handleGoLive}
           onFocus={showPreviewHandler}
           tabIndex={items.length ? 0 : -1}

@@ -85,6 +85,8 @@ const PanelPlaylistList = () => {
           onKeyDownArrowUp={itemsHandler.shiftSelectedItemUp}
           onKeyDownArrowDown={itemsHandler.shiftSelectedItemDown}
           onKeyDownEnter={() => setLiveItemHandler(selectedItem)}
+          onKeyDownHome={itemsHandler.selectFirstItem}
+          onKeyDownEnd={itemsHandler.selectLastItem}
           onFocus={showPreviewHandler}
           tabIndex={items.length ? 0 : -1}
         >

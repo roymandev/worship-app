@@ -8,21 +8,19 @@ import ContextMenuDatabaseItem from './ContextMenuDatabaseItem';
 import ContextMenuPlaylistItem from './ContextMenuPlaylistItem';
 
 const ContainerContextMenu = () => {
-  const [contextMenuActive, setContextMenuActive] = useAtom(
-    atomContextMenuActive,
-  );
-  const contextMenuPos = useAtomValue(atomContextMenuPos);
-  const onClickOutside = useClickOutside(() => setContextMenuActive(null));
+  const [active, setActive] = useAtom(atomContextMenuActive);
+  const pos = useAtomValue(atomContextMenuPos);
+  const onClickOutside = useClickOutside(() => setActive(null));
 
   return (
-    contextMenuActive && (
+    active && (
       <div
         ref={onClickOutside}
         className="rounded shadow-lg border border-slate-300 w-48 fixed flex flex-col bg-white py-1"
-        style={contextMenuPos}
+        style={pos}
       >
-        {contextMenuActive === 'playlistItem' && <ContextMenuPlaylistItem />}
-        {contextMenuActive === 'databaseItem' && <ContextMenuDatabaseItem />}
+        {active === 'playlistItem' && <ContextMenuPlaylistItem />}
+        {active === 'databaseItem' && <ContextMenuDatabaseItem />}
       </div>
     )
   );

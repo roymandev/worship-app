@@ -18,7 +18,7 @@ import {
 import ButtonContextMenu from '../Buttons/ButtonContextMenu';
 
 const ContextMenuPlaylistItem = () => {
-  const setContextMenuActive = useSetAtom(atomContextMenuActive);
+  const setActive = useSetAtom(atomContextMenuActive);
   const playlistSelectedItem = useAtomValue(atomPlaylistSelectedItem);
   const setLiveItem = useSetAtom(atomLiveItem);
   const setLiveItemSelectedLineIndex = useSetAtom(
@@ -32,22 +32,22 @@ const ContextMenuPlaylistItem = () => {
   const handleGoLive = () => {
     setLiveItem(playlistSelectedItem);
     setLiveItemSelectedLineIndex(playlistSelectedItem?.content[0] ? 0 : -1);
-    setContextMenuActive(null);
+    setActive(null);
   };
 
   const handleEdit = () => {
     setPlaylistPanelContent('itemEditor');
-    setContextMenuActive(null);
+    setActive(null);
   };
 
   const hanldeRemove = () => {
     setPlaylistRemoveSelectedItem();
-    setContextMenuActive(null);
+    setActive(null);
   };
 
   const handleAdd = () => {
     setPlaylistPanelContent('addItem');
-    setContextMenuActive(null);
+    setActive(null);
   };
 
   return (

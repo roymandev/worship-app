@@ -41,8 +41,6 @@ const ContentImport = () => {
           evt.target.result as string,
         ) as PlaylistFile;
 
-        console.log(playlistData);
-
         const validatedItems = validatePlaylistItems(playlistData.items);
 
         setPlaylist({

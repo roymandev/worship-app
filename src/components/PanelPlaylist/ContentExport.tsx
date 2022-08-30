@@ -21,7 +21,7 @@ const ContentExport = () => {
 
       <div className="space-y-3 p-3">
         <p>
-          Download &quot;<b>{name}.WORSHIP</b>&quot; playlist.
+          Download &quot;<b>{name || 'Untitled'}.WORSHIP</b>&quot; playlist.
         </p>
 
         <ButtonPrimary color="blue" onClick={downloadHandler}>

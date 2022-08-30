@@ -13,7 +13,8 @@ const usePlaylist = () => {
     setItems(playlist.items || []);
   };
 
-  const download = () => downloadObject({ items }, name + FILE_EXT);
+  const download = () =>
+    downloadObject({ items }, (name || 'Untitled') + FILE_EXT);
 
   return { name, items, upload, download };
 };

@@ -1,14 +1,17 @@
+import BasePanel from '@/components/BasePanel';
+import PanelPlaylist from '@/components/PanelPlaylist';
+import Split from 'react-split';
+
 const Home = () => {
   return (
-    <div className="flex h-screen flex-col items-center justify-center gap-8 bg-slate-900 p-4 text-center text-slate-300">
-      <h1 className="text-6xl font-bold">React Template</h1>
-      <a
-        className="rounded bg-slate-800 px-6 py-3 text-2xl shadow transition-colors hover:bg-slate-700"
-        href="https://github.com/roymandev/template-react"
-      >
-        Visit Repository
-      </a>
-    </div>
+    <Split
+      className="fixed inset-0 flex bg-slate-300 p-1 text-sm text-slate-700"
+      gutterSize={4}
+    >
+      <PanelPlaylist />
+      <BasePanel>Center</BasePanel>
+      <BasePanel>Right</BasePanel>
+    </Split>
   );
 };
 

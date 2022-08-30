@@ -12,3 +12,8 @@ export interface PlaylistItem extends BaseItem {
   id: string;
   note?: string;
 }
+
+export interface PlaylistFile {
+  name: string;
+  items: PlaylistItem[];
+}

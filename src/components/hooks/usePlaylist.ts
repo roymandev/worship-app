@@ -16,7 +16,7 @@ const usePlaylist = () => {
   const download = () =>
     downloadObject({ items }, (name || 'Untitled') + FILE_EXT);
 
-  return { name, items, upload, download };
+  return { name, setName, items, setItems, upload, download };
 };
 
 export default usePlaylist;

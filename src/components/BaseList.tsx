@@ -51,7 +51,7 @@ const BaseList = <T,>({
         'group flex flex-1 cursor-default select-none flex-col overflow-y-auto outline-none',
         className,
       )}
-      tabIndex={-1}
+      tabIndex={0}
       onKeyDown={onKeyDownHandler}
     >
       {items.map((item, index) =>

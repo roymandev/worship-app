@@ -3,7 +3,7 @@ export interface BasePanelProps {
 }
 
 const BasePanel = ({ children }: BasePanelProps) => (
-  <div className="flex-1 rounded bg-white shadow">{children}</div>
+  <div className="flex flex-1 flex-col rounded bg-white shadow">{children}</div>
 );
 
 export default BasePanel;

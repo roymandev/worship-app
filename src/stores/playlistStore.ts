@@ -10,9 +10,7 @@ export const atomPlaylistItems = atomWithStorage<PlaylistItem[]>(
   [],
 );
 
-export const atomPlaylistSelectedItemId = atomWithStorage<
-  PlaylistItem['id'] | null
->('playlistSelectedItemId', null);
+export const atomPlaylistSelectedItemId = atom<PlaylistItem['id'] | null>(null);
 
 export const atomPlaylistPanelContent = atom<
   'list' | 'import' | 'export' | 'editItem' | 'addItem'

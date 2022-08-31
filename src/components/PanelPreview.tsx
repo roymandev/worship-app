@@ -21,10 +21,8 @@ const PanelPreview = () => {
   const selectedLine = useAtomValue(atomPreviewItemContentSelectedLine);
 
   useEffect(() => {
-    if (selectedPlaylistItem) {
-      setItem(selectedPlaylistItem);
-      setContentSelectedLineIndex(selectedPlaylistItem.content[0] ? 0 : -1);
-    }
+    setItem(selectedPlaylistItem);
+    setContentSelectedLineIndex(selectedPlaylistItem?.content[0] ? 0 : -1);
   }, [selectedPlaylistItem]);
 
   return (

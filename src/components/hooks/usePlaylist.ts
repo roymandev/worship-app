@@ -35,6 +35,30 @@ const usePlaylist = () => {
   const shiftSelectedItemDown = () =>
     setSelectedItemId(items[getSelectedItemIndex() + 1].id);
 
+  const moveSelectedItemUp = () => {
+    const selectedItemIndex = getSelectedItemIndex();
+    if (canShiftSelectedItemUp() && selectedItemId) {
+      const newItems = [...items];
+      [newItems[selectedItemIndex], newItems[selectedItemIndex - 1]] = [
+        newItems[selectedItemIndex - 1],
+        newItems[selectedItemIndex],
+      ];
+      setItems(newItems);
+    }
+  };
+
+  const moveSelectedItemDown = () => {
+    const selectedItemIndex = getSelectedItemIndex();
+    if (canShiftSelectedItemDown() && selectedItemId) {
+      const newItems = [...items];
+      [newItems[selectedItemIndex], newItems[selectedItemIndex + 1]] = [
+        newItems[selectedItemIndex + 1],
+        newItems[selectedItemIndex],
+      ];
+      setItems(newItems);
+    }
+  };
+
   const deleteSelectedItem = () => {
     if (canShiftSelectedItemUp()) shiftSelectedItemUp();
     else if (canShiftSelectedItemDown()) shiftSelectedItemDown();
@@ -59,6 +83,8 @@ const usePlaylist = () => {
     deleteSelectedItem,
     shiftSelectedItemUp,
     shiftSelectedItemDown,
+    moveSelectedItemUp,
+    moveSelectedItemDown,
   };
 };
 

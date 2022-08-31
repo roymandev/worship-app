@@ -1,10 +1,12 @@
+import { twclsx } from '@/lib/twclsx';
 import { useEffect, useRef } from 'react';
 
 export interface BaseListProps<T> {
   items: T[];
-  renderItem: (item: T, isSelected: boolean) => React.ReactNode;
+  renderItem: (item: T, isSelected: boolean, index: number) => React.ReactNode;
   selectedItemIndex: number;
   onSelectItem: (index: number) => void;
+  className?: string;
 }
 
 const BaseList = <T,>({
@@ -12,6 +14,7 @@ const BaseList = <T,>({
   renderItem,
   selectedItemIndex,
   onSelectItem,
+  className,
 }: BaseListProps<T>) => {
   const containerRef = useRef<HTMLUListElement | null>(null);
 
@@ -44,12 +47,15 @@ const BaseList = <T,>({
   return (
     <ul
       ref={containerRef}
-      className="group flex flex-1 cursor-default select-none flex-col overflow-y-auto outline-none"
+      className={twclsx(
+        'group flex flex-1 cursor-default select-none flex-col overflow-y-auto outline-none',
+        className,
+      )}
       tabIndex={-1}
       onKeyDown={onKeyDownHandler}
     >
       {items.map((item, index) =>
-        renderItem(item, selectedItemIndex === index),
+        renderItem(item, selectedItemIndex === index, index),
       )}
     </ul>
   );

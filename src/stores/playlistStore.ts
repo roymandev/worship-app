@@ -19,8 +19,17 @@ export const atomPlaylistPanelContent = atom<
 >('list');
 
 // Getter
-export const atomPlaylistSelectedItem = atom((get) =>
-  get(atomPlaylistItems).find(
-    (item) => item.id === get(atomPlaylistSelectedItemId),
-  ),
+export const atomPlaylistSelectedItem = atom<PlaylistItem | null, PlaylistItem>(
+  (get) =>
+    get(atomPlaylistItems).find(
+      (item) => item.id === get(atomPlaylistSelectedItemId),
+    ) || null,
+  (get, set, update) => {
+    set(
+      atomPlaylistItems,
+      get(atomPlaylistItems).map((item) =>
+        item.id === get(atomPlaylistSelectedItemId) ? update : item,
+      ),
+    );
+  },
 );

@@ -1,5 +1,6 @@
 import BasePanel from '@/components/BasePanel';
 import PanelPlaylist from '@/components/PanelPlaylist';
+import PanelPreview from '@/components/PanelPreview';
 import Split from 'react-split';
 
 const Home = () => {
@@ -9,7 +10,7 @@ const Home = () => {
       gutterSize={4}
     >
       <PanelPlaylist />
-      <BasePanel>Center</BasePanel>
+      <PanelPreview />
       <BasePanel>Right</BasePanel>
     </Split>
   );

@@ -1,4 +1,5 @@
 import Loading from '@/components/Fallback/Loading';
+import LiveScreen from '@/pages/LiveScreen';
 import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
@@ -15,6 +16,7 @@ function App() {
     >
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/screen" element={<LiveScreen />} />
       </Routes>
     </Suspense>
   );

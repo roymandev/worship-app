@@ -1,4 +1,5 @@
-import { atomScreenSettings } from '@/stores/screenStore';
+import { scaleScreen } from '@/lib/scaleScreen';
+import { atomScreenMainSize } from '@/stores/screenStore';
 import { BaseItemContentLine } from '@/types';
 import { useAtomValue } from 'jotai';
 import {
@@ -13,43 +14,30 @@ export interface ScreenProps {
   line: BaseItemContentLine | null;
 }
 
-type ScreenSize = Record<string, unknown>;
-
 export interface ScreenRef {
   resizeScreen: () => void;
 }
 
 const Screen = forwardRef<ScreenRef, ScreenProps>(({ line }, ref) => {
-  const screenSettings = useAtomValue(atomScreenSettings);
-  const [screenStyle, setScreenStyle] = useState<ScreenSize>({});
+  const screenMainSize = useAtomValue(atomScreenMainSize);
+  const [screenStyle, setScreenStyle] = useState<Record<string, string>>({});
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Resize screen based on container size
   const resizeScreen = () => {
     if (!containerRef.current) return;
 
-    const { clientWidth: containerWidth, clientHeight: containerHeight } =
-      containerRef.current;
-
-    // Set zoom based on container width
-    let zoom = (containerWidth / screenSettings.size.width) * 100;
-
-    // If scaled height is still overflowing, set zoom based on container height
-    if ((screenSettings.size.height / 100) * zoom > containerHeight)
-      zoom = (containerHeight / screenSettings.size.height) * 100;
-
-    const scaledSize = {} as ScreenSize;
-
-    let key: keyof typeof screenSettings.size;
-    for (key in screenSettings.size) {
-      scaledSize[key] = (screenSettings.size[key] / 100) * zoom + 'px';
-    }
-
-    setScreenStyle(scaledSize);
+    setScreenStyle(
+      scaleScreen(screenMainSize, {
+        width: containerRef.current.clientWidth,
+        height: containerRef.current.clientHeight,
+      }).scaledStyle,
+    );
   };
 
   useEffect(() => {
     if (containerRef.current) resizeScreen();
-  }, [containerRef.current, screenSettings.size]);
+  }, [containerRef.current, screenMainSize]);
 
   useImperativeHandle(ref, () => ({
     resizeScreen,

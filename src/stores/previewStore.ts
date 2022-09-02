@@ -8,5 +8,7 @@ export const atomPreviewItemContentSelectedLineIndex = atom(-1);
 // Getter
 export const atomPreviewItemContentSelectedLine = atom(
   (get) =>
-    get(atomPreviewItem)?.content[get(atomPreviewItemContentSelectedLineIndex)],
+    get(atomPreviewItem)?.content[
+      get(atomPreviewItemContentSelectedLineIndex)
+    ] || null,
 );

@@ -4,6 +4,7 @@ import BaseListItem from '@/components/BaseListItem';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
 import usePlaylist from '@/components/hooks/usePlaylist';
+import { atomLiveItem } from '@/stores/liveStore';
 import { atomPlaylistPanelContent } from '@/stores/playlistStore';
 import { useSetAtom } from 'jotai';
 import {
@@ -15,6 +16,7 @@ import {
 } from 'react-icons/ri';
 
 const ContentList = () => {
+  const setLiveItem = useSetAtom(atomLiveItem);
   const setPanelContent = useSetAtom(atomPlaylistPanelContent);
   const {
     name,
@@ -53,6 +55,7 @@ const ContentList = () => {
               className="select-none py-1 px-2"
               isSelected={isSelected}
               onClick={() => setSelectedItemId(item.id)}
+              onDoubleClick={() => setLiveItem(item)}
             >
               {item.title}
             </BaseListItem>

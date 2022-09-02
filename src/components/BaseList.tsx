@@ -7,6 +7,8 @@ export interface BaseListProps<T> {
   selectedItemIndex: number;
   onSelectItem: (index: number) => void;
   className?: string;
+  onKeyDownArrowLeft?: () => void;
+  onKeyDownArrowRight?: () => void;
 }
 
 const BaseList = <T,>({
@@ -15,6 +17,8 @@ const BaseList = <T,>({
   selectedItemIndex,
   onSelectItem,
   className,
+  onKeyDownArrowLeft,
+  onKeyDownArrowRight,
 }: BaseListProps<T>) => {
   const containerRef = useRef<HTMLUListElement | null>(null);
 
@@ -41,6 +45,15 @@ const BaseList = <T,>({
     if (event.key === 'End') {
       event.preventDefault();
       if (items[items.length - 1]) onSelectItem(items.length - 1);
+    }
+
+    if (event.key === 'ArrowLeft' && onKeyDownArrowLeft) {
+      event.preventDefault();
+      onKeyDownArrowLeft();
+    }
+    if (event.key === 'ArrowRight' && onKeyDownArrowRight) {
+      event.preventDefault();
+      onKeyDownArrowRight();
     }
   };
 

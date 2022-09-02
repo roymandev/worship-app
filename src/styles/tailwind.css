@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.gutter:hover {
+  @apply bg-blue-500;
+}
+.gutter-horizontal:hover {
+  @apply cursor-col-resize;
+}
+.gutter-vertical:hover {
+  @apply cursor-row-resize;
+}

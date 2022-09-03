@@ -1,14 +1,17 @@
 import { twclsx } from '@/lib/twclsx';
 import { useEffect, useRef } from 'react';
 
+type KeydownHandler = () => void;
+
 export interface BaseListProps<T> {
   items: T[];
   renderItem: (item: T, isSelected: boolean, index: number) => React.ReactNode;
   selectedItemIndex: number;
   onSelectItem: (index: number) => void;
   className?: string;
-  onKeyDownArrowLeft?: () => void;
-  onKeyDownArrowRight?: () => void;
+  onKeyDownEnter?: KeydownHandler;
+  onKeyDownArrowLeft?: KeydownHandler;
+  onKeyDownArrowRight?: KeydownHandler;
 }
 
 const BaseList = <T,>({
@@ -17,6 +20,7 @@ const BaseList = <T,>({
   selectedItemIndex,
   onSelectItem,
   className,
+  onKeyDownEnter,
   onKeyDownArrowLeft,
   onKeyDownArrowRight,
 }: BaseListProps<T>) => {
@@ -47,6 +51,10 @@ const BaseList = <T,>({
       if (items[items.length - 1]) onSelectItem(items.length - 1);
     }
 
+    if (event.key === 'Enter' && onKeyDownEnter) {
+      event.preventDefault();
+      onKeyDownEnter();
+    }
     if (event.key === 'ArrowLeft' && onKeyDownArrowLeft) {
       event.preventDefault();
       onKeyDownArrowLeft();

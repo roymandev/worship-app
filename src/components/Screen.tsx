@@ -12,13 +12,17 @@ import {
 
 export interface ScreenProps {
   line: BaseItemContentLine | null;
+  options?: {
+    hideText?: boolean;
+    hideScreen?: boolean;
+  };
 }
 
 export interface ScreenRef {
   resizeScreen: () => void;
 }
 
-const Screen = forwardRef<ScreenRef, ScreenProps>(({ line }, ref) => {
+const Screen = forwardRef<ScreenRef, ScreenProps>(({ line, options }, ref) => {
   const screenMainSize = useAtomValue(atomScreenMainSize);
   const [screenStyle, setScreenStyle] = useState<Record<string, string>>({});
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,12 +52,14 @@ const Screen = forwardRef<ScreenRef, ScreenProps>(({ line }, ref) => {
       ref={containerRef}
       className="grid flex-1 place-items-center overflow-hidden bg-black font-bold uppercase text-white"
     >
-      <p
-        className="grid place-items-center whitespace-pre-line bg-gray-800 text-center"
-        style={screenStyle}
-      >
-        {!line?.type && line?.text}
-      </p>
+      {!options?.hideScreen && (
+        <p
+          className="grid place-items-center whitespace-pre-line bg-gray-800 text-center"
+          style={screenStyle}
+        >
+          {!line?.type && !options?.hideText && line?.text}
+        </p>
+      )}
     </div>
   );
 });

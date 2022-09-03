@@ -32,7 +32,13 @@ const LiveScreen = () => {
 
   return (
     <div className="fixed inset-0 flex">
-      <Screen line={selectedLine} />
+      <Screen
+        line={selectedLine}
+        options={{
+          hideText: screenSettings.hideText,
+          hideScreen: screenSettings.hideScreen,
+        }}
+      />
     </div>
   );
 };

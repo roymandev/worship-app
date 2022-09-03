@@ -1,6 +1,7 @@
 import BaseList from '@/components/BaseList';
 import BasePanel from '@/components/BasePanel';
 import BasePanelHeader from '@/components/BasePanelHeader';
+import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
 import usePlaylist from '@/components/hooks/usePlaylist';
 import ItemContentLine from '@/components/ItemContentLine';
 import Screen, { ScreenRef } from '@/components/Screen';
@@ -9,12 +10,14 @@ import {
   atomLiveItemContentSelectedLine,
   atomLiveItemContentSelectedLineIndex,
 } from '@/stores/liveStore';
+import { atomScreenSettings } from '@/stores/screenStore';
 import { useAtom, useAtomValue } from 'jotai';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 
 const PanelLive = forwardRef((props, ref) => {
   const { shiftSelectedItemUp, shiftSelectedItemDown } = usePlaylist();
+  const [screenSettings, setScreenSettings] = useAtom(atomScreenSettings);
 
   const item = useAtomValue(atomLiveItem);
   const selectedLine = useAtomValue(atomLiveItemContentSelectedLine);
@@ -36,6 +39,34 @@ const PanelLive = forwardRef((props, ref) => {
       <BasePanel>
         <BasePanelHeader>
           <h2 className="px-1">Live</h2>
+
+          <ButtonPrimary
+            color="gray"
+            className="ml-auto h-full py-0"
+            withIcon="left"
+            onClick={() =>
+              setScreenSettings((prevSettings) => ({
+                ...prevSettings,
+                hideScreen: !prevSettings.hideScreen,
+              }))
+            }
+          >
+            Hide Screen
+          </ButtonPrimary>
+
+          <ButtonPrimary
+            color="gray"
+            className="h-full py-0"
+            withIcon="left"
+            onClick={() =>
+              setScreenSettings((prevSettings) => ({
+                ...prevSettings,
+                hideText: !prevSettings.hideText,
+              }))
+            }
+          >
+            Hide Text
+          </ButtonPrimary>
         </BasePanelHeader>
 
         <BasePanelHeader sub>
@@ -63,7 +94,14 @@ const PanelLive = forwardRef((props, ref) => {
       </BasePanel>
 
       <BasePanel>
-        <Screen ref={screenRef} line={selectedLine} />
+        <Screen
+          ref={screenRef}
+          line={selectedLine}
+          options={{
+            hideText: screenSettings.hideText,
+            hideScreen: screenSettings.hideScreen,
+          }}
+        />
       </BasePanel>
     </Split>
   );

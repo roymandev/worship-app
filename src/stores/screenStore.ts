@@ -10,6 +10,8 @@ const BASE_SIZE: Record<string, number> = {
 
 export const atomScreenSettings = atomWithStorage('screenSettings', {
   baseSize: { ...BASE_SIZE },
+  hideText: false,
+  hideScreen: false,
 });
 
 export const atomScreenMainSize = atomWithStorage('screenMainSize', {

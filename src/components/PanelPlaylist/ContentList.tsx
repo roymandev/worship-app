@@ -74,7 +74,8 @@ const ContentList = () => {
               onClick={() => setSelectedItemId(item.id)}
               onDoubleClick={() => setLiveItemHandler(item)}
             >
-              {item.title}
+              <h3 className="font-medium">{item.title}</h3>
+              {item.note && <p className="text-slate-500">{item.note}</p>}
             </BaseListItem>
           )}
         />

@@ -2,7 +2,7 @@ import BaseList from '@/components/BaseList';
 import BasePanel from '@/components/BasePanel';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
-import usePlaylist from '@/components/hooks/usePlaylist';
+import usePlaylist from '@/hooks/usePlaylist';
 import ItemContentLine from '@/components/ItemContentLine';
 import Screen, { ScreenRef } from '@/components/Screen';
 import {

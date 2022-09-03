@@ -3,7 +3,7 @@ import BaseList from '@/components/BaseList';
 import BaseListItem from '@/components/BaseListItem';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
-import usePlaylist from '@/components/hooks/usePlaylist';
+import usePlaylist from '@/hooks/usePlaylist';
 import {
   atomLiveItem,
   atomLiveItemContentSelectedLineIndex,

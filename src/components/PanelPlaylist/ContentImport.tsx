@@ -1,6 +1,6 @@
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
-import usePlaylist from '@/components/hooks/usePlaylist';
+import usePlaylist from '@/hooks/usePlaylist';
 import { FILE_EXT } from '@/constant';
 import { validatePlaylistItems } from '@/lib/validatePlaylistItems';
 import { atomPlaylistPanelContent } from '@/stores/playlistStore';

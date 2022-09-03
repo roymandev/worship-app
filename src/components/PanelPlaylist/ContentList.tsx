@@ -4,9 +4,16 @@ import BaseListItem from '@/components/BaseListItem';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
 import usePlaylist from '@/components/hooks/usePlaylist';
-import { atomLiveItem } from '@/stores/liveStore';
-import { atomPlaylistPanelContent } from '@/stores/playlistStore';
-import { useSetAtom } from 'jotai';
+import {
+  atomLiveItem,
+  atomLiveItemContentSelectedLineIndex,
+} from '@/stores/liveStore';
+import {
+  atomPlaylistPanelContent,
+  atomPlaylistSelectedItem,
+} from '@/stores/playlistStore';
+import { BaseItem } from '@/types';
+import { useAtomValue, useSetAtom } from 'jotai';
 import {
   RiAddLine,
   RiArrowDownLine,
@@ -17,6 +24,9 @@ import {
 
 const ContentList = () => {
   const setLiveItem = useSetAtom(atomLiveItem);
+  const setLiveItemContentSelectedLineIndex = useSetAtom(
+    atomLiveItemContentSelectedLineIndex,
+  );
   const setPanelContent = useSetAtom(atomPlaylistPanelContent);
   const {
     name,
@@ -30,6 +40,12 @@ const ContentList = () => {
     moveSelectedItemUp,
     moveSelectedItemDown,
   } = usePlaylist();
+  const selectedItem = useAtomValue(atomPlaylistSelectedItem);
+
+  const setLiveItemHandler = (item: BaseItem | null) => {
+    setLiveItem(item);
+    setLiveItemContentSelectedLineIndex(item?.content[0] ? 0 : -1);
+  };
 
   return (
     <>
@@ -49,13 +65,14 @@ const ContentList = () => {
             (item) => item.id === selectedItemId,
           )}
           onSelectItem={(index) => setSelectedItemId(items[index].id)}
+          onKeyDownEnter={() => setLiveItemHandler(selectedItem)}
           renderItem={(item, isSelected) => (
             <BaseListItem
               key={item.id}
               className="select-none py-1 px-2"
               isSelected={isSelected}
               onClick={() => setSelectedItemId(item.id)}
-              onDoubleClick={() => setLiveItem(item)}
+              onDoubleClick={() => setLiveItemHandler(item)}
             >
               {item.title}
             </BaseListItem>

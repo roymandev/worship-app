@@ -19,7 +19,7 @@ const Login = () => {
     event.preventDefault();
     setLoading(true);
     await login(email, password).then(
-      (user) => user && navigate('/admin', { replace: true }),
+      (user) => user && navigate('/', { replace: true }),
     );
     setLoading(false);
   };

@@ -7,29 +7,22 @@ import {
   atomLiveItem,
   atomLiveItemContentSelectedLineIndex,
 } from '@/stores/liveStore';
-import { atomPlaylistSelectedItem } from '@/stores/playlistStore';
 import {
   atomPreviewItem,
   atomPreviewItemContentSelectedLine,
   atomPreviewItemContentSelectedLineIndex,
 } from '@/stores/previewStore';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 
 const PanelPreview = forwardRef<ScreenRef>((props, ref) => {
-  const [item, setItem] = useAtom(atomPreviewItem);
+  const item = useAtomValue(atomPreviewItem);
   const [contentSelectedLineIndex, setContentSelectedLineIndex] = useAtom(
     atomPreviewItemContentSelectedLineIndex,
   );
-  const selectedPlaylistItem = useAtomValue(atomPlaylistSelectedItem);
   const selectedLine = useAtomValue(atomPreviewItemContentSelectedLine);
   const screenRef = useRef<ScreenRef | null>(null);
-
-  useEffect(() => {
-    setItem(selectedPlaylistItem);
-    setContentSelectedLineIndex(selectedPlaylistItem?.content[0] ? 0 : -1);
-  }, [selectedPlaylistItem]);
 
   // Set live item
   const setLiveItem = useSetAtom(atomLiveItem);

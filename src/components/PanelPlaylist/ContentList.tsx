@@ -12,6 +12,10 @@ import {
   atomPlaylistPanelContent,
   atomPlaylistSelectedItem,
 } from '@/stores/playlistStore';
+import {
+  atomPreviewItem,
+  atomPreviewItemContentSelectedLineIndex,
+} from '@/stores/previewStore';
 import { BaseItem } from '@/types';
 import { useAtomValue, useSetAtom } from 'jotai';
 import {
@@ -23,6 +27,10 @@ import {
 } from 'react-icons/ri';
 
 const ContentList = () => {
+  const setPreviewItem = useSetAtom(atomPreviewItem);
+  const setPreviewItemContentSelectedLineIndex = useSetAtom(
+    atomPreviewItemContentSelectedLineIndex,
+  );
   const setLiveItem = useSetAtom(atomLiveItem);
   const setLiveItemContentSelectedLineIndex = useSetAtom(
     atomLiveItemContentSelectedLineIndex,
@@ -41,6 +49,11 @@ const ContentList = () => {
     moveSelectedItemDown,
   } = usePlaylist();
   const selectedItem = useAtomValue(atomPlaylistSelectedItem);
+
+  const setPreviewItemHandler = (item: BaseItem | null) => {
+    setPreviewItem(item);
+    setPreviewItemContentSelectedLineIndex(item?.content[0] ? 0 : -1);
+  };
 
   const setLiveItemHandler = (item: BaseItem | null) => {
     setLiveItem(item);
@@ -64,14 +77,21 @@ const ContentList = () => {
           selectedItemIndex={items.findIndex(
             (item) => item.id === selectedItemId,
           )}
-          onSelectItem={(index) => setSelectedItemId(items[index].id)}
+          onSelectItem={(index) => {
+            const item = items[index];
+            setSelectedItemId(item.id);
+            setPreviewItemHandler(item);
+          }}
           onKeyDownEnter={() => setLiveItemHandler(selectedItem)}
           renderItem={(item, isSelected) => (
             <BaseListItem
               key={item.id}
               className="select-none py-1 px-2"
               isSelected={isSelected}
-              onClick={() => setSelectedItemId(item.id)}
+              onClick={() => {
+                setSelectedItemId(item.id);
+                setPreviewItemHandler(item);
+              }}
               onDoubleClick={() => setLiveItemHandler(item)}
             >
               <h3 className="font-medium">{item.title}</h3>

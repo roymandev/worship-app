@@ -17,3 +17,7 @@ export interface PlaylistFile {
   name: string;
   items: PlaylistItem[];
 }
+
+export interface SongItem extends BaseItem {
+  id: string;
+}

@@ -1,9 +1,9 @@
 import Loading from '@/components/Fallback/Loading';
-import LiveScreen from '@/pages/LiveScreen';
 import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 const Home = lazy(() => import('@/pages/Home'));
+const LiveScreen = lazy(() => import('@/pages/LiveScreen'));
 
 function App() {
   return (

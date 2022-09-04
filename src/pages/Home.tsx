@@ -1,3 +1,4 @@
+import Header from '@/components/Header';
 import PanelLive from '@/components/PanelLive';
 import PanelPlaylist from '@/components/PanelPlaylist';
 import PanelPreview from '@/components/PanelPreview';
@@ -20,15 +21,15 @@ const Home = () => {
   }, []);
 
   return (
-    <Split
-      className="fixed inset-0 flex bg-slate-300 p-1 text-sm text-slate-700"
-      gutterSize={4}
-      onDrag={dragHandler}
-    >
-      <PanelPlaylist />
-      <PanelPreview ref={panelPreviewScreenRef} />
-      <PanelLive ref={panelLiveScreenRef} />
-    </Split>
+    <div className="fixed inset-0 flex flex-col gap-1 bg-slate-300 p-1 text-sm text-slate-700">
+      <Header />
+
+      <Split className="flex flex-1" gutterSize={4} onDrag={dragHandler}>
+        <PanelPlaylist />
+        <PanelPreview ref={panelPreviewScreenRef} />
+        <PanelLive ref={panelLiveScreenRef} />
+      </Split>
+    </div>
   );
 };
 

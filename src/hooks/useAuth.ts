@@ -1,21 +1,35 @@
 import { auth } from '@/lib/firebase';
-import { atomCurrentUser } from '@/stores/adminStore';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useSetAtom } from 'jotai';
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  User,
+} from 'firebase/auth';
+import { useEffect, useState } from 'react';
 
 const useAuth = () => {
-  const setCurrentUser = useSetAtom(atomCurrentUser);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(
+    () =>
+      onAuthStateChanged(auth, (user) => {
+        setUser(user);
+      }),
+    [],
+  );
 
   const login = (email: string, password: string) =>
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        setCurrentUser(userCredential.user);
-        return userCredential;
-      })
-      .catch(() => setCurrentUser(null));
+    signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
+      setUser(userCredential.user);
+      return userCredential;
+    });
+
+  const logout = () => signOut(auth);
 
   return {
+    user,
     login,
+    logout,
   };
 };
 

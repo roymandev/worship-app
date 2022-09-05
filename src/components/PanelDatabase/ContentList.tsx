@@ -73,6 +73,7 @@ const ContentList = () => {
             color="blue"
             className="p-1.5"
             onClick={addToPlaylistHandler}
+            disabled={selectedItemIndex < 0}
           >
             <RiPlayListAddFill className="h-4 w-4" />
           </ButtonPrimary>

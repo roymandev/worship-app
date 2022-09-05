@@ -3,13 +3,17 @@ import BaseList from '@/components/BaseList';
 import BaseListItem from '@/components/BaseListItem';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
-import { atomSongs } from '@/stores/databaseStore';
+import {
+  atomSongs,
+  atomSongsSelectedItem,
+  atomSongsSelectedItemId,
+} from '@/stores/databaseStore';
 import { atomPlaylistItems } from '@/stores/playlistStore';
 import {
   atomPreviewItem,
   atomPreviewItemContentSelectedLineIndex,
 } from '@/stores/previewStore';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useState } from 'react';
 import { RiPlayListAddFill } from 'react-icons/ri';
 
@@ -21,22 +25,23 @@ const ContentList = () => {
   );
 
   const songs = useAtomValue(atomSongs);
-  const [selectedItemIndex, setSelectedItemIndex] = useState(-1);
+  const [selectedItemId, setSelectedItemId] = useAtom(atomSongsSelectedItemId);
+  const selectedItem = useAtomValue(atomSongsSelectedItem);
 
   const [search, setSearch] = useState('');
 
   const onSelectItemHandler = (index: number) => {
     const item = songs[index] || null;
-    setSelectedItemIndex(index);
-    setPreviewItem(item);
-    setPreviewItemContentSelectedLineIndex(item?.content[0] ? 0 : -1);
+    if (item) {
+      setSelectedItemId(item.id);
+      setPreviewItem(item);
+      setPreviewItemContentSelectedLineIndex(item.content[0] ? 0 : -1);
+    }
   };
 
   const addToPlaylistHandler = () => {
-    const item = songs[selectedItemIndex] || null;
-    if (item) {
-      setPlaylistItems((prevItems) => [...prevItems, item]);
-    }
+    if (selectedItem)
+      setPlaylistItems((prevItems) => [...prevItems, selectedItem]);
   };
 
   return (
@@ -53,7 +58,9 @@ const ContentList = () => {
       <div className="flex flex-1 divide-x divide-slate-300">
         <BaseList
           items={songs}
-          selectedItemIndex={selectedItemIndex}
+          selectedItemIndex={songs.findIndex(
+            (item) => item.id === selectedItemId,
+          )}
           onSelectItem={onSelectItemHandler}
           renderItem={(song, isSelected, index) => (
             <BaseListItem
@@ -73,7 +80,7 @@ const ContentList = () => {
             color="blue"
             className="p-1.5"
             onClick={addToPlaylistHandler}
-            disabled={selectedItemIndex < 0}
+            disabled={!selectedItem}
           >
             <RiPlayListAddFill className="h-4 w-4" />
           </ButtonPrimary>

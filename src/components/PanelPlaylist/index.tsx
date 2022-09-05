@@ -1,14 +1,25 @@
 import BasePanel from '@/components/BasePanel';
 import ContentExport from '@/components/PanelPlaylist/ContentExport';
 import ContentImport from '@/components/PanelPlaylist/ContentImport';
-import ContentItemEditor from '@/components/PanelPlaylist/ContentItemEditor';
+import ContentItemEditor from '@/components/ContentItemEditor';
 import ContentList from '@/components/PanelPlaylist/ContentList';
 import Header from '@/components/PanelPlaylist/Header';
-import { atomPlaylistPanelContent } from '@/stores/playlistStore';
-import { useAtomValue } from 'jotai';
+import {
+  atomPlaylistItems,
+  atomPlaylistPanelContent,
+  atomPlaylistSelectedItem,
+  atomPlaylistSelectedItemId,
+} from '@/stores/playlistStore';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { nanoid } from 'nanoid';
 
 const PanelPlaylist = () => {
-  const panelContent = useAtomValue(atomPlaylistPanelContent);
+  const [panelContent, setPanelContent] = useAtom(atomPlaylistPanelContent);
+  const setItems = useSetAtom(atomPlaylistItems);
+  const selectedItem = useAtomValue(atomPlaylistSelectedItem);
+  const setSelectedItemId = useSetAtom(atomPlaylistSelectedItemId);
+
+  const onCancelHandler = () => setPanelContent('list');
 
   return (
     <BasePanel>
@@ -16,8 +27,30 @@ const PanelPlaylist = () => {
       {panelContent === 'list' && <ContentList />}
       {panelContent === 'export' && <ContentExport />}
       {panelContent === 'import' && <ContentImport />}
-      {panelContent === 'addItem' && <ContentItemEditor addItem />}
-      {panelContent === 'editItem' && <ContentItemEditor />}
+      {panelContent === 'addItem' && (
+        <ContentItemEditor
+          title="Add Item"
+          item={{ title: '', content: [], note: '' }}
+          onCancel={onCancelHandler}
+          onSubmit={(item) => {
+            const newItem = { ...item, id: nanoid() };
+            setItems((prevItems) => [...prevItems, newItem]);
+            setSelectedItemId(newItem.id);
+          }}
+        />
+      )}
+      {panelContent === 'editItem' && selectedItem && (
+        <ContentItemEditor
+          title="Edit Item"
+          item={selectedItem}
+          onCancel={onCancelHandler}
+          onSubmit={(item) => {
+            const newItem = { ...selectedItem, ...item };
+            setItems((prevItems) => [...prevItems, newItem]);
+            setSelectedItemId(newItem.id);
+          }}
+        />
+      )}
     </BasePanel>
   );
 };

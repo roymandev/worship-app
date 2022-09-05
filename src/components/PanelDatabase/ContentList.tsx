@@ -3,7 +3,9 @@ import BaseList from '@/components/BaseList';
 import BaseListItem from '@/components/BaseListItem';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
+import useAuth from '@/hooks/useAuth';
 import {
+  atomDatabasePanelContent,
   atomSongs,
   atomSongsSelectedItem,
   atomSongsSelectedItemId,
@@ -15,9 +17,12 @@ import {
 } from '@/stores/previewStore';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useState } from 'react';
-import { RiPlayListAddFill } from 'react-icons/ri';
+import { RiPencilLine, RiPlayListAddFill } from 'react-icons/ri';
 
 const ContentList = () => {
+  const { user } = useAuth();
+  const setPanelContent = useSetAtom(atomDatabasePanelContent);
+
   const setPlaylistItems = useSetAtom(atomPlaylistItems);
   const setPreviewItem = useSetAtom(atomPreviewItem);
   const setPreviewItemContentSelectedLineIndex = useSetAtom(
@@ -84,6 +89,21 @@ const ContentList = () => {
           >
             <RiPlayListAddFill className="h-4 w-4" />
           </ButtonPrimary>
+
+          {user && (
+            <>
+              <hr />
+              <ButtonPrimary
+                tabIndex={-1}
+                color="gray"
+                className="p-1.5"
+                onClick={() => setPanelContent('editItem')}
+                disabled={!selectedItemId}
+              >
+                <RiPencilLine className="h-4 w-4" />
+              </ButtonPrimary>
+            </>
+          )}
         </div>
       </div>
     </>

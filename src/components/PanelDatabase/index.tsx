@@ -1,16 +1,21 @@
 import BasePanel from '@/components/BasePanel';
 import BasePanelHeader from '@/components/BasePanelHeader';
+import ContentItemEditor from '@/components/ContentItemEditor';
 import Loading from '@/components/Fallback/Loading';
 import ContentList from '@/components/PanelDatabase/ContentList';
 import useDatabase from '@/hooks/useDatabase';
-import { atomDatabasePanelContent } from '@/stores/databaseStore';
-import { useAtomValue } from 'jotai';
+import {
+  atomDatabasePanelContent,
+  atomSongsSelectedItem,
+} from '@/stores/databaseStore';
+import { useAtom, useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
 
 const PanelDatabase = () => {
-  const panelContent = useAtomValue(atomDatabasePanelContent);
+  const [panelContent, setPanelContent] = useAtom(atomDatabasePanelContent);
   const [loading, setLoading] = useState(true);
-  const { fetchAllSongs } = useDatabase();
+  const { fetchAllSongs, editSongById } = useDatabase();
+  const selectedItem = useAtomValue(atomSongsSelectedItem);
 
   useEffect(() => {
     setLoading(true);
@@ -25,8 +30,21 @@ const PanelDatabase = () => {
 
       {loading ? (
         <Loading className="rounded" />
+      ) : !panelContent ? (
+        <ContentList />
       ) : (
-        !panelContent && <ContentList />
+        panelContent === 'editItem' &&
+        selectedItem && (
+          <ContentItemEditor
+            item={selectedItem}
+            title="Edit database item"
+            onCancel={() => setPanelContent(null)}
+            onSubmit={(item) => {
+              editSongById(selectedItem.id, item);
+              setPanelContent(null);
+            }}
+          />
+        )
       )}
     </BasePanel>
   );

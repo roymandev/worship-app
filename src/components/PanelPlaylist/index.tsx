@@ -30,12 +30,11 @@ const PanelPlaylist = () => {
       {panelContent === 'addItem' && (
         <ContentItemEditor
           title="Add Item"
-          item={{ title: '', content: [], note: '' }}
+          item={{ id: nanoid(), title: '', content: [] }}
           onCancel={onCancelHandler}
           onSubmit={(item) => {
-            const newItem = { ...item, id: nanoid() };
-            setItems((prevItems) => [...prevItems, newItem]);
-            setSelectedItemId(newItem.id);
+            setItems((prevItems) => [...prevItems, item]);
+            setSelectedItemId(item.id);
           }}
         />
       )}

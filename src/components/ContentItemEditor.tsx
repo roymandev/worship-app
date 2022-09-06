@@ -10,23 +10,19 @@ import { BaseItem } from '@/types';
 import { useSetAtom } from 'jotai';
 import { useEffect, useId, useState } from 'react';
 
-interface Item extends BaseItem {
-  note?: string;
-}
-
-export interface ContentItemEditorProps {
+export interface ContentItemEditorProps<T> {
   title?: string;
-  item: Item;
-  onSubmit: (item: Item) => void;
+  item: T;
+  onSubmit: (item: T) => void;
   onCancel: () => void;
 }
 
-const ContentItemEditor = ({
+const ContentItemEditor = <T extends BaseItem>({
   title = 'ItemEditor',
   onSubmit,
   item,
   onCancel,
-}: ContentItemEditorProps) => {
+}: ContentItemEditorProps<T>) => {
   const formId = useId();
   const [currentItem, setItem] = useState({
     ...item,
@@ -41,7 +37,7 @@ const ContentItemEditor = ({
   // Show Preview
   useEffect(() => {
     setPreviewItem({
-      title: currentItem.title,
+      ...currentItem,
       content: parseItemContent(currentItem.content),
     });
   }, [currentItem]);
@@ -99,25 +95,6 @@ const ContentItemEditor = ({
             }
           />
         </fieldset>
-
-        {currentItem.note || (
-          <fieldset className="flex items-center">
-            <label htmlFor={formId + 'note'} className="w-14 px-1">
-              Note
-            </label>
-            <BaseInput
-              className="h-7 flex-1 px-1"
-              id={formId + 'note'}
-              value={currentItem.note}
-              onChange={(event) =>
-                setItem((prevValue) => ({
-                  ...prevValue,
-                  note: event.target.value,
-                }))
-              }
-            />
-          </fieldset>
-        )}
 
         <textarea
           className="flex-1 resize-none rounded border border-slate-300 p-1 outline-none focus:border-blue-600"

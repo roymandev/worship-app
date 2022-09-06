@@ -4,20 +4,16 @@ export interface BaseItemContentLine {
 }
 
 export interface BaseItem {
+  id: string;
   title: string;
   content: BaseItemContentLine[];
 }
 
 export interface PlaylistItem extends BaseItem {
-  id: string;
   note?: string;
 }
 
 export interface PlaylistFile {
   name: string;
   items: PlaylistItem[];
-}
-
-export interface SongItem extends BaseItem {
-  id: string;
 }

@@ -2,7 +2,7 @@ import useAuth from '@/hooks/useAuth';
 import { firestore } from '@/lib/firebase';
 import { parseItemContent } from '@/lib/parseItemContent';
 import { atomSongs } from '@/stores/databaseStore';
-import { BaseItem, SongItem } from '@/types';
+import { BaseItem } from '@/types';
 import { collection, doc, getDocs, updateDoc } from 'firebase/firestore';
 import { useSetAtom } from 'jotai';
 
@@ -15,14 +15,14 @@ const useDatabase = () => {
     try {
       const querySnapshot = await getDocs(songsRef);
 
-      const songs: SongItem[] = [];
+      const songs: BaseItem[] = [];
 
       querySnapshot.forEach((doc) =>
         songs.push({
           ...doc.data(),
           id: doc.id,
           content: parseItemContent(doc.data().content),
-        } as SongItem),
+        } as BaseItem),
       );
 
       setSongs(songs);
@@ -31,7 +31,7 @@ const useDatabase = () => {
     }
   };
 
-  const editSongById = async (id: string, update: BaseItem) => {
+  const editSongById = async (updatedItem: BaseItem) => {
     if (!user) {
       console.log('Unauthorized');
       return;
@@ -40,15 +40,15 @@ const useDatabase = () => {
     try {
       setSongs((prevSongs) =>
         prevSongs.map((song) =>
-          song.id === id ? { ...song, ...update } : song,
+          song.id === updatedItem.id ? { ...song, ...updatedItem } : song,
         ),
       );
 
-      const docRef = doc(songsRef, id);
+      const docRef = doc(songsRef, updatedItem.id);
 
       await updateDoc(docRef, {
-        title: update.title,
-        content: update.content.map((line) => line.text).join('\n\n'),
+        title: updatedItem.title,
+        content: updatedItem.content.map((line) => line.text).join('\n\n'),
       });
     } catch (error) {
       console.error('Error edit song: ', error);

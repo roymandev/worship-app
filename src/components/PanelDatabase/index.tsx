@@ -40,7 +40,7 @@ const PanelDatabase = () => {
             title="Edit database item"
             onCancel={() => setPanelContent(null)}
             onSubmit={(item) => {
-              editSongById(selectedItem.id, item);
+              editSongById(item);
               setPanelContent(null);
             }}
           />

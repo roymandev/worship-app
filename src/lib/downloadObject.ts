@@ -1,3 +1,8 @@
+/**
+ * Download object as file
+ * @param exportObj Object to download
+ * @param exportName filename
+ */
 export const downloadObject = (exportObj: unknown, exportName: string) => {
   const dataStr =
     'data:text/json;charset=utf-8,' +

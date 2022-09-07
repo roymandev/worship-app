@@ -1,4 +1,4 @@
-import { twMerge } from 'tailwind-merge';
+import { twclsx } from '@/lib/twclsx';
 
 const BaseInput = ({
   className,
@@ -8,7 +8,7 @@ const BaseInput = ({
   return (
     <input
       type={type}
-      className={twMerge(
+      className={twclsx(
         'rounded border border-slate-300 outline-none focus:border-blue-600',
         className,
       )}

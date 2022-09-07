@@ -1,12 +1,12 @@
-import { twMerge } from 'tailwind-merge';
-import { BaseItemContentLine } from '../types/itemTypes';
-import BaseListLine, { BaseListLineProps } from './BaseListLine';
+import BaseListItem, { BaseListLineProps } from '@/components/BaseListItem';
+import { twclsx } from '@/lib/twclsx';
+import { BaseItemContentLine } from '@/types';
 
 interface ItemContentLineProps extends BaseListLineProps {
   line: BaseItemContentLine;
 }
 
-const variantClass: Record<string, string> = {
+const lineClass: Record<string, string> = {
   verse: 'text-green-600',
   chorus: 'text-purple-600',
   end: 'text-red-600',
@@ -17,17 +17,15 @@ const ItemContentLine = ({
   isSelected,
   onClick,
   ...rest
-}: ItemContentLineProps) => {
-  return (
-    <BaseListLine
-      className={twMerge('py-1.5 px-1', line.type && variantClass[line.type])}
-      isSelected={isSelected}
-      onClick={onClick}
-      {...rest}
-    >
-      {line.text}
-    </BaseListLine>
-  );
-};
+}: ItemContentLineProps) => (
+  <BaseListItem
+    className={twclsx('py-1.5 px-1', line.type && lineClass[line.type])}
+    isSelected={isSelected}
+    onClick={onClick}
+    {...rest}
+  >
+    {line.text}
+  </BaseListItem>
+);
 
 export default ItemContentLine;

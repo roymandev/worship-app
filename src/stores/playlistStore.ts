@@ -1,62 +1,33 @@
-import { atom, Getter, Setter } from 'jotai';
+import { PlaylistItem } from '@/types';
+import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import { listController } from '../lib/listController';
-import { PlaylistItem } from '../types/itemTypes';
 
 // State
 export const atomPlaylistName = atomWithStorage('playlistName', 'Untitled');
+
 export const atomPlaylistItems = atomWithStorage<PlaylistItem[]>(
-  'playlistItems',
+  'playlistItem',
   [],
 );
-export const atomPlaylistSelectedItemIndex = atom(-1);
+
+export const atomPlaylistSelectedItemId = atom<PlaylistItem['id'] | null>(null);
+
 export const atomPlaylistPanelContent = atom<
-  'list' | 'import' | 'export' | 'itemEditor' | 'addItem'
+  'list' | 'import' | 'export' | 'editItem' | 'addItem'
 >('list');
 
 // Getter
 export const atomPlaylistSelectedItem = atom<PlaylistItem | null, PlaylistItem>(
-  (get) => get(atomPlaylistItems)[get(atomPlaylistSelectedItemIndex)] ?? null,
+  (get) =>
+    get(atomPlaylistItems).find(
+      (item) => item.id === get(atomPlaylistSelectedItemId),
+    ) || null,
   (get, set, update) => {
     set(
       atomPlaylistItems,
-      get(atomPlaylistItems).map((item, index) =>
-        index === get(atomPlaylistSelectedItemIndex) ? update : item,
+      get(atomPlaylistItems).map((item) =>
+        item.id === get(atomPlaylistSelectedItemId) ? update : item,
       ),
     );
   },
 );
-
-// Setter
-export const atomPlaylistAddItem = atom(
-  null,
-  (get, set, item: PlaylistItem) => {
-    set(atomPlaylistItems, [...get(atomPlaylistItems), item]);
-    set(atomPlaylistSelectedItemIndex, get(atomPlaylistItems).length - 1);
-  },
-);
-
-// Playlist store actions
-const playlistItemsHandler = (get: Getter, set: Setter) => {
-  const playlistItems = get(atomPlaylistItems);
-  return listController({
-    items: playlistItems,
-    selectedItemIndex: get(atomPlaylistSelectedItemIndex),
-    setItems: (newItems) => set(atomPlaylistItems, newItems),
-    setSelectedItemIndex: (index) => set(atomPlaylistSelectedItemIndex, index),
-  });
-};
-
-export const atomPlaylistShiftSelectedItemUp = atom(null, (get, set) => {
-  const listHanlder = playlistItemsHandler(get, set);
-  listHanlder.shiftSelectedItemUp();
-});
-
-export const atomPlaylistShiftSelectedItemDown = atom(null, (get, set) => {
-  const listHanlder = playlistItemsHandler(get, set);
-  listHanlder.shiftSelectedItemDown();
-});
-export const atomPlaylistRemoveSelectedItem = atom(null, (get, set) => {
-  const listHanlder = playlistItemsHandler(get, set);
-  listHanlder.removeSelectedItem();
-});

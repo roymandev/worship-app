@@ -1,5 +1,8 @@
-import { twMerge } from 'tailwind-merge';
-import { ButtonColors, BUTTON_TEXT_COLORS } from './buttonColor';
+import {
+  ButtonColors,
+  BUTTON_TEXT_COLORS,
+} from '@/components/Buttons/buttonColors';
+import { twclsx } from '@/lib/twclsx';
 
 export type BaseButtonTextProps = {
   color: keyof ButtonColors;
@@ -9,7 +12,7 @@ const BaseButtonText = ({ color, className, ...rest }: BaseButtonTextProps) => {
   return (
     <button
       type="button"
-      className={twMerge(
+      className={twclsx(
         'outline-none',
         color && BUTTON_TEXT_COLORS[color],
         className,

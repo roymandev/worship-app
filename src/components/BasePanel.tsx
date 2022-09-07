@@ -1,9 +1,19 @@
-const BasePanel = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className="flex overflow-hidden flex-col bg-white rounded shadow">
-      {children}
-    </div>
-  );
-};
+import { twclsx } from '@/lib/twclsx';
+
+export interface BasePanelProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const BasePanel = ({ children, className }: BasePanelProps) => (
+  <div
+    className={twclsx(
+      'flex flex-1 flex-col overflow-hidden rounded bg-white shadow',
+      className,
+    )}
+  >
+    {children}
+  </div>
+);
 
 export default BasePanel;

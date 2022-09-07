@@ -1,9 +1,6 @@
 import { atomWithStorage } from 'jotai/utils';
 
-export type ScreenSize = typeof baseScreenSize;
-export type ScreenStyle = Record<keyof ScreenSize, string>;
-
-const baseScreenSize = {
+const BASE_SIZE: Record<string, number> = {
   width: 480,
   height: 480,
   padding: 12,
@@ -11,12 +8,12 @@ const baseScreenSize = {
   lineHeight: 60,
 };
 
-export const atomBaseScreenSize = atomWithStorage(
-  'baseScreenSize',
-  baseScreenSize,
-);
+export const atomScreenSettings = atomWithStorage('screenSettings', {
+  baseSize: { ...BASE_SIZE },
+  hideText: false,
+  hideScreen: false,
+});
 
-export const atomMainScreenSize = atomWithStorage(
-  'mainScreenSize',
-  baseScreenSize,
-);
+export const atomScreenMainSize = atomWithStorage('screenMainSize', {
+  ...BASE_SIZE,
+});

@@ -1,50 +1,59 @@
+import { twclsx } from '@/lib/twclsx';
 import { useEffect, useRef } from 'react';
-import { twMerge } from 'tailwind-merge';
 
-export interface BaseListProps extends React.ComponentPropsWithoutRef<'ul'> {
-  children: React.ReactNode;
-  scrollToIndex: number;
-  onKeyDownArrowDown?: () => void;
-  onKeyDownArrowUp?: () => void;
-  onKeyDownArrowLeft?: () => void;
-  onKeyDownArrowRight?: () => void;
-  onKeyDownEnter?: () => void;
-  onKeyDownHome?: () => void;
-  onKeyDownEnd?: () => void;
+type KeydownHandler = () => void;
+
+export interface BaseListProps<T> {
+  items: T[];
+  renderItem: (item: T, isSelected: boolean, index: number) => React.ReactNode;
+  selectedItemIndex: number;
+  onSelectItem: (index: number) => void;
+  className?: string;
+  onKeyDownEnter?: KeydownHandler;
+  onKeyDownArrowLeft?: KeydownHandler;
+  onKeyDownArrowRight?: KeydownHandler;
 }
 
-export const BaseList = ({
-  children,
-  scrollToIndex,
+const BaseList = <T,>({
+  items,
+  renderItem,
+  selectedItemIndex,
+  onSelectItem,
   className,
-  onKeyDown,
-  onKeyDownArrowDown,
-  onKeyDownArrowUp,
+  onKeyDownEnter,
   onKeyDownArrowLeft,
   onKeyDownArrowRight,
-  onKeyDownEnter,
-  onKeyDownHome,
-  onKeyDownEnd,
-  ...rest
-}: BaseListProps) => {
+}: BaseListProps<T>) => {
   const containerRef = useRef<HTMLUListElement | null>(null);
 
   useEffect(() => {
-    if (containerRef.current && scrollToIndex !== undefined) {
-      containerRef.current.children[scrollToIndex]?.scrollIntoView({
+    if (containerRef.current)
+      containerRef.current.children[selectedItemIndex]?.scrollIntoView({
         block: 'nearest',
       });
-    }
-  }, [scrollToIndex]);
+  }, [selectedItemIndex]);
 
   const onKeyDownHandler = (event: React.KeyboardEvent<HTMLUListElement>) => {
-    if (event.key === 'ArrowUp' && onKeyDownArrowUp) {
+    if (event.key === 'ArrowUp') {
       event.preventDefault();
-      onKeyDownArrowUp();
+      if (items[selectedItemIndex - 1]) onSelectItem(selectedItemIndex - 1);
     }
-    if (event.key === 'ArrowDown' && onKeyDownArrowDown) {
+    if (event.key === 'ArrowDown') {
       event.preventDefault();
-      onKeyDownArrowDown();
+      if (items[selectedItemIndex + 1]) onSelectItem(selectedItemIndex + 1);
+    }
+    if (event.key === 'Home') {
+      event.preventDefault();
+      if (items[0]) onSelectItem(0);
+    }
+    if (event.key === 'End') {
+      event.preventDefault();
+      if (items[items.length - 1]) onSelectItem(items.length - 1);
+    }
+
+    if (event.key === 'Enter' && onKeyDownEnter) {
+      event.preventDefault();
+      onKeyDownEnter();
     }
     if (event.key === 'ArrowLeft' && onKeyDownArrowLeft) {
       event.preventDefault();
@@ -54,34 +63,21 @@ export const BaseList = ({
       event.preventDefault();
       onKeyDownArrowRight();
     }
-    if (event.key === 'Enter' && onKeyDownEnter) {
-      event.preventDefault();
-      onKeyDownEnter();
-    }
-    if (event.key === 'Home' && onKeyDownHome) {
-      event.preventDefault();
-      onKeyDownHome();
-    }
-    if (event.key === 'End' && onKeyDownEnd) {
-      event.preventDefault();
-      onKeyDownEnd();
-    }
-
-    onKeyDown?.(event);
   };
 
   return (
     <ul
       ref={containerRef}
-      className={twMerge(
-        'cursor-default group outline-none overflow-y-auto select-none',
+      className={twclsx(
+        'group flex flex-1 cursor-default select-none flex-col overflow-y-auto outline-none',
         className,
-        'relative',
       )}
+      tabIndex={0}
       onKeyDown={onKeyDownHandler}
-      {...rest}
     >
-      {children}
+      {items.map((item, index) =>
+        renderItem(item, selectedItemIndex === index, index),
+      )}
     </ul>
   );
 };

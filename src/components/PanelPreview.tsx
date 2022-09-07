@@ -1,95 +1,85 @@
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { forwardRef, useImperativeHandle, useRef } from 'react';
-import Split from 'react-split';
-import { listController } from '../lib/listController';
+import BaseList from '@/components/BaseList';
+import BasePanel from '@/components/BasePanel';
+import BasePanelHeader from '@/components/BasePanelHeader';
+import ItemContentLine from '@/components/ItemContentLine';
+import Screen, { ScreenRef } from '@/components/Screen';
 import {
   atomLiveItem,
   atomLiveItemContentSelectedLineIndex,
-} from '../stores/liveStore';
+} from '@/stores/liveStore';
 import {
   atomPreviewItem,
+  atomPreviewItemContentSelectedLine,
   atomPreviewItemContentSelectedLineIndex,
-} from '../stores/previewStore';
-import BaseList from './BaseList';
-import BasePanel from './BasePanel';
-import BasePanelHeader from './BasePanelHeader';
-import ItemContentLine from './ItemContentLine';
-import TextScreen, { TextScreenRef } from './TextScreen';
+} from '@/stores/previewStore';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
+import Split from 'react-split';
 
-const PanelPreview = forwardRef<TextScreenRef>((props, ref) => {
+const PanelPreview = forwardRef<ScreenRef>((props, ref) => {
   const item = useAtomValue(atomPreviewItem);
   const [contentSelectedLineIndex, setContentSelectedLineIndex] = useAtom(
     atomPreviewItemContentSelectedLineIndex,
   );
+  const selectedLine = useAtomValue(atomPreviewItemContentSelectedLine);
+  const screenRef = useRef<ScreenRef | null>(null);
 
-  const contentHandler = listController({
-    items: item?.content ?? [],
-    selectedItemIndex: contentSelectedLineIndex,
-    setSelectedItemIndex: (index) => setContentSelectedLineIndex(index),
-  });
-
-  // Set Live Item
+  // Set live item
   const setLiveItem = useSetAtom(atomLiveItem);
-  const setLiveItemSelectedLineIndex = useSetAtom(
+  const setLiveItemContentSelectedLineIndex = useSetAtom(
     atomLiveItemContentSelectedLineIndex,
   );
-  const setLiveItemHandler = (index: number) => {
-    if (item) {
-      setLiveItem(item);
-      setLiveItemSelectedLineIndex(index);
-    }
+  const setLiveItemHandler = () => {
+    setLiveItem(item);
+    setLiveItemContentSelectedLineIndex(contentSelectedLineIndex);
   };
 
-  // Pass scaleScreen method to parent
-  const textScreenRef = useRef<TextScreenRef | null>(null);
-  const onDragHandler = () => {
-    if (textScreenRef.current) {
-      textScreenRef.current.scaleScreen();
-    }
-  };
   useImperativeHandle(ref, () => ({
-    scaleScreen: onDragHandler,
+    resizeScreen: () => screenRef.current?.resizeScreen(),
   }));
 
   return (
-    <Split direction="vertical" gutterSize={4} onDrag={onDragHandler}>
+    <Split
+      direction="vertical"
+      gutterSize={4}
+      onDrag={() => screenRef.current?.resizeScreen()}
+    >
       <BasePanel>
         <BasePanelHeader>
-          <h2 className="px-2">Preview</h2>
+          <h2 className="px-1">Preview</h2>
         </BasePanelHeader>
 
         <BasePanelHeader sub>
-          <h2 className="px-2">{item?.title}</h2>
+          <h2 className="px-1">{item?.title}</h2>
         </BasePanelHeader>
 
-        <BaseList
-          className="leading-4 whitespace-pre-line"
-          scrollToIndex={contentSelectedLineIndex}
-          onKeyDownArrowUp={contentHandler.shiftSelectedItemUp}
-          onKeyDownArrowDown={contentHandler.shiftSelectedItemDown}
-          onKeyDownHome={contentHandler.selectFirstItem}
-          onKeyDownEnd={contentHandler.selectLastItem}
-          onKeyDownEnter={() => setLiveItemHandler(contentSelectedLineIndex)}
-          tabIndex={item?.content.length ? 0 : -1}
-        >
-          {item?.content.map((line, index) => (
-            <ItemContentLine
-              key={index}
-              line={line}
-              isSelected={index === contentSelectedLineIndex}
-              onClick={() => setContentSelectedLineIndex(index)}
-              onDoubleClick={() => setLiveItemHandler(index)}
-            />
-          ))}
-        </BaseList>
+        {item && (
+          <BaseList
+            className="whitespace-pre-line leading-4"
+            items={item.content}
+            selectedItemIndex={contentSelectedLineIndex}
+            onSelectItem={(index) => setContentSelectedLineIndex(index)}
+            onKeyDownEnter={setLiveItemHandler}
+            renderItem={(item, isSelected, index) => (
+              <ItemContentLine
+                key={index}
+                line={item}
+                isSelected={isSelected}
+                onClick={() => setContentSelectedLineIndex(index)}
+                onDoubleClick={setLiveItemHandler}
+              />
+            )}
+          />
+        )}
       </BasePanel>
 
       <BasePanel>
-        <TextScreen ref={textScreenRef} line={contentHandler.selectedItem()} />
+        <Screen ref={screenRef} line={selectedLine} />
       </BasePanel>
     </Split>
   );
 });
+
 PanelPreview.displayName = 'PanelPreview';
 
 export default PanelPreview;

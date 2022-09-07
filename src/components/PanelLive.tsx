@@ -1,119 +1,112 @@
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { forwardRef, useImperativeHandle, useRef } from 'react';
-import Split from 'react-split';
-import { listController } from '../lib/listController';
+import BaseList from '@/components/BaseList';
+import BasePanel from '@/components/BasePanel';
+import BasePanelHeader from '@/components/BasePanelHeader';
+import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
+import usePlaylist from '@/hooks/usePlaylist';
+import ItemContentLine from '@/components/ItemContentLine';
+import Screen, { ScreenRef } from '@/components/Screen';
 import {
-  atomLiveHideScreen,
-  atomLiveHideText,
   atomLiveItem,
   atomLiveItemContentSelectedLine,
   atomLiveItemContentSelectedLineIndex,
-} from '../stores/liveStore';
-import {
-  atomPlaylistShiftSelectedItemDown,
-  atomPlaylistShiftSelectedItemUp,
-} from '../stores/playlistStore';
-import BaseList from './BaseList';
-import BasePanel from './BasePanel';
-import BasePanelHeader from './BasePanelHeader';
-import ButtonDefault from './Buttons/ButtonDefault';
-import ItemContentLine from './ItemContentLine';
-import TextScreen, { TextScreenRef } from './TextScreen';
+} from '@/stores/liveStore';
+import { atomScreenSettings } from '@/stores/screenStore';
+import { useAtom, useAtomValue } from 'jotai';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
+import Split from 'react-split';
 
-const PanelLive = forwardRef<TextScreenRef>((props, ref) => {
-  const [hideScreen, setHideScreen] = useAtom(atomLiveHideScreen);
-  const [hideText, setHideText] = useAtom(atomLiveHideText);
+const PanelLive = forwardRef((props, ref) => {
+  const { shiftSelectedItemUp, shiftSelectedItemDown } = usePlaylist();
+  const [screenSettings, setScreenSettings] = useAtom(atomScreenSettings);
+
   const item = useAtomValue(atomLiveItem);
-  const itemSelectedLine = useAtomValue(atomLiveItemContentSelectedLine);
-  const [itemSelectedLineIndex, setItemSelectedLineIndex] = useAtom(
+  const selectedLine = useAtomValue(atomLiveItemContentSelectedLine);
+  const [contentSelectedLineIndex, setContentSelectedLineIndex] = useAtom(
     atomLiveItemContentSelectedLineIndex,
   );
+  const screenRef = useRef<ScreenRef | null>(null);
 
-  const contentHandler = listController({
-    items: item?.content ?? [],
-    selectedItemIndex: itemSelectedLineIndex,
-    setSelectedItemIndex: (index) => setItemSelectedLineIndex(index),
-  });
-
-  // playlistStore handler
-  const playlistShiftSelectedItemUp = useSetAtom(
-    atomPlaylistShiftSelectedItemUp,
-  );
-  const playlistShiftSelectedItemDown = useSetAtom(
-    atomPlaylistShiftSelectedItemDown,
-  );
-
-  // Pass scaleScreen method to parent
-  const textScreenRef = useRef<TextScreenRef | null>(null);
-  const onDragHandler = () => {
-    if (textScreenRef.current) {
-      textScreenRef.current.scaleScreen();
-    }
-  };
   useImperativeHandle(ref, () => ({
-    scaleScreen: onDragHandler,
+    resizeScreen: () => screenRef.current?.resizeScreen(),
   }));
 
   return (
-    <Split direction="vertical" gutterSize={4} onDrag={onDragHandler}>
+    <Split
+      direction="vertical"
+      gutterSize={4}
+      onDrag={() => screenRef.current?.resizeScreen()}
+    >
       <BasePanel>
         <BasePanelHeader>
-          <h2 className="px-2">Live</h2>
+          <h2 className="px-1">Live</h2>
 
-          <ButtonDefault
-            className="h-7 ml-auto mr-1"
-            color={hideScreen ? 'red' : 'gray'}
-            tabIndex={-1}
-            onClick={() => setHideScreen((prev) => !prev)}
+          <ButtonPrimary
+            color={screenSettings.hideScreen ? 'red' : 'gray'}
+            className="ml-auto h-full py-0"
+            withIcon="left"
+            onClick={() =>
+              setScreenSettings((prevSettings) => ({
+                ...prevSettings,
+                hideScreen: !prevSettings.hideScreen,
+              }))
+            }
           >
             Hide Screen
-          </ButtonDefault>
-          <ButtonDefault
-            className="h-7 mr-1"
-            color={hideText ? 'yellow' : 'gray'}
-            tabIndex={-1}
-            onClick={() => setHideText((prev) => !prev)}
+          </ButtonPrimary>
+
+          <ButtonPrimary
+            color={screenSettings.hideText ? 'yellow' : 'gray'}
+            className="h-full py-0"
+            withIcon="left"
+            onClick={() =>
+              setScreenSettings((prevSettings) => ({
+                ...prevSettings,
+                hideText: !prevSettings.hideText,
+              }))
+            }
           >
             Hide Text
-          </ButtonDefault>
+          </ButtonPrimary>
         </BasePanelHeader>
 
         <BasePanelHeader sub>
-          <h2 className="px-2">{item?.title}</h2>
+          <h2 className="px-1">{item?.title}</h2>
         </BasePanelHeader>
 
-        <BaseList
-          className="leading-4 whitespace-pre-line"
-          scrollToIndex={itemSelectedLineIndex}
-          onKeyDownArrowUp={contentHandler.shiftSelectedItemUp}
-          onKeyDownArrowDown={contentHandler.shiftSelectedItemDown}
-          onKeyDownArrowLeft={playlistShiftSelectedItemUp}
-          onKeyDownArrowRight={playlistShiftSelectedItemDown}
-          onKeyDownHome={contentHandler.selectFirstItem}
-          onKeyDownEnd={contentHandler.selectLastItem}
-          tabIndex={item?.content.length ? 0 : -1}
-        >
-          {item?.content.map((line, index) => (
-            <ItemContentLine
-              key={index}
-              line={line}
-              isSelected={index === itemSelectedLineIndex}
-              onClick={() => setItemSelectedLineIndex(index)}
-            />
-          ))}
-        </BaseList>
+        {item && (
+          <BaseList
+            className="whitespace-pre-line leading-4"
+            items={item.content}
+            selectedItemIndex={contentSelectedLineIndex}
+            onSelectItem={(index) => setContentSelectedLineIndex(index)}
+            renderItem={(item, isSelected, index) => (
+              <ItemContentLine
+                key={index}
+                line={item}
+                isSelected={isSelected}
+                onClick={() => setContentSelectedLineIndex(index)}
+              />
+            )}
+            onKeyDownArrowLeft={shiftSelectedItemUp}
+            onKeyDownArrowRight={shiftSelectedItemDown}
+          />
+        )}
       </BasePanel>
 
       <BasePanel>
-        <TextScreen
-          ref={textScreenRef}
-          line={hideText ? null : itemSelectedLine}
-          hideScreen={hideScreen}
+        <Screen
+          ref={screenRef}
+          line={selectedLine}
+          options={{
+            hideText: screenSettings.hideText,
+            hideScreen: screenSettings.hideScreen,
+          }}
         />
       </BasePanel>
     </Split>
   );
 });
+
 PanelLive.displayName = 'PanelLive';
 
 export default PanelLive;

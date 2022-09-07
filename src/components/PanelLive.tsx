@@ -41,7 +41,7 @@ const PanelLive = forwardRef((props, ref) => {
           <h2 className="px-1">Live</h2>
 
           <ButtonPrimary
-            color="gray"
+            color={screenSettings.hideScreen ? 'red' : 'gray'}
             className="ml-auto h-full py-0"
             withIcon="left"
             onClick={() =>
@@ -55,7 +55,7 @@ const PanelLive = forwardRef((props, ref) => {
           </ButtonPrimary>
 
           <ButtonPrimary
-            color="gray"
+            color={screenSettings.hideText ? 'yellow' : 'gray'}
             className="h-full py-0"
             withIcon="left"
             onClick={() =>

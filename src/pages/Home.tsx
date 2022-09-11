@@ -25,7 +25,11 @@ const Home = () => {
     <div className="fixed inset-0 flex flex-col gap-1 bg-slate-300 p-1 text-sm text-slate-700">
       <Header />
 
-      <Split className="flex flex-1" gutterSize={4} onDrag={dragHandler}>
+      <Split
+        className="flex flex-1 overflow-hidden"
+        gutterSize={4}
+        onDrag={dragHandler}
+      >
         <Split direction="vertical" gutterSize={4}>
           <PanelPlaylist />
           <PanelDatabase />

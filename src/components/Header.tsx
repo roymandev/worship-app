@@ -7,7 +7,7 @@ const Header = () => {
   const { user, logout } = useAuth();
 
   return (
-    <BasePanel className="flex-initial flex-row items-center p-1">
+    <BasePanel className="flex-initial shrink-0 flex-row items-center p-1">
       <h1 className="px-3 text-lg font-bold">Worship App</h1>
       <div className="ml-auto flex items-center gap-3">
         {user ? (

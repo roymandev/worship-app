@@ -19,10 +19,12 @@ const useAuth = () => {
   );
 
   const login = (email: string, password: string) =>
-    signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
-      setUser(userCredential.user);
-      return userCredential;
-    });
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        setUser(userCredential.user);
+        return userCredential;
+      })
+      .catch((error) => console.log(error));
 
   const logout = () => signOut(auth);
 

@@ -28,41 +28,46 @@ const Login = () => {
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-300 text-slate-700">
-      <BasePanel className="w-full max-w-sm flex-none">
-        <BasePanelHeader className="h-12">
-          <h1 className="mx-auto px-1 text-lg font-medium">Login</h1>
-        </BasePanelHeader>
+      <div>
+        <h1 className="px-4 py-6 text-center text-4xl font-bold">
+          Worship App
+        </h1>
+        <BasePanel>
+          <BasePanelHeader>
+            <h2 className="mx-auto px-1 font-medium">Login</h2>
+          </BasePanelHeader>
 
-        <form className="p-4" onSubmit={onSubmitHandler}>
-          <fieldset className="mb-4 flex flex-col gap-1">
-            <label htmlFor={formId + 'email'}>Email</label>
-            <BaseInput
-              className="flex-1 py-1 px-2"
-              id={formId + 'email'}
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </fieldset>
+          <form className="p-4" onSubmit={onSubmitHandler}>
+            <fieldset className="mb-4 flex flex-col gap-1">
+              <label htmlFor={formId + 'email'}>Email</label>
+              <BaseInput
+                className="flex-1 py-1 px-2"
+                id={formId + 'email'}
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </fieldset>
 
-          <fieldset className="mb-6 flex flex-col gap-1">
-            <label htmlFor={formId + 'password'}>Password</label>
-            <BaseInput
-              className="flex-1 py-1 px-2"
-              id={formId + 'password'}
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </fieldset>
+            <fieldset className="mb-6 flex flex-col gap-1">
+              <label htmlFor={formId + 'password'}>Password</label>
+              <BaseInput
+                className="flex-1 py-1 px-2"
+                id={formId + 'password'}
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </fieldset>
 
-          <ButtonPrimary color="blue" className="w-full" type="submit">
-            Login
-          </ButtonPrimary>
-        </form>
-      </BasePanel>
+            <ButtonPrimary color="blue" className="w-full" type="submit">
+              Login
+            </ButtonPrimary>
+          </form>
+        </BasePanel>
+      </div>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import FullScreenLoading from '@/components/Fallback/FullScreenLoading';
+import LoadingFullscreen from '@/components/Fallback/LoadingFullscreen';
 import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
@@ -8,7 +8,7 @@ const Login = lazy(() => import('@/pages/Login'));
 
 function App() {
   return (
-    <Suspense fallback={<FullScreenLoading />}>
+    <Suspense fallback={<LoadingFullscreen />}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/screen" element={<LiveScreen />} />

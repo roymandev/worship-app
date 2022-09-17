@@ -2,7 +2,7 @@ import BaseInput from '@/components/BaseInput';
 import BasePanel from '@/components/BasePanel';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
-import FullScreenLoading from '@/components/Fallback/FullScreenLoading';
+import LoadingFullscreen from '@/components/Fallback/LoadingFullscreen';
 import useAuth from '@/hooks/useAuth';
 import { useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +24,7 @@ const Login = () => {
     setLoading(false);
   };
 
-  if (loading) return <FullScreenLoading />;
+  if (loading) return <LoadingFullscreen />;
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-300 text-slate-700">

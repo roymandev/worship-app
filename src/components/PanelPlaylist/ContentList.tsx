@@ -18,6 +18,7 @@ import {
 } from '@/stores/previewStore';
 import { BaseItem } from '@/types';
 import { useAtomValue, useSetAtom } from 'jotai';
+import { useEffect } from 'react';
 import {
   RiAddLine,
   RiArrowDownLine,
@@ -50,10 +51,11 @@ const ContentList = () => {
   } = usePlaylist();
   const selectedItem = useAtomValue(atomPlaylistSelectedItem);
 
-  const setPreviewItemHandler = (item: BaseItem | null) => {
+  useEffect(() => {
+    const item = items.find((item) => item.id === selectedItemId) || null;
     setPreviewItem(item);
     setPreviewItemContentSelectedLineIndex(item?.content[0] ? 0 : -1);
-  };
+  }, [selectedItemId]);
 
   const setLiveItemHandler = (item: BaseItem | null) => {
     setLiveItem(item);
@@ -77,21 +79,14 @@ const ContentList = () => {
           selectedItemIndex={items.findIndex(
             (item) => item.id === selectedItemId,
           )}
-          onSelectItem={(index) => {
-            const item = items[index];
-            setSelectedItemId(item.id);
-            setPreviewItemHandler(item);
-          }}
+          onSelectItem={(index) => setSelectedItemId(items[index]?.id || null)}
           onKeyDownEnter={() => setLiveItemHandler(selectedItem)}
           renderItem={(item, isSelected) => (
             <BaseListItem
               key={item.id}
               className="select-none py-1 px-2"
               isSelected={isSelected}
-              onClick={() => {
-                setSelectedItemId(item.id);
-                setPreviewItemHandler(item);
-              }}
+              onClick={() => setSelectedItemId(item.id)}
               onDoubleClick={() => setLiveItemHandler(item)}
             >
               <h3 className="font-medium">{item.title}</h3>

@@ -1,7 +1,7 @@
 import BasePanel from '@/components/BasePanel';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ContentItemEditor from '@/components/ContentItemEditor';
-import Loading from '@/components/Fallback/Loading';
+import LoadingSpinner from '@/components/Fallback/LoadingSpinner';
 import ContentList from '@/components/PanelDatabase/ContentList';
 import useDatabase from '@/hooks/useDatabase';
 import {
@@ -29,7 +29,7 @@ const PanelDatabase = () => {
       </BasePanelHeader>
 
       {loading ? (
-        <Loading className="rounded" />
+        <LoadingSpinner />
       ) : !panelContent ? (
         <ContentList />
       ) : (

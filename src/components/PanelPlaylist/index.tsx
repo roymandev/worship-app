@@ -35,6 +35,7 @@ const PanelPlaylist = () => {
           onSubmit={(item) => {
             setItems((prevItems) => [...prevItems, item]);
             setSelectedItemId(item.id);
+            setPanelContent('list');
           }}
         />
       )}
@@ -45,8 +46,13 @@ const PanelPlaylist = () => {
           onCancel={onCancelHandler}
           onSubmit={(item) => {
             const newItem = { ...selectedItem, ...item };
-            setItems((prevItems) => [...prevItems, newItem]);
+            setItems((prevItems) =>
+              prevItems.map((item) =>
+                item.id === selectedItem.id ? newItem : item,
+              ),
+            );
             setSelectedItemId(newItem.id);
+            setPanelContent('list');
           }}
         />
       )}

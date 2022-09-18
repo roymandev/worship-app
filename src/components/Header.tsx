@@ -11,7 +11,13 @@ const Header = () => {
 
   return (
     <BasePanel className="flex-initial shrink-0 flex-row items-center p-1">
-      <h1 className="px-3 text-lg font-bold">Worship App</h1>
+      <img
+        src="/Worship%20App.svg"
+        alt="Worship App Logo"
+        className="h-[30px] w-[30px]"
+      />
+      <h1 className="px-2 text-lg font-bold">Worship App</h1>
+
       <div className="ml-auto flex items-center gap-3">
         {user ? (
           <>

@@ -1,6 +1,8 @@
 export type ButtonColors = typeof BUTTON_TEXT_COLORS;
 
 export const BUTTON_TEXT_COLORS = {
+  clean:
+    'text-slate-700 hover:bg-slate-200 focus:bg-slate-400/30 disabled:text-slate-400 disabled:bg-slate-200/20',
   gray: 'text-slate-700 hover:bg-slate-200 focus:bg-slate-400/30 disabled:text-slate-400 disabled:bg-slate-200/20',
   blue: 'text-blue-700 hover:bg-blue-200 focus:bg-blue-400/30 disabled:text-blue-400 disabled:bg-blue-200/20',
   red: 'text-red-700 hover:bg-red-200 focus:bg-red-400/30 disabled:text-red-300 disabled:bg-red-200/20',
@@ -13,6 +15,7 @@ export const BUTTON_TEXT_COLORS = {
 };
 
 export const BUTTON_COLORS: ButtonColors = {
+  clean: 'border-transparent  hover:border-slate-500 focus:border-slate-500',
   gray: 'bg-slate-200/30 border-slate-300 hover:border-slate-500 focus:border-slate-500 disabled:border-slate-200',
   blue: 'bg-blue-200/30 border-blue-300 hover:border-blue-500 focus:border-blue-500 disabled:border-blue-200',
   red: 'bg-red-200/30 border-red-300 hover:border-red-500 focus:border-red-500 disabled:border-red-100',

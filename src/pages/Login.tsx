@@ -3,28 +3,32 @@ import BasePanel from '@/components/BasePanel';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
 import LoadingFullscreen from '@/components/Fallback/LoadingFullscreen';
-import useAuth from '@/hooks/useAuth';
+import { auth } from '@/lib/firebase';
+import { atomUser } from '@/stores/userStore';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useAtom } from 'jotai';
 import { useId, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 const Login = () => {
+  const [user, setUser] = useAtom(atomUser);
   const formId = useId();
-  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const onSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-    await login(email, password).then(
-      (user) => user && navigate('/', { replace: true }),
-    );
-    setLoading(false);
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => setUser(userCredential.user))
+      .catch((error) => console.log(error))
+      .finally(() => setLoading(false));
   };
 
   if (loading) return <LoadingFullscreen />;
+
+  if (user) return <Navigate to="/" replace />;
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-300 text-slate-700">

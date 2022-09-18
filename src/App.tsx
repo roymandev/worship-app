@@ -1,3 +1,4 @@
+import AuthRoutes from '@/components/Auth/AuthRoutes';
 import LoadingFullscreen from '@/components/Fallback/LoadingFullscreen';
 import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
@@ -10,9 +11,12 @@ function App() {
   return (
     <Suspense fallback={<LoadingFullscreen />}>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<AuthRoutes />}>
+          <Route index element={<Home />} />
+          <Route path="/login" element={<Login />} />
+        </Route>
+
         <Route path="/screen" element={<LiveScreen />} />
-        <Route path="/login" element={<Login />} />
       </Routes>
     </Suspense>
   );

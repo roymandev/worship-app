@@ -3,7 +3,6 @@ import BaseList from '@/components/BaseList';
 import BaseListItem from '@/components/BaseListItem';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
-import useAuth from '@/hooks/useAuth';
 import {
   atomDatabasePanelContent,
   atomSongs,
@@ -15,12 +14,13 @@ import {
   atomPreviewItem,
   atomPreviewItemContentSelectedLineIndex,
 } from '@/stores/previewStore';
+import { atomUser } from '@/stores/userStore';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useState } from 'react';
 import { RiPencilLine, RiPlayListAddFill } from 'react-icons/ri';
 
 const ContentList = () => {
-  const { user } = useAuth();
+  const user = useAtomValue(atomUser);
   const setPanelContent = useSetAtom(atomDatabasePanelContent);
 
   const setPlaylistItems = useSetAtom(atomPlaylistItems);

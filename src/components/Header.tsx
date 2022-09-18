@@ -1,10 +1,13 @@
 import BasePanel from '@/components/BasePanel';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
-import useAuth from '@/hooks/useAuth';
+import { auth } from '@/lib/firebase';
+import { atomUser } from '@/stores/userStore';
+import { signOut } from 'firebase/auth';
+import { useAtomValue } from 'jotai';
 import { Link } from 'react-router-dom';
 
 const Header = () => {
-  const { user, logout } = useAuth();
+  const user = useAtomValue(atomUser);
 
   return (
     <BasePanel className="flex-initial shrink-0 flex-row items-center p-1">
@@ -13,7 +16,7 @@ const Header = () => {
         {user ? (
           <>
             <span>royman.dev@gmail.com</span>
-            <ButtonPrimary color="red" onClick={logout}>
+            <ButtonPrimary color="red" onClick={() => signOut(auth)}>
               Logout
             </ButtonPrimary>
           </>

@@ -1,13 +1,13 @@
-import useAuth from '@/hooks/useAuth';
 import { firestore } from '@/lib/firebase';
 import { parseItemContent } from '@/lib/parseItemContent';
 import { atomSongs } from '@/stores/databaseStore';
+import { atomUser } from '@/stores/userStore';
 import { BaseItem } from '@/types';
 import { collection, doc, getDocs, updateDoc } from 'firebase/firestore';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 const useDatabase = () => {
-  const { user } = useAuth();
+  const user = useAtomValue(atomUser);
   const setSongs = useSetAtom(atomSongs);
   const songsRef = collection(firestore, 'songs');
 

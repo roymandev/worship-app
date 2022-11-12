@@ -22,7 +22,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-slate-300 text-sm text-slate-700">
+    <div className="fixed inset-0 flex flex-col bg-slate-800 text-sm text-slate-100">
       <Header />
 
       <Split

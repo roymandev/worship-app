@@ -9,7 +9,7 @@ const Header = () => {
   const user = useAtomValue(atomUser);
 
   return (
-    <div className="flex items-center gap-1 border-b border-slate-600 p-1 shadow">
+    <div className="flex items-center gap-1 border-b border-zinc-600 p-1 shadow">
       <img
         src="/Worship%20App.svg"
         alt="Worship App Logo"

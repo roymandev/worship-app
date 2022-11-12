@@ -6,7 +6,7 @@ const BaseButton = ({ className, ...rest }: BaseButtonProps) => {
   return (
     <button
       className={twclsx(
-        'rounded bg-slate-700 hover:bg-slate-600 transition-colors',
+        'rounded bg-neutral-700 hover:bg-neutral-600 transition-colors',
         className,
       )}
       {...rest}

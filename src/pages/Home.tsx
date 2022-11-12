@@ -22,15 +22,15 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-slate-800 text-sm text-slate-100">
+    <div className="fixed inset-0 flex flex-col bg-zinc-800 text-sm text-zinc-300">
       <Header />
 
       <Split
-        className="flex flex-1 overflow-hidden p-1"
-        gutterSize={4}
+        className="flex flex-1 overflow-hidden"
+        gutterSize={1}
         onDrag={dragHandler}
       >
-        <Split direction="vertical" gutterSize={4}>
+        <Split direction="vertical" gutterSize={1}>
           <PanelPlaylist />
           <PanelDatabase />
         </Split>

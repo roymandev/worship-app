@@ -7,9 +7,9 @@ interface ItemContentLineProps extends BaseListLineProps {
 }
 
 const lineClass: Record<string, string> = {
-  verse: 'text-green-600',
-  chorus: 'text-purple-600',
-  end: 'text-red-600',
+  verse: 'text-green-400',
+  chorus: 'text-purple-400',
+  end: 'text-red-400',
 };
 
 const ItemContentLine = ({

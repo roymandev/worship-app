@@ -73,7 +73,7 @@ const ContentList = () => {
         />
       </BasePanelHeader>
 
-      <div className="flex flex-1 divide-x divide-slate-300">
+      <div className="flex flex-1 divide-x divide-zinc-600">
         <BaseList
           items={items}
           selectedItemIndex={items.findIndex(
@@ -90,7 +90,6 @@ const ContentList = () => {
               onDoubleClick={() => setLiveItemHandler(item)}
             >
               <h3 className="font-medium">{item.title}</h3>
-              {item.note && <p className="text-slate-500">{item.note}</p>}
             </BaseListItem>
           )}
         />
@@ -98,13 +97,13 @@ const ContentList = () => {
         <div className="flex flex-col gap-1 p-1">
           <ButtonPrimary
             tabIndex={-1}
-            className="p-1.5"
+            withIcon
             onClick={() => setPanelContent('addItem')}
           >
             <RiAddLine className="h-4 w-4" />
           </ButtonPrimary>
 
-          <hr />
+          <hr className="border-zinc-600" />
 
           <ButtonPrimary
             tabIndex={-1}
@@ -123,7 +122,7 @@ const ContentList = () => {
             <RiArrowDownLine className="h-4 w-4" />
           </ButtonPrimary>
 
-          <hr />
+          <hr className="border-zinc-600" />
 
           <ButtonPrimary
             tabIndex={-1}

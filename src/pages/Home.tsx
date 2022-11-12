@@ -22,11 +22,11 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 flex flex-col gap-1 bg-slate-300 p-1 text-sm text-slate-700">
+    <div className="fixed inset-0 flex flex-col bg-slate-300 text-sm text-slate-700">
       <Header />
 
       <Split
-        className="flex flex-1 overflow-hidden"
+        className="flex flex-1 overflow-hidden p-1"
         gutterSize={4}
         onDrag={dragHandler}
       >

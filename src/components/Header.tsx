@@ -1,4 +1,3 @@
-import BasePanel from '@/components/BasePanel';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
 import { auth } from '@/lib/firebase';
 import { atomUser } from '@/stores/userStore';
@@ -10,13 +9,13 @@ const Header = () => {
   const user = useAtomValue(atomUser);
 
   return (
-    <BasePanel className="flex-initial shrink-0 flex-row items-center p-1">
+    <div className="flex items-center bg-white p-1 shadow">
       <img
         src="/Worship%20App.svg"
         alt="Worship App Logo"
-        className="h-[30px] w-[30px]"
+        className="h-8 w-8"
       />
-      <h1 className="px-2 text-lg font-bold">Worship App</h1>
+      <h1 className="ml-1 px-2 text-lg font-bold">Worship App</h1>
 
       <div className="ml-auto flex items-center gap-3">
         {user ? (
@@ -32,7 +31,7 @@ const Header = () => {
           </Link>
         )}
       </div>
-    </BasePanel>
+    </div>
   );
 };
 

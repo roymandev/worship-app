@@ -82,7 +82,6 @@ const ContentList = () => {
         <div className="flex flex-col gap-1 p-1">
           <ButtonPrimary
             tabIndex={-1}
-            color="blue"
             className="p-1.5"
             onClick={addToPlaylistHandler}
             disabled={!selectedItem}
@@ -95,7 +94,6 @@ const ContentList = () => {
               <hr />
               <ButtonPrimary
                 tabIndex={-1}
-                color="gray"
                 className="p-1.5"
                 onClick={() => setPanelContent('editItem')}
                 disabled={!selectedItemId}

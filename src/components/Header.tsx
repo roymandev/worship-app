@@ -21,13 +21,11 @@ const Header = () => {
         {user ? (
           <>
             <span>royman.dev@gmail.com</span>
-            <ButtonPrimary color="red" onClick={() => signOut(auth)}>
-              Logout
-            </ButtonPrimary>
+            <ButtonPrimary onClick={() => signOut(auth)}>Logout</ButtonPrimary>
           </>
         ) : (
           <Link to="/login">
-            <ButtonPrimary color="blue">Login</ButtonPrimary>
+            <ButtonPrimary>Login</ButtonPrimary>
           </Link>
         )}
       </div>

@@ -66,7 +66,7 @@ const Login = () => {
               />
             </fieldset>
 
-            <ButtonPrimary color="blue" className="w-full" type="submit">
+            <ButtonPrimary className="w-full" type="submit">
               Login
             </ButtonPrimary>
           </form>

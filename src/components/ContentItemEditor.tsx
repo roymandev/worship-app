@@ -112,12 +112,8 @@ const ContentItemEditor = <T extends BaseItem>({
         />
 
         <div className="flex justify-end gap-1">
-          <ButtonPrimary color="blue" type="submit">
-            Save
-          </ButtonPrimary>
-          <ButtonPrimary color="gray" onClick={onCancel}>
-            Cancel
-          </ButtonPrimary>
+          <ButtonPrimary type="submit">Save</ButtonPrimary>
+          <ButtonPrimary onClick={onCancel}>Cancel</ButtonPrimary>
         </div>
       </form>
     </>

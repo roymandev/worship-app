@@ -24,15 +24,9 @@ const ContentExport = () => {
           Download &quot;<b>{name || 'Untitled'}.WORSHIP</b>&quot; playlist.
         </p>
 
-        <ButtonPrimary color="blue" onClick={downloadHandler}>
-          Download
-        </ButtonPrimary>
+        <ButtonPrimary onClick={downloadHandler}>Download</ButtonPrimary>
 
-        <ButtonPrimary
-          color="gray"
-          className="ml-1"
-          onClick={() => setPanelContent('list')}
-        >
+        <ButtonPrimary className="ml-1" onClick={() => setPanelContent('list')}>
           Cancel
         </ButtonPrimary>
       </div>

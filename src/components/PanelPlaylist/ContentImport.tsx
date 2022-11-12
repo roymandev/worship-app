@@ -78,17 +78,12 @@ const ContentImport = () => {
         {errorMsg && <div className="text-red-500">{errorMsg}</div>}
 
         <ButtonPrimary
-          color="blue"
           disabled={!!errorMsg || !playlist}
           onClick={importHandler}
         >
           Import Selected File
         </ButtonPrimary>
-        <ButtonPrimary
-          color="gray"
-          className="ml-1"
-          onClick={() => setPanelContent('list')}
-        >
+        <ButtonPrimary className="ml-1" onClick={() => setPanelContent('list')}>
           Cancel
         </ButtonPrimary>
       </div>

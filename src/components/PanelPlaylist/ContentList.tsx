@@ -98,7 +98,6 @@ const ContentList = () => {
         <div className="flex flex-col gap-1 p-1">
           <ButtonPrimary
             tabIndex={-1}
-            color="blue"
             className="p-1.5"
             onClick={() => setPanelContent('addItem')}
           >
@@ -109,7 +108,6 @@ const ContentList = () => {
 
           <ButtonPrimary
             tabIndex={-1}
-            color="gray"
             className="p-1.5"
             onClick={moveSelectedItemUp}
             disabled={!canShiftSelectedItemUp() || !selectedItemId}
@@ -118,7 +116,6 @@ const ContentList = () => {
           </ButtonPrimary>
           <ButtonPrimary
             tabIndex={-1}
-            color="gray"
             className="p-1.5"
             onClick={moveSelectedItemDown}
             disabled={!canShiftSelectedItemDown() || !selectedItemId}
@@ -130,7 +127,6 @@ const ContentList = () => {
 
           <ButtonPrimary
             tabIndex={-1}
-            color="gray"
             className="p-1.5"
             onClick={() => setPanelContent('editItem')}
             disabled={!selectedItemId}
@@ -139,7 +135,6 @@ const ContentList = () => {
           </ButtonPrimary>
           <ButtonPrimary
             tabIndex={-1}
-            color="red"
             className="p-1.5"
             onClick={deleteSelectedItem}
             disabled={!selectedItemId}

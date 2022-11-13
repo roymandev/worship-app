@@ -54,7 +54,7 @@ const Screen = forwardRef<ScreenRef, ScreenProps>(({ line, options }, ref) => {
     >
       {!options?.hideScreen && (
         <p
-          className="grid place-items-center whitespace-pre-line bg-gray-800 text-center"
+          className="grid place-items-center whitespace-pre-line bg-zinc-900 text-center"
           style={screenStyle}
         >
           {!line?.type && !options?.hideText && line?.text}

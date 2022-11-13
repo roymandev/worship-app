@@ -9,7 +9,7 @@ const BaseInput = ({
     <input
       type={type}
       className={twclsx(
-        'rounded border border-zinc-600 bg-transparent outline-none bg-zinc-800 focus:border-sky-500 placeholder:text-zinc-500',
+        'rounded border border-zinc-600 bg-transparent outline-none bg-zinc-800 focus:border-sky-500 placeholder:text-zinc-500 h-7',
         className,
       )}
       {...rest}

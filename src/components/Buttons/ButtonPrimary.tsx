@@ -13,9 +13,9 @@ const ButtonPrimary = ({
   return (
     <BaseButton
       className={twclsx(
-        'py-1 h-7',
-        withIcon ? 'flex items-center gap-1' : 'px-3',
-        withIcon === true && 'w-7 justify-center',
+        'flex items-center h-7 justify-center',
+        withIcon ? 'gap-1' : 'px-3',
+        withIcon === true && 'w-7',
         withIcon === 'left' && 'pr-3 pl-2',
         withIcon === 'right' && 'pr-2 pl-3',
         className,

@@ -31,12 +31,12 @@ const Login = () => {
   if (user) return <Navigate to="/" replace />;
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-300 text-slate-700">
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-zinc-800 text-slate-300">
       <div>
         <h1 className="px-4 py-6 text-center text-4xl font-bold">
           Worship App
         </h1>
-        <BasePanel>
+        <BasePanel className="border border-zinc-600">
           <BasePanelHeader>
             <h2 className="mx-auto px-1 font-medium">Login</h2>
           </BasePanelHeader>
@@ -45,7 +45,7 @@ const Login = () => {
             <fieldset className="mb-4 flex flex-col gap-1">
               <label htmlFor={formId + 'email'}>Email</label>
               <BaseInput
-                className="flex-1 py-1 px-2"
+                className="h-8 px-2"
                 id={formId + 'email'}
                 type="email"
                 required
@@ -57,7 +57,7 @@ const Login = () => {
             <fieldset className="mb-6 flex flex-col gap-1">
               <label htmlFor={formId + 'password'}>Password</label>
               <BaseInput
-                className="flex-1 py-1 px-2"
+                className="h-8 px-2"
                 id={formId + 'password'}
                 type="password"
                 required
@@ -66,7 +66,7 @@ const Login = () => {
               />
             </fieldset>
 
-            <ButtonPrimary className="w-full" type="submit">
+            <ButtonPrimary className="h-8 w-full" type="submit">
               Login
             </ButtonPrimary>
           </form>

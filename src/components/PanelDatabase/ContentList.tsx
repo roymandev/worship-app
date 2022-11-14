@@ -60,7 +60,7 @@ const ContentList = () => {
         />
       </BasePanelHeader>
 
-      <div className="flex flex-1 divide-x divide-slate-300">
+      <div className="flex flex-1 divide-x divide-zinc-600">
         <BaseList
           items={songs}
           selectedItemIndex={songs.findIndex(
@@ -82,7 +82,6 @@ const ContentList = () => {
         <div className="flex flex-col gap-1 p-1">
           <ButtonPrimary
             tabIndex={-1}
-            color="blue"
             className="p-1.5"
             onClick={addToPlaylistHandler}
             disabled={!selectedItem}
@@ -92,11 +91,10 @@ const ContentList = () => {
 
           {user && (
             <>
-              <hr />
+              <hr className="border-zinc-600" />
               <ButtonPrimary
                 tabIndex={-1}
-                color="gray"
-                className="p-1.5"
+                withIcon
                 onClick={() => setPanelContent('editItem')}
                 disabled={!selectedItemId}
               >

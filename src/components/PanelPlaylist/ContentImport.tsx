@@ -71,24 +71,19 @@ const ContentImport = () => {
         </p>
         <input
           type="file"
-          className="w-full file:cursor-pointer file:rounded file:border file:border-solid file:border-slate-300 file:bg-slate-200 file:py-1 file:px-3 file:text-inherit file:outline-none hover:file:border-slate-400 hover:file:bg-slate-300"
+          className="w-full file:h-7 file:cursor-pointer file:rounded file:border-none file:bg-zinc-700 file:px-4 file:font-sans file:text-inherit file:shadow file:outline-none hover:file:bg-zinc-600"
           accept=".WORSHIP"
           onChange={fileChangeHandler}
         />
         {errorMsg && <div className="text-red-500">{errorMsg}</div>}
 
         <ButtonPrimary
-          color="blue"
           disabled={!!errorMsg || !playlist}
           onClick={importHandler}
         >
           Import Selected File
         </ButtonPrimary>
-        <ButtonPrimary
-          color="gray"
-          className="ml-1"
-          onClick={() => setPanelContent('list')}
-        >
+        <ButtonPrimary className="ml-1" onClick={() => setPanelContent('list')}>
           Cancel
         </ButtonPrimary>
       </div>

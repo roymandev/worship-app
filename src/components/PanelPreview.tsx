@@ -41,7 +41,7 @@ const PanelPreview = forwardRef<ScreenRef>((props, ref) => {
   return (
     <Split
       direction="vertical"
-      gutterSize={4}
+      gutterSize={1}
       onDrag={() => screenRef.current?.resizeScreen()}
     >
       <BasePanel>

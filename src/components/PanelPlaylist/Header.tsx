@@ -12,20 +12,14 @@ const Header = () => {
       <h2 className="px-1">Playlist</h2>
 
       <ButtonPrimary
-        color="gray"
-        className="ml-auto h-full py-0"
+        className="ml-auto"
         withIcon="left"
         onClick={() => setPanelContent('import')}
       >
         <RiUploadLine className="h-4 w-4" />
         Import
       </ButtonPrimary>
-      <ButtonPrimary
-        color="gray"
-        className="h-full py-0"
-        withIcon="left"
-        onClick={() => setPanelContent('export')}
-      >
+      <ButtonPrimary withIcon="left" onClick={() => setPanelContent('export')}>
         <RiDownloadLine className="h-4 w-4" />
         Export
       </ButtonPrimary>

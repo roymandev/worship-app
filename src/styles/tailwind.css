@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+.gutter {
+  @apply bg-zinc-600;
+}
 .gutter:hover {
   @apply bg-blue-500;
 }

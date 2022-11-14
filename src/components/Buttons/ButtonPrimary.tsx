@@ -1,9 +1,8 @@
-import BaseButton from '@/components/Buttons/BaseButton';
-import { BaseButtonTextProps } from '@/components/Buttons/BaseButtonText';
+import BaseButton, { BaseButtonProps } from '@/components/Buttons/BaseButton';
 import { twclsx } from '@/lib/twclsx';
 
-interface ButtonPrimaryProps extends BaseButtonTextProps {
-  withIcon?: 'left' | 'right';
+interface ButtonPrimaryProps extends BaseButtonProps {
+  withIcon?: 'left' | 'right' | boolean;
 }
 
 const ButtonPrimary = ({
@@ -14,8 +13,9 @@ const ButtonPrimary = ({
   return (
     <BaseButton
       className={twclsx(
-        'py-1 h-8',
-        withIcon ? 'flex items-center gap-1' : 'px-4',
+        'flex items-center h-7 justify-center',
+        withIcon ? 'gap-1' : 'px-3',
+        withIcon === true && 'w-7',
         withIcon === 'left' && 'pr-3 pl-2',
         withIcon === 'right' && 'pr-2 pl-3',
         className,

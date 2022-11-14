@@ -97,7 +97,7 @@ const ContentItemEditor = <T extends BaseItem>({
         </fieldset>
 
         <textarea
-          className="flex-1 resize-none rounded border border-slate-300 p-1 outline-none focus:border-blue-600"
+          className="flex-1 resize-none rounded border border-zinc-600 bg-transparent p-1 outline-none placeholder:text-zinc-500 focus:border-sky-500"
           spellCheck="false"
           placeholder="Content"
           value={currentItem.content}
@@ -112,12 +112,8 @@ const ContentItemEditor = <T extends BaseItem>({
         />
 
         <div className="flex justify-end gap-1">
-          <ButtonPrimary color="blue" type="submit">
-            Save
-          </ButtonPrimary>
-          <ButtonPrimary color="gray" onClick={onCancel}>
-            Cancel
-          </ButtonPrimary>
+          <ButtonPrimary type="submit">Save</ButtonPrimary>
+          <ButtonPrimary onClick={onCancel}>Cancel</ButtonPrimary>
         </div>
       </form>
     </>

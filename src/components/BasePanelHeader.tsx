@@ -14,8 +14,8 @@ const BasePanelHeader = ({
   return (
     <div
       className={twclsx(
-        'flex items-center border-b border-slate-300 flex-shrink-0 p-1 gap-1 h-10',
-        sub && 'bg-slate-100',
+        'flex items-center border-b border-zinc-600 flex-shrink-0 p-1 gap-1 h-9',
+        sub && 'bg-zinc-900',
         className,
       )}
     >

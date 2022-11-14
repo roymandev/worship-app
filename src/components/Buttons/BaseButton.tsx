@@ -1,16 +1,12 @@
-import BaseButtonText, {
-  BaseButtonTextProps,
-} from '@/components/Buttons/BaseButtonText';
-import { BUTTON_COLORS } from '@/components/Buttons/buttonColors';
 import { twclsx } from '@/lib/twclsx';
 
-const BaseButton = ({ className, color, ...rest }: BaseButtonTextProps) => {
+export type BaseButtonProps = React.ComponentPropsWithoutRef<'button'>;
+
+const BaseButton = ({ className, ...rest }: BaseButtonProps) => {
   return (
-    <BaseButtonText
-      color={color}
+    <button
       className={twclsx(
-        'rounded border',
-        color && BUTTON_COLORS[color],
+        'rounded bg-zinc-700 hover:bg-zinc-600 transition-colors disabled:bg-zinc-700/30 disabled:text-zinc-500 shadow disabled:shadow-none',
         className,
       )}
       {...rest}

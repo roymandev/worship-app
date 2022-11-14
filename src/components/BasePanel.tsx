@@ -8,7 +8,7 @@ export interface BasePanelProps {
 const BasePanel = ({ children, className }: BasePanelProps) => (
   <div
     className={twclsx(
-      'flex flex-1 flex-col overflow-hidden rounded bg-white shadow',
+      'flex flex-1 flex-col overflow-hidden rounded',
       className,
     )}
   >

@@ -1,17 +1,14 @@
-import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
-import usePlaylist from '@/hooks/usePlaylist';
+import BaseModal, { BaseModalProps } from '@/components/Modals/BaseModal';
 import { FILE_EXT } from '@/constant';
+import usePlaylist from '@/hooks/usePlaylist';
 import { validatePlaylistItems } from '@/lib/validatePlaylistItems';
-import { atomPlaylistPanelContent } from '@/stores/playlistStore';
 import { PlaylistFile } from '@/types';
-import { useSetAtom } from 'jotai';
 import { useState } from 'react';
 
 const ERROR_UNKNOWN_FILE = 'Unknown file, please upload .WORSHIP file';
 
-const ContentImport = () => {
-  const setPanelContent = useSetAtom(atomPlaylistPanelContent);
+const ModalPlaylistImport = ({ onClose }: Pick<BaseModalProps, 'onClose'>) => {
   const [errorMsg, setErrorMsg] = useState('');
   const [playlist, setPlaylist] = useState<PlaylistFile | null>(null);
   const { upload } = usePlaylist();
@@ -57,38 +54,40 @@ const ContentImport = () => {
 
   const importHandler = () => {
     playlist && upload(playlist);
-    setPanelContent('list');
+    onClose();
   };
 
   return (
-    <>
-      <BasePanelHeader sub>
-        <h2 className="px-1">Import</h2>
-      </BasePanelHeader>
+    <BaseModal onClose={onClose} title="Import Playlist">
       <div className="space-y-3 p-3">
         <p>
           Upload <b>.WORSHIP</b> file to import
         </p>
+
         <input
           type="file"
           className="w-full file:h-7 file:cursor-pointer file:rounded file:border-none file:bg-zinc-700 file:px-4 file:font-sans file:text-inherit file:shadow file:outline-none hover:file:bg-zinc-600"
           accept=".WORSHIP"
           onChange={fileChangeHandler}
         />
-        {errorMsg && <div className="text-red-500">{errorMsg}</div>}
 
-        <ButtonPrimary
-          disabled={!!errorMsg || !playlist}
-          onClick={importHandler}
-        >
-          Import Selected File
-        </ButtonPrimary>
-        <ButtonPrimary className="ml-1" onClick={() => setPanelContent('list')}>
-          Cancel
-        </ButtonPrimary>
+        {errorMsg && <div className="text-red-400">{errorMsg}</div>}
+
+        <div className="flex">
+          <ButtonPrimary
+            className="ml-auto"
+            disabled={!!errorMsg || !playlist}
+            onClick={importHandler}
+          >
+            Import Selected File
+          </ButtonPrimary>
+          <ButtonPrimary className="ml-1" onClick={onClose}>
+            Cancel
+          </ButtonPrimary>
+        </div>
       </div>
-    </>
+    </BaseModal>
   );
 };
 
-export default ContentImport;
+export default ModalPlaylistImport;

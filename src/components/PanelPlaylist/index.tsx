@@ -1,6 +1,4 @@
 import BasePanel from '@/components/BasePanel';
-import ContentExport from '@/components/PanelPlaylist/ContentExport';
-import ContentImport from '@/components/PanelPlaylist/ContentImport';
 import ContentItemEditor from '@/components/ContentItemEditor';
 import ContentList from '@/components/PanelPlaylist/ContentList';
 import Header from '@/components/PanelPlaylist/Header';
@@ -25,8 +23,6 @@ const PanelPlaylist = () => {
     <BasePanel>
       <Header />
       {panelContent === 'list' && <ContentList />}
-      {panelContent === 'export' && <ContentExport />}
-      {panelContent === 'import' && <ContentImport />}
       {panelContent === 'addItem' && (
         <ContentItemEditor
           title="Add Item"

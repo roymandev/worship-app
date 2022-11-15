@@ -1,4 +1,4 @@
-import { FILE_EXT } from '@/constant';
+import { PLAYLIST_FILE_EXT } from '@/constant';
 import { downloadObject } from '@/lib/downloadObject';
 import {
   atomPlaylistItems,
@@ -27,7 +27,7 @@ const usePlaylist = () => {
   };
 
   const download = () =>
-    downloadObject({ items }, (name || 'Untitled') + FILE_EXT);
+    downloadObject({ items }, (name || 'Untitled') + PLAYLIST_FILE_EXT);
 
   const shiftSelectedItemUp = () =>
     setSelectedItemId(items[getSelectedItemIndex() - 1].id);

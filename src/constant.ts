@@ -1,1 +1,1 @@
-export const FILE_EXT = '.WORSHIP';
+export const PLAYLIST_FILE_EXT = '.WORSHIP';

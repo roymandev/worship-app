@@ -1,6 +1,6 @@
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
 import BaseModal, { BaseModalProps } from '@/components/Modals/BaseModal';
-import { FILE_EXT } from '@/constant';
+import { PLAYLIST_FILE_EXT } from '@/constant';
 import usePlaylist from '@/hooks/usePlaylist';
 import { validatePlaylistItems } from '@/lib/validatePlaylistItems';
 import { PlaylistFile } from '@/types';
@@ -23,7 +23,7 @@ const ModalPlaylistImport = ({ onClose }: Pick<BaseModalProps, 'onClose'>) => {
     const fileName = file.name.split('.');
 
     // Check file extension
-    if (fileName.pop() !== FILE_EXT.substring(1)) {
+    if (fileName.pop() !== PLAYLIST_FILE_EXT.substring(1)) {
       setErrorMsg(ERROR_UNKNOWN_FILE);
       return;
     }

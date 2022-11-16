@@ -14,6 +14,7 @@ import { atomScreenSettings } from '@/stores/screenStore';
 import { useAtom, useAtomValue } from 'jotai';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
+import { RiExternalLinkLine } from 'react-icons/ri';
 
 const PanelLive = forwardRef((props, ref) => {
   const { shiftSelectedItemUp, shiftSelectedItemDown } = usePlaylist();
@@ -42,7 +43,6 @@ const PanelLive = forwardRef((props, ref) => {
 
           <ButtonPrimary
             className="ml-auto h-full py-0"
-            withIcon="left"
             onClick={() =>
               setScreenSettings((prevSettings) => ({
                 ...prevSettings,
@@ -55,7 +55,6 @@ const PanelLive = forwardRef((props, ref) => {
 
           <ButtonPrimary
             className="h-full py-0"
-            withIcon="left"
             onClick={() =>
               setScreenSettings((prevSettings) => ({
                 ...prevSettings,
@@ -64,6 +63,20 @@ const PanelLive = forwardRef((props, ref) => {
             }
           >
             Hide Text
+          </ButtonPrimary>
+
+          <ButtonPrimary
+            withIcon="right"
+            onClick={() =>
+              window.open(
+                '/screen',
+                '_blank',
+                'location=yes,height=570,width=520,scrollbars=yes,status=yes',
+              )
+            }
+          >
+            Open Screen
+            <RiExternalLinkLine className="h-4 w-4" />
           </ButtonPrimary>
         </BasePanelHeader>
 

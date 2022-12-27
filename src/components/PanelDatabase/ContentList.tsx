@@ -60,7 +60,7 @@ const ContentList = () => {
         />
       </BasePanelHeader>
 
-      <div className="flex flex-1 divide-x divide-zinc-600">
+      <div className="flex flex-1 divide-x divide-zinc-600 overflow-hidden">
         <BaseList
           items={songs}
           selectedItemIndex={songs.findIndex(

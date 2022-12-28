@@ -45,8 +45,10 @@ const ContentList = () => {
   };
 
   const addToPlaylistHandler = () => {
-    if (selectedItem)
-      setPlaylistItems((prevItems) => [...prevItems, selectedItem]);
+    if (selectedItem) {
+      const newItem = { ...selectedItem, id: crypto.randomUUID() };
+      setPlaylistItems((prevItems) => [...prevItems, newItem]);
+    }
   };
 
   return (

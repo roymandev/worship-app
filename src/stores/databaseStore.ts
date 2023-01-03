@@ -6,8 +6,6 @@ import { atomWithStorage } from 'jotai/utils';
 export const atomSongs = atomWithStorage<BaseItem[]>('songs', []);
 export const atomSongsSelectedItemId = atom<string | null>(null);
 
-export const atomDatabasePanelContent = atom<'editItem' | null>(null);
-
 // Getter
 export const atomSongsSelectedItem = atom<BaseItem | null, BaseItem>(
   (get) =>

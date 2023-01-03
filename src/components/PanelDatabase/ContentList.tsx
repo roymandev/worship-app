@@ -4,7 +4,6 @@ import BaseListItem from '@/components/BaseListItem';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
 import {
-  atomDatabasePanelContent,
   atomSongs,
   atomSongsSelectedItem,
   atomSongsSelectedItemId,
@@ -14,15 +13,11 @@ import {
   atomPreviewItem,
   atomPreviewItemContentSelectedLineIndex,
 } from '@/stores/previewStore';
-import { atomUser } from '@/stores/userStore';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useState } from 'react';
-import { RiPencilLine, RiPlayListAddFill } from 'react-icons/ri';
+import { RiPlayListAddFill } from 'react-icons/ri';
 
 const ContentList = () => {
-  const user = useAtomValue(atomUser);
-  const setPanelContent = useSetAtom(atomDatabasePanelContent);
-
   const setPlaylistItems = useSetAtom(atomPlaylistItems);
   const setPreviewItem = useSetAtom(atomPreviewItem);
   const setPreviewItemContentSelectedLineIndex = useSetAtom(
@@ -90,20 +85,6 @@ const ContentList = () => {
           >
             <RiPlayListAddFill className="h-4 w-4" />
           </ButtonPrimary>
-
-          {user && (
-            <>
-              <hr className="border-zinc-600" />
-              <ButtonPrimary
-                tabIndex={-1}
-                withIcon
-                onClick={() => setPanelContent('editItem')}
-                disabled={!selectedItemId}
-              >
-                <RiPencilLine className="h-4 w-4" />
-              </ButtonPrimary>
-            </>
-          )}
         </div>
       </div>
     </>

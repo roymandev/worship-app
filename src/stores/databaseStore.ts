@@ -1,8 +1,9 @@
 import { BaseItem } from '@/types';
 import { atom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 
 // State
-export const atomSongs = atom<BaseItem[]>([]);
+export const atomSongs = atomWithStorage<BaseItem[]>('songs', []);
 export const atomSongsSelectedItemId = atom<string | null>(null);
 
 export const atomDatabasePanelContent = atom<'editItem' | null>(null);

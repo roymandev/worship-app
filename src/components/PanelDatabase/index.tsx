@@ -7,6 +7,7 @@ import useDatabase from '@/hooks/useDatabase';
 import {
   atomDatabasePanelContent,
   atomSongsSelectedItem,
+  atomSongs,
 } from '@/stores/databaseStore';
 import { useAtom, useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
@@ -14,12 +15,17 @@ import { useEffect, useState } from 'react';
 const PanelDatabase = () => {
   const [panelContent, setPanelContent] = useAtom(atomDatabasePanelContent);
   const [loading, setLoading] = useState(true);
+  const songs = useAtomValue(atomSongs);
   const { fetchAllSongs, editSongById } = useDatabase();
   const selectedItem = useAtomValue(atomSongsSelectedItem);
 
   useEffect(() => {
-    setLoading(true);
-    fetchAllSongs().then(() => setLoading(false));
+    if (songs.length) {
+      setLoading(false);
+    } else {
+      setLoading(true);
+      fetchAllSongs().then(() => setLoading(false));
+    }
   }, []);
 
   return (

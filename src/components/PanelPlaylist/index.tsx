@@ -1,12 +1,12 @@
 import BasePanel from '@/components/BasePanel';
-import ContentList from '@/components/PanelPlaylist/ContentList';
+import List from '@/components/PanelPlaylist/List';
 import Header from '@/components/PanelPlaylist/Header';
 
 const PanelPlaylist = () => {
   return (
     <BasePanel>
       <Header />
-      <ContentList />
+      <List />
     </BasePanel>
   );
 };

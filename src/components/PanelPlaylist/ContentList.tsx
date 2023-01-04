@@ -8,10 +8,7 @@ import {
   atomLiveItem,
   atomLiveItemContentSelectedLineIndex,
 } from '@/stores/liveStore';
-import {
-  atomPlaylistPanelContent,
-  atomPlaylistSelectedItem,
-} from '@/stores/playlistStore';
+import { atomPlaylistSelectedItem } from '@/stores/playlistStore';
 import {
   atomPreviewItem,
   atomPreviewItemContentSelectedLineIndex,
@@ -36,7 +33,6 @@ const ContentList = () => {
   const setLiveItemContentSelectedLineIndex = useSetAtom(
     atomLiveItemContentSelectedLineIndex,
   );
-  const setPanelContent = useSetAtom(atomPlaylistPanelContent);
   const {
     name,
     setName,
@@ -95,11 +91,7 @@ const ContentList = () => {
         />
 
         <div className="flex flex-col gap-1 p-1">
-          <ButtonPrimary
-            tabIndex={-1}
-            withIcon
-            onClick={() => setPanelContent('addItem')}
-          >
+          <ButtonPrimary tabIndex={-1} withIcon>
             <RiAddLine className="h-4 w-4" />
           </ButtonPrimary>
 
@@ -127,7 +119,6 @@ const ContentList = () => {
           <ButtonPrimary
             tabIndex={-1}
             className="p-1.5"
-            onClick={() => setPanelContent('editItem')}
             disabled={!selectedItemId}
           >
             <RiPencilLine className="h-4 w-4" />

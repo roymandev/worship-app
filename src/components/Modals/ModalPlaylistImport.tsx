@@ -8,7 +8,10 @@ import { useState } from 'react';
 
 const ERROR_UNKNOWN_FILE = 'Unknown file, please upload .WORSHIP file';
 
-const ModalPlaylistImport = ({ onClose }: Pick<BaseModalProps, 'onClose'>) => {
+const ModalPlaylistImport = (
+  props: Omit<BaseModalProps, 'title' | 'children'>,
+) => {
+  const { onClose } = props;
   const [errorMsg, setErrorMsg] = useState('');
   const [playlist, setPlaylist] = useState<PlaylistFile | null>(null);
   const { upload } = usePlaylist();
@@ -58,7 +61,7 @@ const ModalPlaylistImport = ({ onClose }: Pick<BaseModalProps, 'onClose'>) => {
   };
 
   return (
-    <BaseModal onClose={onClose} title="Import Playlist">
+    <BaseModal title="Import Playlist" {...props}>
       <div className="space-y-3 p-3">
         <p>
           Upload <b>.WORSHIP</b> file to import

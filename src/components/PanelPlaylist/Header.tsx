@@ -36,8 +36,8 @@ const Header = () => {
         </ButtonPrimary>
       </BasePanelHeader>
 
-      {isOpenImport && <ModalPlaylistImport onClose={closeModalImport} />}
-      {isOpenExport && <ModalPlaylistExport onClose={closeModalExport} />}
+      <ModalPlaylistImport opened={isOpenImport} onClose={closeModalImport} />
+      <ModalPlaylistExport opened={isOpenExport} onClose={closeModalExport} />
     </>
   );
 };

@@ -2,7 +2,10 @@ import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
 import BaseModal, { BaseModalProps } from '@/components/Modals/BaseModal';
 import usePlaylist from '@/hooks/usePlaylist';
 
-const ModalPlaylistExport = ({ onClose }: Pick<BaseModalProps, 'onClose'>) => {
+const ModalPlaylistExport = (
+  props: Omit<BaseModalProps, 'title' | 'children'>,
+) => {
+  const { onClose } = props;
   const { name, download } = usePlaylist();
 
   const downloadHandler = () => {
@@ -11,7 +14,7 @@ const ModalPlaylistExport = ({ onClose }: Pick<BaseModalProps, 'onClose'>) => {
   };
 
   return (
-    <BaseModal onClose={onClose} title="Export Playlist">
+    <BaseModal title="Export Playlist" {...props}>
       <div className="space-y-3 p-3">
         <p>
           Download &quot;<b>{name || 'Untitled'}.WORSHIP</b>&quot; playlist.

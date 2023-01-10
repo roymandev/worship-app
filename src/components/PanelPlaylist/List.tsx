@@ -45,7 +45,7 @@ const List = () => {
     <>
       <BasePanelHeader sub>
         <BaseInput
-          className="h-7 flex-1 px-1"
+          className="h-7 flex-1"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Playlist name"

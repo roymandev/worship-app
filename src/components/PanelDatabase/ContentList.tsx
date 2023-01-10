@@ -50,7 +50,7 @@ const ContentList = () => {
     <>
       <BasePanelHeader sub>
         <BaseInput
-          className="h-7 flex-1 px-1"
+          className="h-7 flex-1"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search"

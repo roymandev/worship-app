@@ -1,22 +1,14 @@
 import { useState } from 'react';
 
-const useModal = <T>(initialState = false, initialPayload?: T) => {
+const useModal = (initialState = false) => {
   const [isOpen, setIsOpen] = useState(initialState);
-  const [payload, setPayload] = useState(initialPayload);
 
-  const openModal = (payload?: T) => {
-    setIsOpen(true);
-    setPayload(payload);
-  };
+  const openModal = () => setIsOpen(true);
 
-  const closeModal = () => {
-    setIsOpen(false);
-    setPayload(undefined);
-  };
+  const closeModal = () => setIsOpen(false);
 
   return {
     isOpen,
-    payload,
     openModal,
     closeModal,
   };

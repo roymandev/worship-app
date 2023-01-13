@@ -1,5 +1,4 @@
 import Header from '@/components/Header';
-import PanelDatabase from '@/components/PanelDatabase';
 import PanelLive from '@/components/PanelLive';
 import PanelPlaylist from '@/components/PanelPlaylist';
 import PanelPreview from '@/components/PanelPreview';
@@ -30,10 +29,7 @@ const Home = () => {
         gutterSize={1}
         onDrag={dragHandler}
       >
-        <Split direction="vertical" gutterSize={1}>
-          <PanelPlaylist />
-          <PanelDatabase />
-        </Split>
+        <PanelPlaylist />
         <PanelPreview ref={panelPreviewScreenRef} />
         <PanelLive ref={panelLiveScreenRef} />
       </Split>

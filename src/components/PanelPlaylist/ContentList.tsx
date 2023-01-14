@@ -4,24 +4,18 @@ import BaseListItem from '@/components/BaseListItem';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ListController from '@/components/PanelPlaylist/ListController';
 import usePlaylist from '@/hooks/usePlaylist';
+import usePreview from '@/hooks/usePreview';
 import {
   atomLiveItem,
   atomLiveItemContentSelectedLineIndex,
 } from '@/stores/liveStore';
 import { atomPlaylistSelectedItem } from '@/stores/playlistStore';
-import {
-  atomPreviewItem,
-  atomPreviewItemContentSelectedLineIndex,
-} from '@/stores/previewStore';
 import { BaseItem } from '@/types';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useEffect } from 'react';
 
 const ContentList = () => {
-  const setPreviewItem = useSetAtom(atomPreviewItem);
-  const setPreviewItemContentSelectedLineIndex = useSetAtom(
-    atomPreviewItemContentSelectedLineIndex,
-  );
+  const preview = usePreview();
   const setLiveItem = useSetAtom(atomLiveItem);
   const setLiveItemContentSelectedLineIndex = useSetAtom(
     atomLiveItemContentSelectedLineIndex,
@@ -32,8 +26,7 @@ const ContentList = () => {
 
   useEffect(() => {
     const item = items.find((item) => item.id === selectedItemId) || null;
-    setPreviewItem(item);
-    setPreviewItemContentSelectedLineIndex(item?.content[0] ? 0 : -1);
+    preview.show(item);
   }, [selectedItemId]);
 
   const setLiveItemHandler = (item: BaseItem | null) => {

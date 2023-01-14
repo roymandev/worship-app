@@ -3,24 +3,18 @@ import BasePanel from '@/components/BasePanel';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ItemContentLine from '@/components/ItemContentLine';
 import Screen, { ScreenRef } from '@/components/Screen';
+import usePreview from '@/hooks/usePreview';
 import {
   atomLiveItem,
   atomLiveItemContentSelectedLineIndex,
 } from '@/stores/liveStore';
-import {
-  atomPreviewItem,
-  atomPreviewItemContentSelectedLine,
-  atomPreviewItemContentSelectedLineIndex,
-} from '@/stores/previewStore';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { atomPreviewItemContentSelectedLine } from '@/stores/previewStore';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 
 const PanelPreview = forwardRef<ScreenRef>((props, ref) => {
-  const item = useAtomValue(atomPreviewItem);
-  const [contentSelectedLineIndex, setContentSelectedLineIndex] = useAtom(
-    atomPreviewItemContentSelectedLineIndex,
-  );
+  const { item, selectedLineIndex, setSelectedLineIndex } = usePreview();
   const selectedLine = useAtomValue(atomPreviewItemContentSelectedLine);
   const screenRef = useRef<ScreenRef | null>(null);
 
@@ -31,7 +25,7 @@ const PanelPreview = forwardRef<ScreenRef>((props, ref) => {
   );
   const setLiveItemHandler = () => {
     setLiveItem(item);
-    setLiveItemContentSelectedLineIndex(contentSelectedLineIndex);
+    setLiveItemContentSelectedLineIndex(selectedLineIndex);
   };
 
   useImperativeHandle(ref, () => ({
@@ -57,15 +51,15 @@ const PanelPreview = forwardRef<ScreenRef>((props, ref) => {
           <BaseList
             className="whitespace-pre-line leading-4"
             items={item.content}
-            selectedItemIndex={contentSelectedLineIndex}
-            onSelectItem={(index) => setContentSelectedLineIndex(index)}
+            selectedItemIndex={selectedLineIndex}
+            onSelectItem={(index) => setSelectedLineIndex(index)}
             onKeyDownEnter={setLiveItemHandler}
             renderItem={(item, isSelected, index) => (
               <ItemContentLine
                 key={index}
                 line={item}
                 isSelected={isSelected}
-                onClick={() => setContentSelectedLineIndex(index)}
+                onClick={() => setSelectedLineIndex(index)}
                 onDoubleClick={setLiveItemHandler}
               />
             )}

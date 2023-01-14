@@ -17,7 +17,7 @@ import { BaseItem } from '@/types';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useEffect } from 'react';
 
-const List = () => {
+const ContentList = () => {
   const setPreviewItem = useSetAtom(atomPreviewItem);
   const setPreviewItemContentSelectedLineIndex = useSetAtom(
     atomPreviewItemContentSelectedLineIndex,
@@ -79,4 +79,4 @@ const List = () => {
   );
 };
 
-export default List;
+export default ContentList;

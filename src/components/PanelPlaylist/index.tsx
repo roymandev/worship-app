@@ -1,12 +1,16 @@
 import BasePanel from '@/components/BasePanel';
-import List from '@/components/PanelPlaylist/List';
+import ContentList from '@/components/PanelPlaylist/ContentList';
 import Header from '@/components/PanelPlaylist/Header';
+import { useState } from 'react';
 
 const PanelPlaylist = () => {
+  const [content] = useState<'list'>('list');
+
   return (
     <BasePanel>
       <Header />
-      <List />
+
+      {content === 'list' && <ContentList />}
     </BasePanel>
   );
 };

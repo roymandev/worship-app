@@ -3,13 +3,10 @@ import BasePanel from '@/components/BasePanel';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ItemContentLine from '@/components/ItemContentLine';
 import Screen, { ScreenRef } from '@/components/Screen';
+import useLive from '@/hooks/useLive';
 import usePreview from '@/hooks/usePreview';
-import {
-  atomLiveItem,
-  atomLiveItemContentSelectedLineIndex,
-} from '@/stores/liveStore';
 import { atomPreviewItemContentSelectedLine } from '@/stores/previewStore';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 
@@ -19,14 +16,8 @@ const PanelPreview = forwardRef<ScreenRef>((props, ref) => {
   const screenRef = useRef<ScreenRef | null>(null);
 
   // Set live item
-  const setLiveItem = useSetAtom(atomLiveItem);
-  const setLiveItemContentSelectedLineIndex = useSetAtom(
-    atomLiveItemContentSelectedLineIndex,
-  );
-  const setLiveItemHandler = () => {
-    setLiveItem(item);
-    setLiveItemContentSelectedLineIndex(selectedLineIndex);
-  };
+  const live = useLive();
+  const setLiveItemHandler = () => live.show(item);
 
   useImperativeHandle(ref, () => ({
     resizeScreen: () => screenRef.current?.resizeScreen(),

@@ -1,9 +1,12 @@
-import { BaseItem } from '@/types';
+import { PreviewItem } from '@/stores/previewStore';
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 
 // State
-export const atomLiveItem = atomWithStorage<BaseItem | null>('liveItem', null);
+export const atomLiveItem = atomWithStorage<PreviewItem | null>(
+  'liveItem',
+  null,
+);
 export const atomLiveItemContentSelectedLineIndex = atomWithStorage(
   'liveItemSelectedLineIndex',
   -1,

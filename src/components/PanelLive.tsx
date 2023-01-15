@@ -5,26 +5,21 @@ import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
 import usePlaylist from '@/hooks/usePlaylist';
 import ItemContentLine from '@/components/ItemContentLine';
 import Screen, { ScreenRef } from '@/components/Screen';
-import {
-  atomLiveItem,
-  atomLiveItemContentSelectedLine,
-  atomLiveItemContentSelectedLineIndex,
-} from '@/stores/liveStore';
+import { atomLiveItemContentSelectedLine } from '@/stores/liveStore';
 import { atomScreenSettings } from '@/stores/screenStore';
 import { useAtom, useAtomValue } from 'jotai';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 import { RiExternalLinkLine } from 'react-icons/ri';
+import useLive from '@/hooks/useLive';
 
 const PanelLive = forwardRef((props, ref) => {
   const { shiftSelectedItemUp, shiftSelectedItemDown } = usePlaylist();
   const [screenSettings, setScreenSettings] = useAtom(atomScreenSettings);
 
-  const item = useAtomValue(atomLiveItem);
+  const { item, selectedLineIndex, setSelectedLineIndex } = useLive();
   const selectedLine = useAtomValue(atomLiveItemContentSelectedLine);
-  const [contentSelectedLineIndex, setContentSelectedLineIndex] = useAtom(
-    atomLiveItemContentSelectedLineIndex,
-  );
+
   const screenRef = useRef<ScreenRef | null>(null);
 
   useImperativeHandle(ref, () => ({
@@ -88,14 +83,14 @@ const PanelLive = forwardRef((props, ref) => {
           <BaseList
             className="whitespace-pre-line leading-4"
             items={item.content}
-            selectedItemIndex={contentSelectedLineIndex}
-            onSelectItem={(index) => setContentSelectedLineIndex(index)}
+            selectedItemIndex={selectedLineIndex}
+            onSelectItem={(index) => setSelectedLineIndex(index)}
             renderItem={(item, isSelected, index) => (
               <ItemContentLine
                 key={index}
                 line={item}
                 isSelected={isSelected}
-                onClick={() => setContentSelectedLineIndex(index)}
+                onClick={() => setSelectedLineIndex(index)}
               />
             )}
             onKeyDownArrowLeft={shiftSelectedItemUp}

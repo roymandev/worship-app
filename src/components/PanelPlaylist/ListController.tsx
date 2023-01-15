@@ -26,6 +26,7 @@ const ListController = () => {
     <>
       <div className="flex flex-col gap-1 p-1">
         <ButtonPrimary
+          title="Add Playlist Item"
           tabIndex={-1}
           withIcon
           onClick={() => setPlaylistPanelContent('addItem')}
@@ -36,6 +37,7 @@ const ListController = () => {
         <hr className="border-zinc-600" />
 
         <ButtonPrimary
+          title="Move Selected Item Up"
           tabIndex={-1}
           className="p-1.5"
           onClick={moveSelectedItemUp}
@@ -44,6 +46,7 @@ const ListController = () => {
           <RiArrowUpLine className="h-4 w-4" />
         </ButtonPrimary>
         <ButtonPrimary
+          title="Move Selected Item Down"
           tabIndex={-1}
           className="p-1.5"
           onClick={moveSelectedItemDown}
@@ -55,6 +58,7 @@ const ListController = () => {
         <hr className="border-zinc-600" />
 
         <ButtonPrimary
+          title="Edit Selected Item Up"
           tabIndex={-1}
           className="p-1.5"
           disabled={!selectedItemId}
@@ -63,6 +67,7 @@ const ListController = () => {
           <RiPencilLine className="h-4 w-4" />
         </ButtonPrimary>
         <ButtonPrimary
+          title="Delete Selected Item Up"
           tabIndex={-1}
           className="p-1.5"
           disabled={!selectedItemId}

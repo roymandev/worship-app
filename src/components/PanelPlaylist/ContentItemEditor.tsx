@@ -79,7 +79,9 @@ const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
 
   return (
     <>
-      <BasePanelHeader sub>Edit Item</BasePanelHeader>
+      <BasePanelHeader sub>
+        <h3 className="px-1">Edit Item</h3>
+      </BasePanelHeader>
 
       <form className="flex flex-1 flex-col p-1" onSubmit={onSubmitHandler}>
         <div className="flex flex-1 flex-col gap-1 p-1">

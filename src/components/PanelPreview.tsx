@@ -35,7 +35,7 @@ const PanelPreview = forwardRef<ScreenRef>((props, ref) => {
         </BasePanelHeader>
 
         <BasePanelHeader sub>
-          <h2 className="px-1">{item?.title}</h2>
+          <h3 className="px-1">{item?.title}</h3>
         </BasePanelHeader>
 
         {item && (

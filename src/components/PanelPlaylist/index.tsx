@@ -1,7 +1,7 @@
 import BasePanel from '@/components/BasePanel';
+import BasePanelHeader from '@/components/BasePanelHeader';
 import ContentItemEditor from '@/components/PanelPlaylist/ContentItemEditor';
 import ContentList from '@/components/PanelPlaylist/ContentList';
-import Header from '@/components/PanelPlaylist/Header';
 import { atomPlaylistPanelContent } from '@/stores/playlistStore';
 import { useAtomValue } from 'jotai';
 
@@ -10,7 +10,9 @@ const PanelPlaylist = () => {
 
   return (
     <BasePanel>
-      <Header />
+      <BasePanelHeader>
+        <h2 className="px-1">Playlist</h2>
+      </BasePanelHeader>
 
       {content === 'list' && <ContentList />}
       {content === 'addItem' && <ContentItemEditor newItem />}

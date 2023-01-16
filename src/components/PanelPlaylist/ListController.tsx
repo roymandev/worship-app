@@ -1,4 +1,7 @@
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
+import ModalPlaylistExport from '@/components/Modals/ModalPlaylistExport';
+import ModalPlaylistImport from '@/components/Modals/ModalPlaylistImport';
+import useModal from '@/hooks/useModal';
 import usePlaylist from '@/hooks/usePlaylist';
 import { atomPlaylistPanelContent } from '@/stores/playlistStore';
 import { useSetAtom } from 'jotai';
@@ -7,7 +10,9 @@ import {
   RiArrowDownLine,
   RiArrowUpLine,
   RiDeleteBin2Line,
+  RiDownload2Line,
   RiPencilLine,
+  RiUpload2Line,
 } from 'react-icons/ri';
 
 const ListController = () => {
@@ -21,6 +26,17 @@ const ListController = () => {
     moveSelectedItemDown,
     deleteSelectedItem,
   } = usePlaylist();
+
+  const {
+    isOpen: isOpenImport,
+    openModal: openModalImport,
+    closeModal: closeModalImport,
+  } = useModal();
+  const {
+    isOpen: isOpenExport,
+    openModal: openModalExport,
+    closeModal: closeModalExport,
+  } = useModal();
 
   return (
     <>
@@ -75,7 +91,25 @@ const ListController = () => {
         >
           <RiDeleteBin2Line className="h-4 w-4" />
         </ButtonPrimary>
+
+        <ButtonPrimary
+          title="Import Playlist"
+          className="mt-auto p-1.5"
+          onClick={openModalImport}
+        >
+          <RiUpload2Line className="h-4 w-4" />
+        </ButtonPrimary>
+        <ButtonPrimary
+          title="Export Playlist"
+          className="p-1.5"
+          onClick={openModalExport}
+        >
+          <RiDownload2Line className="h-4 w-4" />
+        </ButtonPrimary>
       </div>
+
+      <ModalPlaylistImport opened={isOpenImport} onClose={closeModalImport} />
+      <ModalPlaylistExport opened={isOpenExport} onClose={closeModalExport} />
     </>
   );
 };

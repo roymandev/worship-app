@@ -83,24 +83,26 @@ const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
         <h3 className="px-1">Edit Item</h3>
       </BasePanelHeader>
 
-      <form className="flex flex-1 flex-col p-1" onSubmit={onSubmitHandler}>
-        <div className="flex flex-1 flex-col gap-1 p-1">
-          <BaseInput
-            placeholder="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+      <form
+        className="flex flex-1 flex-col gap-1 p-1"
+        onSubmit={onSubmitHandler}
+      >
+        <BaseInput
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-          <textarea
-            className="flex-1 resize-none rounded border border-zinc-600 bg-transparent p-1 outline-none placeholder:text-zinc-500 focus:border-sky-500"
-            spellCheck="false"
-            placeholder="Content"
-            value={stringContent}
-            onChange={(e) => setStringContent(e.target.value)}
-            onKeyUp={onTextAreaCursorMoveHandler}
-            onMouseUp={onTextAreaCursorMoveHandler}
-          />
-        </div>
+        <textarea
+          className="flex-1 resize-none rounded border border-zinc-600 bg-transparent p-1 outline-none placeholder:text-zinc-500 focus:border-sky-500"
+          spellCheck="false"
+          placeholder="Content"
+          value={stringContent}
+          onChange={(e) => setStringContent(e.target.value)}
+          onKeyUp={onTextAreaCursorMoveHandler}
+          onMouseUp={onTextAreaCursorMoveHandler}
+        />
+
         <div className="flex justify-end gap-1">
           <ButtonPrimary onClick={closeEditorHandler}>Cancel</ButtonPrimary>
           <ButtonPrimary type="submit">Save</ButtonPrimary>

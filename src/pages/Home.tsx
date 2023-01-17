@@ -1,6 +1,6 @@
 import Header from '@/components/Header';
+import PanelLeft from '@/components/PanelLeft';
 import PanelLive from '@/components/PanelLive';
-import PanelPlaylist from '@/components/PanelPlaylist';
 import PanelPreview from '@/components/PanelPreview';
 import { ScreenRef } from '@/components/Screen';
 import { useEffect, useRef } from 'react';
@@ -29,7 +29,7 @@ const Home = () => {
         gutterSize={1}
         onDrag={dragHandler}
       >
-        <PanelPlaylist />
+        <PanelLeft />
         <PanelPreview ref={panelPreviewScreenRef} />
         <PanelLive ref={panelLiveScreenRef} />
       </Split>

@@ -7,7 +7,7 @@ export interface BaseListProps<T> {
   items: T[];
   renderItem: (item: T, isSelected: boolean, index: number) => React.ReactNode;
   selectedItemIndex: number;
-  onSelectItem: (index: number) => void;
+  onSelectItem: (item: T, index: number) => void;
   className?: string;
   onKeyDownEnter?: KeydownHandler;
   onKeyDownArrowLeft?: KeydownHandler;
@@ -36,19 +36,22 @@ const BaseList = <T,>({
   const onKeyDownHandler = (event: React.KeyboardEvent<HTMLUListElement>) => {
     if (event.key === 'ArrowUp') {
       event.preventDefault();
-      if (items[selectedItemIndex - 1]) onSelectItem(selectedItemIndex - 1);
+      const item = items[selectedItemIndex - 1];
+      if (item) onSelectItem(item, selectedItemIndex - 1);
     }
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      if (items[selectedItemIndex + 1]) onSelectItem(selectedItemIndex + 1);
+      const item = items[selectedItemIndex + 1];
+      if (item) onSelectItem(item, selectedItemIndex + 1);
     }
     if (event.key === 'Home') {
       event.preventDefault();
-      if (items[0]) onSelectItem(0);
+      if (items[0]) onSelectItem(items[0], 0);
     }
     if (event.key === 'End') {
       event.preventDefault();
-      if (items[items.length - 1]) onSelectItem(items.length - 1);
+      const item = items[items.length - 1];
+      if (item) onSelectItem(item, items.length - 1);
     }
 
     if (event.key === 'Enter' && onKeyDownEnter) {

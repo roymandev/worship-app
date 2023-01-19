@@ -84,7 +84,7 @@ const PanelLive = forwardRef((props, ref) => {
             className="whitespace-pre-line leading-4"
             items={item.content}
             selectedItemIndex={selectedLineIndex}
-            onSelectItem={(index) => setSelectedLineIndex(index)}
+            onSelectItem={(item, index) => setSelectedLineIndex(index)}
             renderItem={(item, isSelected, index) => (
               <ItemContentLine
                 key={index}

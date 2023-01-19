@@ -44,7 +44,7 @@ const ContentList = () => {
           selectedItemIndex={items.findIndex(
             (item) => item.id === selectedItemId,
           )}
-          onSelectItem={(index) => setSelectedItemId(items[index]?.id || null)}
+          onSelectItem={(item) => setSelectedItemId(item.id)}
           onKeyDownEnter={() => setLiveItemHandler(selectedItem)}
           renderItem={(item, isSelected) => (
             <BaseListItem

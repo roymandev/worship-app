@@ -3,6 +3,7 @@ import { Tabs } from '@/components/PanelLeft';
 import { HeaderButton } from '@/components/PanelLeft/HeaderButton';
 import { atomPlaylistItems } from '@/stores/playlistStore';
 import { useAtomValue } from 'jotai';
+import { RiSearchLine } from 'react-icons/ri';
 
 type HeaderProps = {
   tab: Tabs;
@@ -21,6 +22,11 @@ const Header = ({ tab, setTab }: HeaderProps) => {
         <span className="rounded bg-zinc-900 py-0.5 px-2">
           {playlistItems.length}
         </span>
+      </HeaderButton>
+
+      <HeaderButton active={tab === 'search'} onClick={() => setTab('search')}>
+        Search
+        <RiSearchLine className="h-4 w-4" />
       </HeaderButton>
     </BasePanelHeader>
   );

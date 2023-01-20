@@ -1,13 +1,13 @@
-import { BaseItem } from '@/types';
+import { SongItem } from '@/types';
 import { atom } from 'jotai';
 
 // State
 export const atomSearchQuery = atom('');
-export const atomSongs = atom<BaseItem[]>([]);
-export const atomSongsSelectedSongId = atom<BaseItem['id'] | null>(null);
+export const atomSongs = atom<SongItem[]>([]);
+export const atomSongsSelectedSongId = atom<SongItem['id'] | null>(null);
 
 // Getter
-export const atomSongsSelectedSong = atom<BaseItem | null, BaseItem>(
+export const atomSongsSelectedSong = atom<SongItem | null, SongItem>(
   (get) =>
     get(atomSongs).find((item) => item.id === get(atomSongsSelectedSongId)) ||
     null,

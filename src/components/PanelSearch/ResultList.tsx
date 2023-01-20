@@ -7,7 +7,7 @@ import {
   atomSongsSelectedSong,
   atomSongsSelectedSongId,
 } from '@/stores/searchStore';
-import { BaseItem } from '@/types';
+import { SongItem } from '@/types';
 import { useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 
@@ -25,7 +25,7 @@ const ResultList = () => {
   }, [selectedSong]);
 
   return (
-    <BaseList<BaseItem>
+    <BaseList<SongItem>
       items={result}
       selectedItemIndex={result.findIndex((item) => item.id === selectedSongId)}
       onSelectItem={(item) => setSelectedSongId(item.id)}

@@ -1,4 +1,4 @@
-import { BaseItem } from '@/types';
+import { SongItem } from '@/types';
 import { createClient } from '@supabase/supabase-js';
 import { parseItemContent } from '@/lib/parseItemContent';
 
@@ -8,11 +8,11 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_KEY,
 );
 
-type Songs = (Pick<BaseItem, 'id' | 'title'> & {
+type Songs = (SongItem & {
   content: string;
 })[];
 
-export const searchSongs = async (query: string): Promise<BaseItem[]> => {
+export const searchSongs = async (query: string): Promise<SongItem[]> => {
   const { data: songs } = await supabase
     .from('songs')
     .select()

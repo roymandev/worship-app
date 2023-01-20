@@ -1,17 +1,20 @@
-export interface BaseItemContentLine {
+export type BaseItemContentLine = {
   text: string;
   type?: string;
-}
+};
 
-export interface BaseItem {
-  id: string;
+export type BaseItem = {
   title: string;
   content: BaseItemContentLine[];
-}
+};
 
-export interface PlaylistItem extends BaseItem {
+export type SongItem = BaseItem & {
+  id: string;
+};
+
+export type PlaylistItem = SongItem & {
   note?: string;
-}
+};
 
 export interface PlaylistFile {
   name: string;

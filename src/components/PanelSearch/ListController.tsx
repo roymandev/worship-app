@@ -1,16 +1,15 @@
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
-import { atomPlaylistItems } from '@/stores/playlistStore';
+import usePlaylist from '@/hooks/usePlaylist';
 import { atomSongsSelectedSong } from '@/stores/searchStore';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { RiPlayListAddFill } from 'react-icons/ri';
 
 const ListController = () => {
   const selectedSong = useAtomValue(atomSongsSelectedSong);
-  const setPlaylistItems = useSetAtom(atomPlaylistItems);
+  const { addItem } = usePlaylist();
 
   const addPlaylistItemHandler = () => {
-    if (selectedSong)
-      setPlaylistItems((prevItems) => [...prevItems, selectedSong]);
+    if (selectedSong) addItem(selectedSong);
   };
 
   return (

@@ -5,7 +5,7 @@ import {
   atomPlaylistName,
   atomPlaylistSelectedItemId,
 } from '@/stores/playlistStore';
-import { PlaylistFile } from '@/types';
+import { BaseItem, PlaylistFile } from '@/types';
 import { useAtom } from 'jotai';
 
 const usePlaylist = () => {
@@ -20,6 +20,12 @@ const usePlaylist = () => {
 
   const canShiftSelectedItemUp = () => items[getSelectedItemIndex() - 1];
   const canShiftSelectedItemDown = () => items[getSelectedItemIndex() + 1];
+
+  const addItem = (item: BaseItem) =>
+    setItems((prevItems) => [
+      ...prevItems,
+      { ...item, id: crypto.randomUUID() },
+    ]);
 
   const upload = (playlist: PlaylistFile) => {
     setName(playlist.name);
@@ -78,6 +84,7 @@ const usePlaylist = () => {
     setSelectedItemId,
     canShiftSelectedItemUp,
     canShiftSelectedItemDown,
+    addItem,
     upload,
     download,
     deleteSelectedItem,

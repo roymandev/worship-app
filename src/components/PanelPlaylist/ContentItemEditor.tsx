@@ -1,10 +1,10 @@
 import BaseInput from '@/components/BaseInput';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
+import usePlaylist from '@/hooks/usePlaylist';
 import usePreview from '@/hooks/usePreview';
 import { ParsedContentLine, parseItemContent } from '@/lib/parseItemContent';
 import {
-  atomPlaylistItems,
   atomPlaylistPanelContent,
   atomPlaylistSelectedItem,
 } from '@/stores/playlistStore';
@@ -17,10 +17,9 @@ export type ContentItemEditorProps = {
 
 const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
   const setPlaylistContent = useSetAtom(atomPlaylistPanelContent);
-  const setPlaylistItems = useSetAtom(atomPlaylistItems);
+  const { addItem: addPlaylistItem } = usePlaylist();
   const preview = usePreview();
 
-  const [id, setId] = useState(crypto.randomUUID());
   const [title, setTitle] = useState('');
   const [stringContent, setStringContent] = useState('');
   const [content, setContent] = useState<ParsedContentLine[]>([]);
@@ -30,7 +29,6 @@ const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
   // Set form initial value
   useEffect(() => {
     if (!newItem && selectedItem) {
-      setId(selectedItem.id);
       setTitle(selectedItem.title);
       setStringContent(
         selectedItem.content.map((line) => line.text).join('\n\n'),
@@ -68,10 +66,10 @@ const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
     event.preventDefault();
 
     if (!newItem && selectedItem) {
-      setSelectedItem({ id, title, content });
+      setSelectedItem({ ...selectedItem, title, content });
     } else {
       // if new item
-      setPlaylistItems((prevItems) => [...prevItems, { id, title, content }]);
+      addPlaylistItem({ title, content });
     }
 
     closeEditorHandler();

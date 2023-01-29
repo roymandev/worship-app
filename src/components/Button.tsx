@@ -9,6 +9,8 @@ type ButtonProps = ComponentPropsWithoutRef<'button'> & {
 const colors = {
   gray: 'bg-zinc-700 hover:bg-zinc-600',
   blue: 'bg-sky-700 hover:bg-sky-600',
+  yellow: 'bg-yellow-700 hover:bg-yellow-600',
+  red: 'bg-red-700 hover:bg-red-600',
 } as const;
 
 const Button = ({ className, icon, color = 'gray', ...rest }: ButtonProps) => (

@@ -1,6 +1,6 @@
 import BaseInput from '@/components/BaseInput';
 import BasePanelHeader from '@/components/BasePanelHeader';
-import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
+import Button from '@/components/Button';
 import usePlaylist from '@/hooks/usePlaylist';
 import usePreview from '@/hooks/usePreview';
 import { ParsedContentLine, parseItemContent } from '@/lib/parseItemContent';
@@ -102,8 +102,10 @@ const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
         />
 
         <div className="flex justify-end gap-1">
-          <ButtonPrimary onClick={closeEditorHandler}>Cancel</ButtonPrimary>
-          <ButtonPrimary type="submit">Save</ButtonPrimary>
+          <Button onClick={closeEditorHandler}>Cancel</Button>
+          <Button color="blue" type="submit">
+            Save
+          </Button>
         </div>
       </form>
     </>

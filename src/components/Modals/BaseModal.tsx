@@ -1,5 +1,5 @@
 import BasePanelHeader from '@/components/BasePanelHeader';
-import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
+import Button from '@/components/Button';
 import ReactDOM from 'react-dom';
 import { RiCloseFill } from 'react-icons/ri';
 
@@ -24,9 +24,9 @@ const BaseModal = ({ opened, title, children, onClose }: BaseModalProps) => {
             <BasePanelHeader>
               <h3 className="px-1">{title}</h3>
 
-              <ButtonPrimary withIcon className="ml-auto" onClick={onClose}>
+              <Button icon className="ml-auto" onClick={onClose}>
                 <RiCloseFill className="h-4 w-4" />
-              </ButtonPrimary>
+              </Button>
             </BasePanelHeader>
 
             {children}

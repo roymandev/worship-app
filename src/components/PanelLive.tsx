@@ -1,7 +1,6 @@
 import BaseList from '@/components/BaseList';
 import BasePanel from '@/components/BasePanel';
 import BasePanelHeader from '@/components/BasePanelHeader';
-import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
 import usePlaylist from '@/hooks/usePlaylist';
 import ItemContentLine from '@/components/ItemContentLine';
 import Screen, { ScreenRef } from '@/components/Screen';
@@ -12,6 +11,7 @@ import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 import { RiExternalLinkLine } from 'react-icons/ri';
 import useLive from '@/hooks/useLive';
+import Button from '@/components/Button';
 
 const PanelLive = forwardRef((props, ref) => {
   const { shiftSelectedItemUp, shiftSelectedItemDown } = usePlaylist();
@@ -36,8 +36,8 @@ const PanelLive = forwardRef((props, ref) => {
         <BasePanelHeader>
           <h2 className="px-1">Live</h2>
 
-          <ButtonPrimary
-            className="ml-auto h-full py-0"
+          <Button
+            className="ml-auto"
             onClick={() =>
               setScreenSettings((prevSettings) => ({
                 ...prevSettings,
@@ -46,10 +46,9 @@ const PanelLive = forwardRef((props, ref) => {
             }
           >
             Hide Screen
-          </ButtonPrimary>
+          </Button>
 
-          <ButtonPrimary
-            className="h-full py-0"
+          <Button
             onClick={() =>
               setScreenSettings((prevSettings) => ({
                 ...prevSettings,
@@ -58,10 +57,9 @@ const PanelLive = forwardRef((props, ref) => {
             }
           >
             Hide Text
-          </ButtonPrimary>
+          </Button>
 
-          <ButtonPrimary
-            withIcon="right"
+          <Button
             onClick={() =>
               window.open(
                 '/screen',
@@ -72,7 +70,7 @@ const PanelLive = forwardRef((props, ref) => {
           >
             Open Screen
             <RiExternalLinkLine className="h-4 w-4" />
-          </ButtonPrimary>
+          </Button>
         </BasePanelHeader>
 
         <BasePanelHeader sub>

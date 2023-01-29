@@ -1,4 +1,4 @@
-import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
+import Button from '@/components/Button';
 import usePlaylist from '@/hooks/usePlaylist';
 import { atomSongsSelectedSong } from '@/stores/searchStore';
 import { useAtomValue } from 'jotai';
@@ -14,15 +14,16 @@ const ListController = () => {
 
   return (
     <div className="flex flex-col gap-1 p-1">
-      <ButtonPrimary
+      <Button
+        color="blue"
+        icon
         title="Add Song to Playlist"
         tabIndex={-1}
-        withIcon
         disabled={!selectedSong}
         onClick={addPlaylistItemHandler}
       >
         <RiPlayListAddFill className="h-4 w-4" />
-      </ButtonPrimary>
+      </Button>
     </div>
   );
 };

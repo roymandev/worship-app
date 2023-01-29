@@ -1,4 +1,4 @@
-import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
+import Button from '@/components/Button';
 import BaseModal, { BaseModalProps } from '@/components/Modals/BaseModal';
 import { PLAYLIST_FILE_EXT } from '@/constant';
 import usePlaylist from '@/hooks/usePlaylist';
@@ -77,16 +77,17 @@ const ModalPlaylistImport = (
         {errorMsg && <div className="text-red-400">{errorMsg}</div>}
 
         <div className="flex">
-          <ButtonPrimary
+          <Button
+            color="blue"
             className="ml-auto"
             disabled={!!errorMsg || !playlist}
             onClick={importHandler}
           >
             Import Selected File
-          </ButtonPrimary>
-          <ButtonPrimary className="ml-1" onClick={onClose}>
+          </Button>
+          <Button className="ml-1" onClick={onClose}>
             Cancel
-          </ButtonPrimary>
+          </Button>
         </div>
       </div>
     </BaseModal>

@@ -1,4 +1,4 @@
-import ButtonPrimary from '@/components/Buttons/ButtonPrimary';
+import Button from '@/components/Button';
 import BaseModal, { BaseModalProps } from '@/components/Modals/BaseModal';
 import usePlaylist from '@/hooks/usePlaylist';
 
@@ -21,12 +21,12 @@ const ModalPlaylistExport = (
         </p>
 
         <div className="flex">
-          <ButtonPrimary className="ml-auto" onClick={downloadHandler}>
+          <Button color="blue" className="ml-auto" onClick={downloadHandler}>
             Download
-          </ButtonPrimary>
-          <ButtonPrimary className="ml-1" onClick={onClose}>
+          </Button>
+          <Button className="ml-1" onClick={onClose}>
             Cancel
-          </ButtonPrimary>
+          </Button>
         </div>
       </div>
     </BaseModal>

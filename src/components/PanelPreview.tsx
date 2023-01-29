@@ -17,7 +17,7 @@ const PanelPreview = forwardRef<ScreenRef>((props, ref) => {
 
   // Set live item
   const live = useLive();
-  const setLiveItemHandler = () => live.show(item);
+  const setLiveItemHandler = () => live.show(item, selectedLineIndex);
 
   useImperativeHandle(ref, () => ({
     resizeScreen: () => screenRef.current?.resizeScreen(),

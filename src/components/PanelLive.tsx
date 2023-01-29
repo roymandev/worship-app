@@ -5,19 +5,27 @@ import usePlaylist from '@/hooks/usePlaylist';
 import ItemContentLine from '@/components/ItemContentLine';
 import Screen, { ScreenRef } from '@/components/Screen';
 import { atomLiveItemContentSelectedLine } from '@/stores/liveStore';
-import { atomScreenSettings } from '@/stores/screenStore';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
-import { RiExternalLinkLine } from 'react-icons/ri';
+import {
+  RiCloseFill,
+  RiExternalLinkLine,
+  RiEyeLine,
+  RiEyeOffLine,
+  RiFormatClear,
+  RiText,
+} from 'react-icons/ri';
 import useLive from '@/hooks/useLive';
 import Button from '@/components/Button';
+import useScreen from '@/hooks/useScreen';
 
 const PanelLive = forwardRef((props, ref) => {
   const { shiftSelectedItemUp, shiftSelectedItemDown } = usePlaylist();
-  const [screenSettings, setScreenSettings] = useAtom(atomScreenSettings);
 
-  const { item, selectedLineIndex, setSelectedLineIndex } = useLive();
+  const { settings, changeSetting } = useScreen();
+
+  const { item, show, selectedLineIndex, setSelectedLineIndex } = useLive();
   const selectedLine = useAtomValue(atomLiveItemContentSelectedLine);
 
   const screenRef = useRef<ScreenRef | null>(null);
@@ -36,40 +44,8 @@ const PanelLive = forwardRef((props, ref) => {
         <BasePanelHeader>
           <h2 className="px-1">Live</h2>
 
-          <Button
-            className="ml-auto"
-            onClick={() =>
-              setScreenSettings((prevSettings) => ({
-                ...prevSettings,
-                hideScreen: !prevSettings.hideScreen,
-              }))
-            }
-          >
-            Hide Screen
-          </Button>
-
-          <Button
-            onClick={() =>
-              setScreenSettings((prevSettings) => ({
-                ...prevSettings,
-                hideText: !prevSettings.hideText,
-              }))
-            }
-          >
-            Hide Text
-          </Button>
-
-          <Button
-            onClick={() =>
-              window.open(
-                '/screen',
-                '_blank',
-                'location=yes,height=570,width=520,scrollbars=yes,status=yes',
-              )
-            }
-          >
-            Open Screen
-            <RiExternalLinkLine className="h-4 w-4" />
+          <Button icon className="ml-auto" onClick={() => show(null)}>
+            <RiCloseFill className="h-4 w-4" />
           </Button>
         </BasePanelHeader>
 
@@ -98,14 +74,52 @@ const PanelLive = forwardRef((props, ref) => {
       </BasePanel>
 
       <BasePanel>
-        <Screen
-          ref={screenRef}
-          line={selectedLine}
-          options={{
-            hideText: screenSettings.hideText,
-            hideScreen: screenSettings.hideScreen,
-          }}
-        />
+        <BasePanelHeader>
+          <h2 className="px-1">Live Screen Preview</h2>
+
+          <Button
+            color={settings.hideScreen ? 'red' : 'gray'}
+            icon
+            className="ml-auto"
+            onClick={() =>
+              changeSetting('hideScreen', (prevValue) => !prevValue)
+            }
+          >
+            {settings.hideScreen ? (
+              <RiEyeOffLine className="h-4 w-4" />
+            ) : (
+              <RiEyeLine className="h-4 w-4" />
+            )}
+          </Button>
+
+          <Button
+            color={settings.hideText ? 'yellow' : 'gray'}
+            icon
+            onClick={() => changeSetting('hideText', (prevValue) => !prevValue)}
+          >
+            {settings.hideText ? (
+              <RiFormatClear className="h-4 w-4" />
+            ) : (
+              <RiText className="h-4 w-4" />
+            )}
+          </Button>
+
+          <Button
+            color="blue"
+            icon
+            onClick={() =>
+              window.open(
+                '/screen',
+                '_blank',
+                'location=yes,height=570,width=520,scrollbars=yes,status=yes',
+              )
+            }
+            className="ml-2"
+          >
+            <RiExternalLinkLine className="h-4 w-4" />
+          </Button>
+        </BasePanelHeader>
+        <Screen ref={screenRef} line={selectedLine} options={settings} />
       </BasePanel>
     </Split>
   );

@@ -44,7 +44,12 @@ const PanelLive = forwardRef((props, ref) => {
         <BasePanelHeader>
           <h2 className="px-1">Live</h2>
 
-          <Button icon className="ml-auto" onClick={() => show(null)}>
+          <Button
+            title="Clear item"
+            icon
+            className="ml-auto"
+            onClick={() => show(null)}
+          >
             <RiCloseFill className="h-4 w-4" />
           </Button>
         </BasePanelHeader>
@@ -78,6 +83,7 @@ const PanelLive = forwardRef((props, ref) => {
           <h2 className="px-1">Live Screen Preview</h2>
 
           <Button
+            title="Toggle blank screen"
             color={settings.hideScreen ? 'red' : 'gray'}
             icon
             className="ml-auto"
@@ -93,6 +99,7 @@ const PanelLive = forwardRef((props, ref) => {
           </Button>
 
           <Button
+            title="Toggle screen text"
             color={settings.hideText ? 'yellow' : 'gray'}
             icon
             onClick={() => changeSetting('hideText', (prevValue) => !prevValue)}
@@ -105,6 +112,7 @@ const PanelLive = forwardRef((props, ref) => {
           </Button>
 
           <Button
+            title="Open new screen"
             color="blue"
             icon
             onClick={() =>

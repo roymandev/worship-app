@@ -24,7 +24,12 @@ const BaseModal = ({ opened, title, children, onClose }: BaseModalProps) => {
             <BasePanelHeader>
               <h3 className="px-1">{title}</h3>
 
-              <Button icon className="ml-auto" onClick={onClose}>
+              <Button
+                title="Close modal"
+                icon
+                className="ml-auto"
+                onClick={onClose}
+              >
                 <RiCloseFill className="h-4 w-4" />
               </Button>
             </BasePanelHeader>

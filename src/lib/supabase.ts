@@ -13,10 +13,7 @@ type Songs = (SongItem & {
 })[];
 
 export const searchSongs = async (query: string): Promise<SongItem[]> => {
-  const { data: songs } = await supabase
-    .from('songs')
-    .select()
-    .textSearch('title', query, { type: 'websearch' });
+  const { data: songs } = await supabase.rpc('search-songs', { query: query });
 
   return (songs as Songs).map((data) => ({
     ...data,

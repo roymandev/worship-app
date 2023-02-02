@@ -1,6 +1,6 @@
 import Button from '@/components/Button';
 import usePlaylist from '@/hooks/usePlaylist';
-import { atomSongsSelectedSong } from '@/stores/searchStore';
+import { atomSongsSelectedSong } from '@/stores/songsStore';
 import { useAtomValue } from 'jotai';
 import { RiPlayListAddFill } from 'react-icons/ri';
 

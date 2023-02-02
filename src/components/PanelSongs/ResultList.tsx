@@ -6,7 +6,7 @@ import {
   atomSongs,
   atomSongsSelectedSong,
   atomSongsSelectedSongId,
-} from '@/stores/searchStore';
+} from '@/stores/songsStore';
 import { SongItem } from '@/types';
 import { useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';

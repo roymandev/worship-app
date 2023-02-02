@@ -3,7 +3,7 @@ import { Tabs } from '@/components/PanelLeft';
 import { HeaderButton } from '@/components/PanelLeft/HeaderButton';
 import { atomPlaylistItems } from '@/stores/playlistStore';
 import { useAtomValue } from 'jotai';
-import { RiSearchLine } from 'react-icons/ri';
+import { RiMusic2Fill } from 'react-icons/ri';
 
 type HeaderProps = {
   tab: Tabs;
@@ -24,9 +24,9 @@ const Header = ({ tab, setTab }: HeaderProps) => {
         </span>
       </HeaderButton>
 
-      <HeaderButton active={tab === 'search'} onClick={() => setTab('search')}>
-        Search
-        <RiSearchLine className="h-4 w-4" />
+      <HeaderButton active={tab === 'songs'} onClick={() => setTab('songs')}>
+        Songs
+        <RiMusic2Fill className="h-4 w-4" />
       </HeaderButton>
     </BasePanelHeader>
   );

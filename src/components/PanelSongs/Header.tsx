@@ -5,7 +5,7 @@ import {
   atomSearchQuery,
   atomSongs,
   atomSongsSelectedSongId,
-} from '@/stores/searchStore';
+} from '@/stores/songsStore';
 import BaseInput from '@/components/BaseInput';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import { RiLoader4Fill } from 'react-icons/ri';

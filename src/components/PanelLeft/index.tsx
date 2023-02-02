@@ -2,9 +2,9 @@ import BasePanel from '@/components/BasePanel';
 import PanelPlaylist from '@/components/PanelPlaylist';
 import Header from '@/components/PanelLeft/Header';
 import { useState } from 'react';
-import PanelSearch from '@/components/PanelSearch';
+import PanelSongs from '@/components/PanelSongs';
 
-export type Tabs = 'playlist' | 'search';
+export type Tabs = 'playlist' | 'songs';
 
 const PanelLeft = () => {
   const [tab, setTab] = useState<Tabs>('playlist');
@@ -14,7 +14,7 @@ const PanelLeft = () => {
       <Header tab={tab} setTab={setTab} />
 
       {tab === 'playlist' && <PanelPlaylist />}
-      {tab === 'search' && <PanelSearch />}
+      {tab === 'songs' && <PanelSongs />}
     </BasePanel>
   );
 };

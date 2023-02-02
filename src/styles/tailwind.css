@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 .gutter {
-  @apply bg-zinc-600;
+  @apply bg-zinc-700;
 }
 .gutter:hover {
-  @apply bg-blue-500;
+  @apply bg-sky-500;
 }
 .gutter-horizontal:hover {
   @apply cursor-col-resize;

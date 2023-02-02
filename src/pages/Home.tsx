@@ -26,7 +26,7 @@ const Home = () => {
 
       <Split
         className="flex flex-1 overflow-hidden"
-        gutterSize={1}
+        gutterSize={2}
         onDrag={dragHandler}
       >
         <PanelLeft />

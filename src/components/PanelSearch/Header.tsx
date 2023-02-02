@@ -39,15 +39,18 @@ const Header = () => {
 
   return (
     <BasePanelHeader sub className="relative">
+      <label htmlFor="search_song" className="px-1">
+        Search:
+      </label>
       <BaseInput
+        id="search_song"
         className="h-7 flex-1 pr-8"
         value={query}
         onChange={onChangeHanlder}
-        placeholder="Search songs..."
+        placeholder="Title or Lyrics"
       />
-
       {isLoading && (
-        <RiLoader4Fill className="absolute right-3 h-4 w-4 animate-spin" />
+        <RiLoader4Fill className="absolute right-3 h-4 w-4 animate-spin text-sky-400" />
       )}
     </BasePanelHeader>
   );

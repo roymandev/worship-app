@@ -22,7 +22,7 @@ const BasePanelHeader = ({
       >
         {children}
       </div>
-      <hr className="border-zinc-600" />
+      <hr className="border-zinc-700" />
     </>
   );
 };

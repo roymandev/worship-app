@@ -20,7 +20,7 @@ const BaseModal = ({ opened, title, children, onClose }: BaseModalProps) => {
             if (e.target === e.currentTarget) onClose();
           }}
         >
-          <div className="mt-32 w-full max-w-md border border-zinc-600 bg-zinc-800 text-sm text-zinc-300 shadow">
+          <div className="mt-32 w-full max-w-md border border-zinc-700 bg-zinc-800 text-sm text-zinc-300 shadow">
             <BasePanelHeader>
               <h3 className="px-1">{title}</h3>
 

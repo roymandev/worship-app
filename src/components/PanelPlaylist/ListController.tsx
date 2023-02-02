@@ -51,7 +51,7 @@ const ListController = () => {
           <RiAddLine className="h-4 w-4" />
         </Button>
 
-        <hr className="border-zinc-600" />
+        <hr className="border-zinc-700" />
 
         <Button
           icon
@@ -72,7 +72,7 @@ const ListController = () => {
           <RiArrowDownLine className="h-4 w-4" />
         </Button>
 
-        <hr className="border-zinc-600" />
+        <hr className="border-zinc-700" />
 
         <Button
           icon

@@ -7,7 +7,7 @@ const PanelSongs = () => {
     <>
       <Header />
 
-      <div className="flex flex-1 divide-x divide-zinc-600 overflow-hidden">
+      <div className="flex flex-1 divide-x divide-zinc-700 overflow-hidden">
         <ResultList />
         <ListController />
       </div>

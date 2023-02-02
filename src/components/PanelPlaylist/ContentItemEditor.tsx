@@ -92,7 +92,7 @@ const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
         />
 
         <textarea
-          className="flex-1 resize-none rounded border border-zinc-600 bg-transparent p-1 outline-none placeholder:text-zinc-500 focus:border-sky-500"
+          className="flex-1 resize-none rounded border border-zinc-700 bg-transparent p-1 outline-none placeholder:text-zinc-500 focus:border-sky-500"
           spellCheck="false"
           placeholder="Content"
           value={stringContent}

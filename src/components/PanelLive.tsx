@@ -44,14 +44,16 @@ const PanelLive = forwardRef((props, ref) => {
         <BasePanelHeader>
           <h2 className="px-1">Live</h2>
 
-          <Button
-            title="Clear item"
-            icon
-            className="ml-auto"
-            onClick={() => show(null)}
-          >
-            <RiCloseFill className="h-4 w-4" />
-          </Button>
+          {item && (
+            <Button
+              title="Clear item"
+              icon
+              className="ml-auto"
+              onClick={() => show(null)}
+            >
+              <RiCloseFill className="h-4 w-4" />
+            </Button>
+          )}
         </BasePanelHeader>
 
         <BasePanelHeader sub>

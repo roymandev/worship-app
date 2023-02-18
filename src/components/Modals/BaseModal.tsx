@@ -3,21 +3,31 @@ import Button from '@/components/Button';
 import ReactDOM from 'react-dom';
 import { RiCloseFill } from 'react-icons/ri';
 
-export type BaseModalProps = {
+export type ModalProps = {
   opened: boolean;
-  title: string;
-  children: React.ReactNode;
   onClose: () => void;
 };
 
-const BaseModal = ({ opened, title, children, onClose }: BaseModalProps) => {
+type BaseModalProps = ModalProps & {
+  title: string;
+  children: React.ReactNode;
+  closeOnClickOutside?: boolean;
+};
+
+const BaseModal = ({
+  opened,
+  title,
+  children,
+  onClose,
+  closeOnClickOutside = true,
+}: BaseModalProps) => {
   return !opened
     ? null
     : ReactDOM.createPortal(
         <div
           className="fixed inset-0 z-50 flex flex-col items-center bg-zinc-900/80 "
           onClick={(e) => {
-            if (e.target === e.currentTarget) onClose();
+            if (e.target === e.currentTarget && closeOnClickOutside) onClose();
           }}
         >
           <div className="mt-32 w-full max-w-md border border-zinc-700 bg-zinc-800 text-sm text-zinc-300 shadow">

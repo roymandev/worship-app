@@ -1,16 +1,13 @@
 import Button from '@/components/Button';
-import BaseModal, { BaseModalProps } from '@/components/Modals/BaseModal';
+import BaseModal, { ModalProps } from '@/components/Modals/BaseModal';
 import usePlaylist from '@/hooks/usePlaylist';
 
-const ModalPlaylistExport = (
-  props: Omit<BaseModalProps, 'title' | 'children'>,
-) => {
-  const { onClose } = props;
+const ModalPlaylistExport = (props: ModalProps) => {
   const { name, download } = usePlaylist();
 
   const downloadHandler = () => {
     download();
-    onClose();
+    props.onClose();
   };
 
   return (
@@ -24,7 +21,7 @@ const ModalPlaylistExport = (
           <Button color="blue" className="ml-auto" onClick={downloadHandler}>
             Download
           </Button>
-          <Button className="ml-1" onClick={onClose}>
+          <Button className="ml-1" onClick={props.onClose}>
             Cancel
           </Button>
         </div>

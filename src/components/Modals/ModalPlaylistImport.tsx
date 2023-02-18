@@ -1,5 +1,5 @@
 import Button from '@/components/Button';
-import BaseModal, { BaseModalProps } from '@/components/Modals/BaseModal';
+import BaseModal, { ModalProps } from '@/components/Modals/BaseModal';
 import { PLAYLIST_FILE_EXT } from '@/constant';
 import usePlaylist from '@/hooks/usePlaylist';
 import { validatePlaylistItems } from '@/lib/validatePlaylistItems';
@@ -8,10 +8,7 @@ import { useState } from 'react';
 
 const ERROR_UNKNOWN_FILE = 'Unknown file, please upload .WORSHIP file';
 
-const ModalPlaylistImport = (
-  props: Omit<BaseModalProps, 'title' | 'children'>,
-) => {
-  const { onClose } = props;
+const ModalPlaylistImport = (props: ModalProps) => {
   const [errorMsg, setErrorMsg] = useState('');
   const [playlist, setPlaylist] = useState<PlaylistFile | null>(null);
   const { upload } = usePlaylist();
@@ -57,7 +54,7 @@ const ModalPlaylistImport = (
 
   const importHandler = () => {
     playlist && upload(playlist);
-    onClose();
+    props.onClose();
   };
 
   return (
@@ -85,7 +82,7 @@ const ModalPlaylistImport = (
           >
             Import Selected File
           </Button>
-          <Button className="ml-1" onClick={onClose}>
+          <Button className="ml-1" onClick={props.onClose}>
             Cancel
           </Button>
         </div>

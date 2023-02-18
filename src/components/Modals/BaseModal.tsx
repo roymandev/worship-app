@@ -1,5 +1,6 @@
 import BasePanelHeader from '@/components/BasePanelHeader';
 import Button from '@/components/Button';
+import { twclsx } from '@/lib/twclsx';
 import ReactDOM from 'react-dom';
 import { RiCloseFill } from 'react-icons/ri';
 
@@ -12,6 +13,7 @@ type BaseModalProps = ModalProps & {
   title: string;
   children: React.ReactNode;
   closeOnClickOutside?: boolean;
+  className?: string;
 };
 
 const BaseModal = ({
@@ -20,6 +22,7 @@ const BaseModal = ({
   children,
   onClose,
   closeOnClickOutside = true,
+  className,
 }: BaseModalProps) => {
   return !opened
     ? null
@@ -30,7 +33,12 @@ const BaseModal = ({
             if (e.target === e.currentTarget && closeOnClickOutside) onClose();
           }}
         >
-          <div className="mt-32 w-full max-w-md border border-zinc-700 bg-zinc-800 text-sm text-zinc-300 shadow">
+          <div
+            className={twclsx(
+              'mt-32 w-full max-w-md border border-zinc-700 bg-zinc-800 text-sm text-zinc-300 shadow',
+              className,
+            )}
+          >
             <BasePanelHeader>
               <h3 className="px-1">{title}</h3>
 

@@ -1,9 +1,11 @@
+import { SCREEN_BASE_SIZE } from '@/stores/screenStore';
+
 interface Container {
   width: number;
   height: number;
 }
 
-type ScreenSize = Record<string, number>;
+type ScreenSize = typeof SCREEN_BASE_SIZE;
 
 export const scaleScreen = (screenSize: ScreenSize, container: Container) => {
   const zoom = calculateZoom(screenSize, container);

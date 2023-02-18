@@ -1,6 +1,6 @@
 import { atomWithStorage } from 'jotai/utils';
 
-const BASE_SIZE: Record<string, number> = {
+export const SCREEN_BASE_SIZE = {
   width: 480,
   height: 480,
   padding: 12,
@@ -9,11 +9,8 @@ const BASE_SIZE: Record<string, number> = {
 };
 
 export const atomScreenSettings = atomWithStorage('screenSettings', {
-  baseSize: { ...BASE_SIZE },
+  mainSize: { ...SCREEN_BASE_SIZE },
   hideText: false,
   hideScreen: false,
-});
-
-export const atomScreenMainSize = atomWithStorage('screenMainSize', {
-  ...BASE_SIZE,
+  textColor: '#ffffff',
 });

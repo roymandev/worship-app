@@ -1,31 +1,33 @@
 import Screen from '@/components/Screen';
 import { scaleScreen } from '@/lib/scaleScreen';
 import { atomLiveItemContentSelectedLine } from '@/stores/liveStore';
-import { atomScreenMainSize, atomScreenSettings } from '@/stores/screenStore';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { atomScreenSettings, SCREEN_BASE_SIZE } from '@/stores/screenStore';
+import { useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 
 const LiveScreen = () => {
   const selectedLine = useAtomValue(atomLiveItemContentSelectedLine);
-  const screenSettings = useAtomValue(atomScreenSettings);
-  const setScreenMainSize = useSetAtom(atomScreenMainSize);
+  const [screenSettings, setScreenSettings] = useAtom(atomScreenSettings);
 
-  // Resize main screen size based on screen size
   const resizeHandler = () => {
-    const containerSize = {
+    const containerSizes = {
       width: window.innerWidth,
       height: window.innerHeight,
     };
 
-    setScreenMainSize({
-      ...scaleScreen(screenSettings.baseSize, containerSize).scaledSize,
-      ...containerSize,
-    });
+    setScreenSettings((prevSettings) => ({
+      ...prevSettings,
+      mainSize: {
+        ...scaleScreen(SCREEN_BASE_SIZE, containerSizes).scaledSize,
+        ...containerSizes,
+      },
+    }));
   };
 
   // Resize screen on mounted and on window resize
   useEffect(() => {
     resizeHandler();
+
     window.addEventListener('resize', resizeHandler);
     return () => window.removeEventListener('resize', resizeHandler);
   }, []);

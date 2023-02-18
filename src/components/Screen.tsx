@@ -1,5 +1,5 @@
 import { scaleScreen } from '@/lib/scaleScreen';
-import { atomScreenMainSize } from '@/stores/screenStore';
+import { atomScreenSettings } from '@/stores/screenStore';
 import { BaseItemContentLine } from '@/types';
 import { useAtomValue } from 'jotai';
 import {
@@ -16,53 +16,59 @@ export interface ScreenProps {
     hideText?: boolean;
     hideScreen?: boolean;
   };
+  mainScreen?: boolean;
 }
 
 export interface ScreenRef {
   resizeScreen: () => void;
 }
 
-const Screen = forwardRef<ScreenRef, ScreenProps>(({ line, options }, ref) => {
-  const screenMainSize = useAtomValue(atomScreenMainSize);
-  const [screenStyle, setScreenStyle] = useState<Record<string, string>>({});
-  const containerRef = useRef<HTMLDivElement>(null);
+const Screen = forwardRef<ScreenRef, ScreenProps>(
+  ({ line, options, mainScreen = false }, ref) => {
+    const screenSettings = useAtomValue(atomScreenSettings);
+    const [screenStyle, setScreenStyle] = useState<Record<string, string>>({});
+    const containerRef = useRef<HTMLDivElement>(null);
 
-  // Resize screen based on container size
-  const resizeScreen = () => {
-    if (!containerRef.current) return;
+    // Scale screen based on container size
+    const resizeScreen = () => {
+      if (!containerRef.current) return;
 
-    setScreenStyle(
-      scaleScreen(screenMainSize, {
+      const containerSizes = {
         width: containerRef.current.clientWidth,
         height: containerRef.current.clientHeight,
-      }).scaledStyle,
+      };
+
+      setScreenStyle(
+        scaleScreen(screenSettings.mainSize, containerSizes).scaledStyle,
+      );
+    };
+
+    // Resize screen if main screen resized
+    useEffect(() => {
+      if (!mainScreen) resizeScreen();
+    }, [screenSettings.mainSize]);
+
+    useImperativeHandle(ref, () => ({
+      resizeScreen,
+    }));
+
+    return (
+      <div
+        ref={containerRef}
+        className="grid flex-1 place-items-center overflow-hidden bg-black font-bold uppercase text-white"
+      >
+        {!options?.hideScreen && (
+          <p
+            className="grid place-items-center whitespace-pre-line bg-zinc-900 text-center"
+            style={{ ...screenStyle, color: screenSettings.textColor }}
+          >
+            {!line?.type && !options?.hideText && line?.text}
+          </p>
+        )}
+      </div>
     );
-  };
-
-  useEffect(() => {
-    if (containerRef.current) resizeScreen();
-  }, [containerRef.current, screenMainSize]);
-
-  useImperativeHandle(ref, () => ({
-    resizeScreen,
-  }));
-
-  return (
-    <div
-      ref={containerRef}
-      className="grid flex-1 place-items-center overflow-hidden bg-black font-bold uppercase text-white"
-    >
-      {!options?.hideScreen && (
-        <p
-          className="grid place-items-center whitespace-pre-line bg-zinc-900 text-center"
-          style={screenStyle}
-        >
-          {!line?.type && !options?.hideText && line?.text}
-        </p>
-      )}
-    </div>
-  );
-});
+  },
+);
 
 Screen.displayName = 'Screen';
 

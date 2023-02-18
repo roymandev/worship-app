@@ -34,12 +34,7 @@ const ModalSettings = (props: ModalProps) => {
     }));
 
   return (
-    <BaseModal
-      title="Settings"
-      closeOnClickOutside={false}
-      className="max-w-2xl"
-      {...props}
-    >
+    <BaseModal title="Settings" className="max-w-2xl" {...props}>
       <div className="grid grid-cols-2 gap-1 p-1">
         <form className="space-y-2 pl-1" onSubmit={onSubmit}>
           <fieldset className="flex items-center">

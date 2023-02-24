@@ -30,7 +30,10 @@ const NavItem = ({ title, icon, ...rest }: NavItemProps) => (
 );
 
 const MainNavbar = () => (
-  <Navbar width={{ base: 51 }}>
+  <Navbar
+    width={{ base: 51 }}
+    sx={(theme) => ({ borderColor: theme.colors.dark[4] })}
+  >
     <Navbar.Section p={8}>
       <Image
         src="/Worship%20App.svg"

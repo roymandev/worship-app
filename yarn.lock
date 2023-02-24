@@ -727,6 +727,19 @@
     "@supabase/storage-js" "^2.1.0"
     cross-fetch "^3.1.5"
 
+"@tabler/icons-react@^2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@tabler/icons-react/-/icons-react-2.5.0.tgz#db847043e632d94e501129ef5c6b1c0dcafbfa86"
+  integrity sha512-RP5gOEis5QPArMkAuOomMEvT4+nDWF2CBNv2SCGVYFC8mXEz5tYzjPoaBQDpyWO7vB6IeJvvk7feOaLBvD2zRA==
+  dependencies:
+    "@tabler/icons" "2.5.0"
+    prop-types "^15.7.2"
+
+"@tabler/icons@2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@tabler/icons/-/icons-2.5.0.tgz#d212de4953c8fad778571c5da2a4d4bb5b23abe0"
+  integrity sha512-gQceaW6itR2Wna2Kqcrxz3gm2cNxwg/DCgT17W1N9la4Iri1r9g681uO2LryDskGXfs71Trhd3CtrED/T6dzUQ==
+
 "@types/json-schema@^7.0.9":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.11.tgz#d421b6c527a3037f7c84433fd2c4229e016863d3"
@@ -2601,7 +2614,7 @@ prettier@^2.8.3:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.8.3.tgz#ab697b1d3dd46fb4626fbe2f543afe0cc98d8632"
   integrity sha512-tJ/oJ4amDihPoufT5sM0Z1SKEuKay8LfVAMlbbhnnkvt6BUserZylqo2PN+p9KeljLr0OHa2rXHU1T8reeoTrw==
 
-prop-types@^15.5.7, prop-types@^15.8.1:
+prop-types@^15.5.7, prop-types@^15.7.2, prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==

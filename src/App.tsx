@@ -14,6 +14,9 @@ function App() {
       theme={{
         fontFamily: 'Outfit, sans-serif',
         colorScheme: 'dark',
+        headings: {
+          fontFamily: 'Outfit, sans-serif',
+        },
       }}
     >
       <Suspense fallback={<LoadingFullscreen />}>

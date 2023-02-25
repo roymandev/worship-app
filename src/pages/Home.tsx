@@ -2,6 +2,7 @@ import { ScreenRef } from '@/components/Screen';
 import { useEffect, useRef } from 'react';
 import { Flex, AppShell } from '@mantine/core';
 import MainNavbar from '@/components/layout/MainNavbar';
+import MainPanels from '@/components/layout/MainPanels';
 
 const Home = () => {
   const panelPreviewScreenRef = useRef<ScreenRef | null>(null);
@@ -20,7 +21,7 @@ const Home = () => {
   return (
     <Flex>
       <AppShell padding={0} navbar={<MainNavbar />}>
-        content
+        <MainPanels />
       </AppShell>
     </Flex>
   );

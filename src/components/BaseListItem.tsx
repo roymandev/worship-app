@@ -1,25 +1,45 @@
-import { twclsx } from '@/lib/twclsx';
+import { packSx, UnstyledButton, UnstyledButtonProps } from '@mantine/core';
+import { useEventListener, useMergedRef } from '@mantine/hooks';
 
-export interface BaseListLineProps
-  extends React.ComponentPropsWithoutRef<'li'> {
+type BaseListLineProps = UnstyledButtonProps & {
   isSelected: boolean;
-}
+  onClick?: (event: MouseEvent) => void;
+  onDoubleClick?: (event: MouseEvent) => void;
+};
 
 const BaseListItem = ({
   isSelected,
-  className,
+  sx,
+  onClick,
+  onDoubleClick,
   ...rest
-}: BaseListLineProps) => (
-  <li
-    className={twclsx(
-      'border-y border-transparent first:border-t-0 last:border-b-0',
-      className,
-      isSelected
-        ? 'bg-blue-400/10 group-focus:bg-blue-400/40'
-        : ' hover:bg-zinc-700',
-    )}
-    {...rest}
-  />
-);
+}: BaseListLineProps) => {
+  const onClickRef = useEventListener('click', (e) => onClick?.(e));
+  const onDoubleClickRef = useEventListener('click', (e) => onDoubleClick?.(e));
+  const mergedRef = useMergedRef(onClickRef, onDoubleClickRef);
+
+  return (
+    <UnstyledButton
+      ref={mergedRef}
+      sx={[
+        {
+          padding: '4px 8px',
+        },
+        isSelected
+          ? (theme) => ({
+              color: 'white',
+              backgroundColor: theme.colors.blue[8],
+            })
+          : (theme) => ({
+              '&:hover': {
+                backgroundColor: theme.colors.dark[6],
+              },
+            }),
+        ...packSx(sx),
+      ]}
+      {...rest}
+    />
+  );
+};
 
 export default BaseListItem;

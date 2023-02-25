@@ -1,7 +1,15 @@
 import { twclsx } from '@/lib/twclsx';
 import { useEffect, useRef } from 'react';
+import { Stack } from '@mantine/core';
+import {
+  getHotkeyHandler,
+  useEventListener,
+  useMergedRef,
+} from '@mantine/hooks';
 
-type KeydownHandler = () => void;
+type KeydownHandler = (
+  event: React.KeyboardEvent<HTMLElement> | KeyboardEvent,
+) => void;
 
 export interface BaseListProps<T> {
   items: T[];
@@ -24,7 +32,34 @@ const BaseList = <T,>({
   onKeyDownArrowLeft,
   onKeyDownArrowRight,
 }: BaseListProps<T>) => {
-  const containerRef = useRef<HTMLUListElement | null>(null);
+  const selectItemAbove = () => {
+    const indexTarget = selectedItemIndex - 1;
+    if (items[indexTarget]) onSelectItem(items[indexTarget], indexTarget);
+  };
+  const selectItemBelow = () => {
+    const indexTarget = selectedItemIndex + 1;
+    if (items[indexTarget]) onSelectItem(items[indexTarget], indexTarget);
+  };
+  const selectFirstItem = () => items[0] && onSelectItem(items[0], 0);
+  const selectLastItem = () => {
+    const indexTarget = items.length - 1;
+    if (items[indexTarget]) onSelectItem(items[indexTarget], indexTarget);
+  };
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const keyDownRef = useEventListener(
+    'keydown',
+    getHotkeyHandler([
+      ['ArrowUp', selectItemAbove, { preventDefault: true }],
+      ['ArrowDown', selectItemBelow, { preventDefault: true }],
+      ['Home', selectFirstItem, { preventDefault: true }],
+      ['End', selectLastItem, { preventDefault: true }],
+      ['Enter', (e) => onKeyDownEnter?.(e), { preventDefault: true }],
+      ['ArrowLeft', (e) => onKeyDownArrowLeft?.(e), { preventDefault: true }],
+      ['ArrowRight', (e) => onKeyDownArrowRight?.(e), { preventDefault: true }],
+    ]),
+  );
+  const mergedRef = useMergedRef(containerRef, keyDownRef);
 
   useEffect(() => {
     if (containerRef.current)
@@ -33,55 +68,19 @@ const BaseList = <T,>({
       });
   }, [selectedItemIndex]);
 
-  const onKeyDownHandler = (event: React.KeyboardEvent<HTMLUListElement>) => {
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      const item = items[selectedItemIndex - 1];
-      if (item) onSelectItem(item, selectedItemIndex - 1);
-    }
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      const item = items[selectedItemIndex + 1];
-      if (item) onSelectItem(item, selectedItemIndex + 1);
-    }
-    if (event.key === 'Home') {
-      event.preventDefault();
-      if (items[0]) onSelectItem(items[0], 0);
-    }
-    if (event.key === 'End') {
-      event.preventDefault();
-      const item = items[items.length - 1];
-      if (item) onSelectItem(item, items.length - 1);
-    }
-
-    if (event.key === 'Enter' && onKeyDownEnter) {
-      event.preventDefault();
-      onKeyDownEnter();
-    }
-    if (event.key === 'ArrowLeft' && onKeyDownArrowLeft) {
-      event.preventDefault();
-      onKeyDownArrowLeft();
-    }
-    if (event.key === 'ArrowRight' && onKeyDownArrowRight) {
-      event.preventDefault();
-      onKeyDownArrowRight();
-    }
-  };
-
   return (
-    <ul
-      ref={containerRef}
+    <Stack
+      ref={mergedRef}
       className={twclsx(
         'group flex flex-1 cursor-default select-none flex-col overflow-y-auto outline-none',
         className,
       )}
       tabIndex={0}
-      onKeyDown={onKeyDownHandler}
     >
       {items.map((item, index) =>
         renderItem(item, selectedItemIndex === index, index),
       )}
-    </ul>
+    </Stack>
   );
 };
 

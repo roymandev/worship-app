@@ -1,7 +1,6 @@
 import BaseList from '@/components/BaseList';
 import BaseListItem from '@/components/BaseListItem';
 import BasePanelHeader from '@/components/BasePanelHeader';
-import ListController from '@/components/PanelPlaylist/ListController';
 import useLive from '@/hooks/useLive';
 import usePlaylist from '@/hooks/usePlaylist';
 import usePreview from '@/hooks/usePreview';
@@ -11,6 +10,7 @@ import { useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 import BasePanelHeaderInput from '@/components/BasePanelHeaderInput';
 import { IconPencil } from '@tabler/icons-react';
+import { Text } from '@mantine/core';
 
 const ContentList = () => {
   const preview = usePreview();
@@ -39,29 +39,27 @@ const ContentList = () => {
         />
       </BasePanelHeader>
 
-      <div className="flex flex-1 divide-x divide-zinc-700 overflow-hidden">
-        <BaseList
-          items={items}
-          selectedItemIndex={items.findIndex(
-            (item) => item.id === selectedItemId,
-          )}
-          onSelectItem={(item) => setSelectedItemId(item.id)}
-          onKeyDownEnter={() => setLiveItemHandler(selectedItem)}
-          renderItem={(item, isSelected) => (
-            <BaseListItem
-              key={item.id}
-              className="select-none py-1 px-2"
-              isSelected={isSelected}
-              onClick={() => setSelectedItemId(item.id)}
-              onDoubleClick={() => setLiveItemHandler(item)}
-            >
-              <h3 className="font-medium">{item.title || '(Untitled)'}</h3>
-            </BaseListItem>
-          )}
-        />
-
-        <ListController />
-      </div>
+      <BaseList
+        items={items}
+        selectedItemIndex={items.findIndex(
+          (item) => item.id === selectedItemId,
+        )}
+        onSelectItem={(item) => setSelectedItemId(item.id)}
+        onKeyDownEnter={() => setLiveItemHandler(selectedItem)}
+        renderItem={(item, isSelected) => (
+          <BaseListItem
+            key={item.id}
+            className="select-none py-1 px-2"
+            isSelected={isSelected}
+            onClick={() => setSelectedItemId(item.id)}
+            onDoubleClick={() => setLiveItemHandler(item)}
+          >
+            <Text fz={14} fw={500}>
+              {item.title || '(Untitled)'}
+            </Text>
+          </BaseListItem>
+        )}
+      />
     </>
   );
 };

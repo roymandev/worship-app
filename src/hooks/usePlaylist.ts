@@ -6,7 +6,10 @@ import {
   atomPlaylistSelectedItemId,
 } from '@/stores/playlistStore';
 import { BaseItem, PlaylistFile } from '@/types';
+import { showNotification } from '@mantine/notifications';
+import { IconCheck } from '@tabler/icons-react';
 import { useAtom } from 'jotai';
+import React from 'react';
 
 const usePlaylist = () => {
   const [name, setName] = useAtom(atomPlaylistName);
@@ -21,11 +24,19 @@ const usePlaylist = () => {
   const canShiftSelectedItemUp = () => items[getSelectedItemIndex() - 1];
   const canShiftSelectedItemDown = () => items[getSelectedItemIndex() + 1];
 
-  const addItem = (item: BaseItem) =>
+  const addItem = (item: BaseItem) => {
     setItems((prevItems) => [
       ...prevItems,
       { ...item, id: crypto.randomUUID() },
     ]);
+    showNotification({
+      color: 'green',
+      icon: React.createElement(IconCheck, { size: 20 }),
+      title: 'Success add to playlist',
+      message: item.title,
+      autoClose: 2000,
+    });
+  };
 
   const upload = (playlist: PlaylistFile) => {
     setName(playlist.name);

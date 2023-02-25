@@ -6,11 +6,12 @@ import {
   atomSongs,
   atomSongsSelectedSongId,
 } from '@/stores/songsStore';
-import BaseInput from '@/components/BaseInput';
 import BasePanelHeader from '@/components/BasePanelHeader';
-import { RiLoader4Fill } from 'react-icons/ri';
+import BasePanelHeaderInput from '../BasePanelHeaderInput';
+import { IconSearch } from '@tabler/icons-react';
+import { Loader } from '@mantine/core';
 
-const Header = () => {
+const SearchInput = () => {
   const setResult = useSetAtom(atomSongs);
   const setSelectedSongId = useSetAtom(atomSongsSelectedSongId);
   const [isLoading, setIsLoading] = useState(false);
@@ -38,22 +39,17 @@ const Header = () => {
   };
 
   return (
-    <BasePanelHeader sub className="relative">
-      <label htmlFor="search_song" className="px-1">
-        Search:
-      </label>
-      <BaseInput
-        id="search_song"
-        className="h-7 flex-1 pr-8"
+    <BasePanelHeader sub px={0}>
+      <BasePanelHeaderInput
+        placeholder="Search title or lyrics"
         value={query}
         onChange={onChangeHanlder}
-        placeholder="Title or Lyrics"
+        rightSection={
+          isLoading ? <Loader size={18} /> : <IconSearch size={18} />
+        }
       />
-      {isLoading && (
-        <RiLoader4Fill className="absolute right-3 h-4 w-4 animate-spin text-sky-400" />
-      )}
     </BasePanelHeader>
   );
 };
 
-export default Header;
+export default SearchInput;

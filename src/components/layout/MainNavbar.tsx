@@ -2,8 +2,8 @@ import { Button, Divider, Image, Navbar, Stack, Tooltip } from '@mantine/core';
 import {
   IconDownload,
   IconInfoCircle,
+  IconListCheck,
   IconMusic,
-  IconPlayerPlayFilled,
   IconSettings,
   IconUpload,
 } from '@tabler/icons-react';
@@ -47,7 +47,7 @@ const MainNavbar = () => (
 
     <Navbar.Section grow>
       <Stack align="center" p={8} spacing={8}>
-        <NavItem title="Playlist" icon={<IconPlayerPlayFilled size={18} />} />
+        <NavItem title="Playlist" icon={<IconListCheck size={18} />} />
 
         <NavItem title="Song database" icon={<IconMusic size={18} />} />
       </Stack>

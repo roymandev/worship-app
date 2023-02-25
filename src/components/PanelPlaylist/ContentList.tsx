@@ -1,4 +1,3 @@
-import BaseInput from '@/components/BaseInput';
 import BaseList from '@/components/BaseList';
 import BaseListItem from '@/components/BaseListItem';
 import BasePanelHeader from '@/components/BasePanelHeader';
@@ -10,6 +9,8 @@ import { atomPlaylistSelectedItem } from '@/stores/playlistStore';
 import { BaseItem } from '@/types';
 import { useAtomValue } from 'jotai';
 import { useEffect } from 'react';
+import BasePanelHeaderInput from '@/components/BasePanelHeaderInput';
+import { IconPencil } from '@tabler/icons-react';
 
 const ContentList = () => {
   const preview = usePreview();
@@ -29,12 +30,12 @@ const ContentList = () => {
 
   return (
     <>
-      <BasePanelHeader sub>
-        <BaseInput
-          className="h-7 flex-1"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+      <BasePanelHeader sub px={0}>
+        <BasePanelHeaderInput
           placeholder="Playlist name"
+          value={name}
+          onChange={(event) => setName(event.currentTarget.value)}
+          rightSection={<IconPencil size={18} />}
         />
       </BasePanelHeader>
 

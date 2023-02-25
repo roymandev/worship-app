@@ -1,17 +1,24 @@
 import BasePanel from '@/components/BasePanel';
 import PanelPlaylist from '@/components/PanelPlaylist';
-import Header from '@/components/PanelLeft/Header';
 import { useState } from 'react';
 import PanelSongs from '@/components/PanelSongs';
+import { Title } from '@mantine/core';
+import BasePanelHeader from '../BasePanelHeader';
+import { IconListCheck } from '@tabler/icons-react';
 
 export type Tabs = 'playlist' | 'songs';
 
 const PanelLeft = () => {
-  const [tab, setTab] = useState<Tabs>('playlist');
+  const [tab] = useState<Tabs>('playlist');
 
   return (
     <BasePanel>
-      <Header tab={tab} setTab={setTab} />
+      <BasePanelHeader>
+        <IconListCheck size={18} />
+        <Title size="h6" weight="normal">
+          Playlist
+        </Title>
+      </BasePanelHeader>
 
       {tab === 'playlist' && <PanelPlaylist />}
       {tab === 'songs' && <PanelSongs />}

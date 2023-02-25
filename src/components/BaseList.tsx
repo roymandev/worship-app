@@ -1,4 +1,3 @@
-import { twclsx } from '@/lib/twclsx';
 import { useEffect, useRef } from 'react';
 import { Stack } from '@mantine/core';
 import {
@@ -16,7 +15,6 @@ export interface BaseListProps<T> {
   renderItem: (item: T, isSelected: boolean, index: number) => React.ReactNode;
   selectedItemIndex: number;
   onSelectItem: (item: T, index: number) => void;
-  className?: string;
   onKeyDownEnter?: KeydownHandler;
   onKeyDownArrowLeft?: KeydownHandler;
   onKeyDownArrowRight?: KeydownHandler;
@@ -27,7 +25,6 @@ const BaseList = <T,>({
   renderItem,
   selectedItemIndex,
   onSelectItem,
-  className,
   onKeyDownEnter,
   onKeyDownArrowLeft,
   onKeyDownArrowRight,
@@ -69,14 +66,7 @@ const BaseList = <T,>({
   }, [selectedItemIndex]);
 
   return (
-    <Stack
-      ref={mergedRef}
-      className={twclsx(
-        'group flex flex-1 cursor-default select-none flex-col overflow-y-auto outline-none',
-        className,
-      )}
-      tabIndex={0}
-    >
+    <Stack ref={mergedRef} spacing={0} tabIndex={0} sx={{ overflowY: 'auto' }}>
       {items.map((item, index) =>
         renderItem(item, selectedItemIndex === index, index),
       )}

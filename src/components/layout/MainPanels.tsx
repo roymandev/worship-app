@@ -5,7 +5,7 @@ import PanelLeft from '../PanelLeft';
 const useStyles = createStyles((theme) => ({
   split: {
     display: 'flex',
-    height: '100%',
+    height: '100vh',
     '& .gutter': { backgroundColor: theme.colors.dark[4] },
     '& .gutter:hover': { backgroundColor: theme.colors.dark[3] },
     '& .gutter-horizontal:hover': {

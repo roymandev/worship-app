@@ -11,6 +11,7 @@ const BasePanelHeader = ({ sub, sx, ...rest }: BasePanelHeaderProps) => {
         px="xs"
         spacing="xs"
         sx={[
+          { flexShrink: 0 },
           (theme) => ({
             backgroundColor: sub ? theme.colors.dark[8] : 'inherit',
           }),

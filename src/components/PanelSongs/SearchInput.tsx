@@ -1,6 +1,6 @@
 import { searchSongs } from '@/lib/supabase';
 import { useRef, useState } from 'react';
-import { useAtom, useSetAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import {
   atomSearchQuery,
   atomSongs,
@@ -16,14 +16,16 @@ const SearchInput = () => {
   const setSelectedSongId = useSetAtom(atomSongsSelectedSongId);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [query, setQuery] = useAtom(atomSearchQuery);
+  const [searchValue, setSearchValue] = useState('');
+  const setQuery = useSetAtom(atomSearchQuery);
   const timeoutIdRef = useRef<NodeJS.Timeout>();
 
   const cancelSearch = () => clearTimeout(timeoutIdRef.current);
 
   const onChangeHanlder: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const inputValue = e.target.value;
-    setQuery(inputValue);
+    setSearchValue(inputValue);
+    setQuery('');
     cancelSearch();
 
     timeoutIdRef.current = setTimeout(async () => {
@@ -31,6 +33,7 @@ const SearchInput = () => {
 
       const songs = await searchSongs(inputValue);
 
+      setQuery(inputValue);
       setResult(songs);
       setSelectedSongId(songs[0]?.id || null);
 
@@ -42,7 +45,7 @@ const SearchInput = () => {
     <BasePanelHeader sub px={0}>
       <BasePanelHeaderInput
         placeholder="Search title or lyrics"
-        value={query}
+        value={searchValue}
         onChange={onChangeHanlder}
         rightSection={
           isLoading ? <Loader size={18} /> : <IconSearch size={18} />

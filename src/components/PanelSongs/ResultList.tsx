@@ -3,15 +3,19 @@ import BaseListItem from '@/components/BaseListItem';
 import useLive from '@/hooks/useLive';
 import usePreview from '@/hooks/usePreview';
 import {
+  atomSearchQuery,
   atomSongs,
   atomSongsSelectedSong,
   atomSongsSelectedSongId,
 } from '@/stores/songsStore';
 import { SongItem } from '@/types';
+import { Group, Text, ThemeIcon } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 
 const ResultList = () => {
+  const searchQuery = useAtomValue(atomSearchQuery);
   const preview = usePreview();
   const live = useLive();
 
@@ -23,6 +27,16 @@ const ResultList = () => {
   useEffect(() => {
     preview.show(selectedSong);
   }, [selectedSong]);
+
+  if (searchQuery && !result.length)
+    return (
+      <Group p="xs" noWrap spacing="sm">
+        <ThemeIcon variant="light" color="yellow" size="lg">
+          <IconInfoCircle size={18} />
+        </ThemeIcon>
+        <Text fz={14}>Songs not found.</Text>
+      </Group>
+    );
 
   return (
     <BaseList<SongItem>
@@ -38,7 +52,9 @@ const ResultList = () => {
           onClick={() => setSelectedSongId(item.id)}
           onDoubleClick={() => live.show(item)}
         >
-          <h3 className="font-medium">{item.title || '(Untitled)'}</h3>
+          <Text fz={14} fw={500}>
+            {item.title || '(Untitled)'}
+          </Text>
         </BaseListItem>
       )}
     />

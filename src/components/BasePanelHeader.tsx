@@ -1,28 +1,25 @@
-import { twclsx } from '@/lib/twclsx';
+import { Divider, Group, GroupProps, packSx } from '@mantine/core';
 
-interface BasePanelHeaderProps {
-  children: React.ReactNode;
-  className?: string;
+type BasePanelHeaderProps = GroupProps & {
   sub?: boolean;
-}
+};
 
-const BasePanelHeader = ({
-  children,
-  className,
-  sub = false,
-}: BasePanelHeaderProps) => {
+const BasePanelHeader = ({ sub, sx, ...rest }: BasePanelHeaderProps) => {
   return (
     <>
-      <div
-        className={twclsx(
-          'flex items-center flex-shrink-0 p-1 gap-1 h-9',
-          sub && 'bg-zinc-900',
-          className,
-        )}
-      >
-        {children}
-      </div>
-      <hr className="border-zinc-700" />
+      <Group
+        px="xs"
+        spacing="xs"
+        sx={[
+          (theme) => ({
+            backgroundColor: sub ? theme.colors.dark[8] : 'inherit',
+          }),
+          ...packSx(sx),
+        ]}
+        h={36}
+        {...rest}
+      />
+      <Divider />
     </>
   );
 };

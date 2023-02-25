@@ -1,14 +1,14 @@
-import { twclsx } from '@/lib/twclsx';
+import { Stack } from '@mantine/core';
 
 export interface BasePanelProps {
   children: React.ReactNode;
   className?: string;
 }
 
-const BasePanel = ({ children, className }: BasePanelProps) => (
-  <div className={twclsx('flex flex-1 flex-col overflow-hidden', className)}>
+const BasePanel = ({ children }: BasePanelProps) => (
+  <Stack sx={{ flex: '1 1 0%' }} spacing={0}>
     {children}
-  </div>
+  </Stack>
 );
 
 export default BasePanel;

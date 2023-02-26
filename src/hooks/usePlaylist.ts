@@ -41,6 +41,14 @@ const usePlaylist = () => {
   const upload = (playlist: PlaylistFile) => {
     setName(playlist.name);
     setItems(playlist.items || []);
+
+    showNotification({
+      color: 'green',
+      icon: React.createElement(IconCheck, { size: 20 }),
+      title: 'Success import playlist',
+      message: playlist.name,
+      autoClose: 2000,
+    });
   };
 
   const download = () =>

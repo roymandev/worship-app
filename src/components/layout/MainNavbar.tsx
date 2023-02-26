@@ -1,5 +1,6 @@
 import { atomLeftPanelContent } from '@/stores/layoutStore';
 import { Button, Divider, Image, Navbar, Stack, Tooltip } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import {
   IconDownload,
   IconInfoCircle,
@@ -9,6 +10,7 @@ import {
   IconUpload,
 } from '@tabler/icons-react';
 import { useAtom } from 'jotai';
+import ModalPlaylistImport from '../Modals/ModalPlaylistImport';
 
 type NavItemProps = {
   title: string;
@@ -35,6 +37,7 @@ const NavItem = ({ title, icon, isActive, ...rest }: NavItemProps) => (
 
 const MainNavbar = () => {
   const [leftPanelContent, setLeftPanelContent] = useAtom(atomLeftPanelContent);
+  const [isOpenImportModal, importModal] = useDisclosure(false);
 
   return (
     <Navbar
@@ -74,7 +77,11 @@ const MainNavbar = () => {
 
       <Navbar.Section>
         <Stack align="center" p={8} spacing={8}>
-          <NavItem title="Import playlist" icon={<IconUpload size={18} />} />
+          <NavItem
+            title="Import playlist"
+            icon={<IconUpload size={18} />}
+            onClick={importModal.open}
+          />
           <NavItem title="Export playlist" icon={<IconDownload size={18} />} />
         </Stack>
       </Navbar.Section>
@@ -87,6 +94,9 @@ const MainNavbar = () => {
           <NavItem title="About" icon={<IconInfoCircle size={18} />} />
         </Stack>
       </Navbar.Section>
+
+      {/* Modals */}
+      <ModalPlaylistImport isOpen={isOpenImportModal} handler={importModal} />
     </Navbar>
   );
 };

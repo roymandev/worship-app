@@ -1,22 +1,44 @@
-import Button from '@/components/Button';
-import BaseModal, { ModalProps } from '@/components/Modals/BaseModal';
 import { PLAYLIST_FILE_EXT } from '@/constant';
 import usePlaylist from '@/hooks/usePlaylist';
 import { validatePlaylistItems } from '@/lib/validatePlaylistItems';
+import {
+  atomLeftPanelContent,
+  atomPlaylistPanelContent,
+} from '@/stores/layoutStore';
 import { PlaylistFile } from '@/types';
+import {
+  Button,
+  Code,
+  FileInput,
+  Group,
+  Modal,
+  Stack,
+  Text,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
+import { IconCheck } from '@tabler/icons-react';
+import { useSetAtom } from 'jotai';
 import { useState } from 'react';
 
 const ERROR_UNKNOWN_FILE = 'Unknown file, please upload .WORSHIP file';
 
-const ModalPlaylistImport = (props: ModalProps) => {
+export type ModalPlaylistImportProps = {
+  isOpen: boolean;
+  handler: ReturnType<typeof useDisclosure>[1];
+};
+
+const ModalPlaylistImport = ({ isOpen, handler }: ModalPlaylistImportProps) => {
+  const setLeftPanelContent = useSetAtom(atomLeftPanelContent);
+  const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
+
   const [errorMsg, setErrorMsg] = useState('');
   const [playlist, setPlaylist] = useState<PlaylistFile | null>(null);
   const { upload } = usePlaylist();
 
-  const fileChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const fileChangeHandler = (file: File | null) => {
     setErrorMsg('');
     setPlaylist(null);
-    const file = event.currentTarget.files?.[0];
 
     if (!file) return;
 
@@ -52,42 +74,65 @@ const ModalPlaylistImport = (props: ModalProps) => {
     fileReader.readAsText(file);
   };
 
+  const closeHandler = () => {
+    setPlaylist(null);
+    handler.close();
+  };
+
   const importHandler = () => {
-    playlist && upload(playlist);
-    props.onClose();
+    if (playlist) {
+      upload(playlist);
+
+      showNotification({
+        color: 'green',
+        icon: <IconCheck size={20} />,
+        title: 'Success import playlist',
+        message: playlist?.name,
+        autoClose: 2000,
+      });
+
+      setLeftPanelContent('playlist');
+      setPlaylistPanelContent('list');
+
+      closeHandler();
+    }
   };
 
   return (
-    <BaseModal title="Import Playlist" {...props}>
-      <div className="space-y-3 p-3">
-        <p>
-          Upload <b>.WORSHIP</b> file to import
-        </p>
-
-        <input
-          type="file"
-          className="w-full file:h-7 file:cursor-pointer file:rounded file:border-none file:bg-zinc-700 file:px-4 file:font-sans file:text-inherit file:shadow file:outline-none hover:file:bg-zinc-600"
+    <Modal
+      title="Import Playlist"
+      withCloseButton={false}
+      opened={isOpen}
+      onClose={closeHandler}
+    >
+      <Stack>
+        <FileInput
+          placeholder="Select .WORSHIP file"
+          label={
+            <Text mb="xs">
+              Upload <Code fw="bold">.WORSHIP</Code> file to import playlist.
+            </Text>
+          }
           accept=".WORSHIP"
           onChange={fileChangeHandler}
+          error={errorMsg}
         />
 
-        {errorMsg && <div className="text-red-400">{errorMsg}</div>}
-
-        <div className="flex">
+        <Group spacing="xs" position="right">
           <Button
             color="blue"
-            className="ml-auto"
             disabled={!!errorMsg || !playlist}
             onClick={importHandler}
           >
-            Import Selected File
+            Import selected playlist
           </Button>
-          <Button className="ml-1" onClick={props.onClose}>
+
+          <Button color="gray" onClick={closeHandler}>
             Cancel
           </Button>
-        </div>
-      </div>
-    </BaseModal>
+        </Group>
+      </Stack>
+    </Modal>
   );
 };
 

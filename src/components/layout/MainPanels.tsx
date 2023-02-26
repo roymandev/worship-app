@@ -2,6 +2,7 @@ import { createStyles } from '@mantine/core';
 import { useEffect, useRef } from 'react';
 import Split from 'react-split';
 import PanelLeft from '../PanelLeft';
+import PanelLive from '../PanelLive';
 import PanelPreview from '../PanelPreview';
 import { ScreenRef } from '../Screen';
 
@@ -40,7 +41,7 @@ const MainPanels = () => {
     <Split className={classes.split} gutterSize={2} onDrag={dragHandler}>
       <PanelLeft />
       <PanelPreview ref={panelLiveScreenRef} />
-      <div>right</div>
+      <PanelLive ref={panelLiveScreenRef} />
     </Split>
   );
 };

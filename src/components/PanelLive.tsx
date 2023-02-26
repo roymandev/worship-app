@@ -8,17 +8,17 @@ import { atomLiveItemContentSelectedLine } from '@/stores/liveStore';
 import { useAtomValue } from 'jotai';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
-import {
-  RiCloseFill,
-  RiExternalLinkLine,
-  RiEyeLine,
-  RiEyeOffLine,
-  RiFormatClear,
-  RiText,
-} from 'react-icons/ri';
 import useLive from '@/hooks/useLive';
-import Button from '@/components/Button';
 import useScreen from '@/hooks/useScreen';
+import { ActionIcon, Button, Text, Title, Tooltip } from '@mantine/core';
+import {
+  IconExternalLink,
+  IconPresentation,
+  IconPresentationOff,
+  IconTypography,
+  IconTypographyOff,
+  IconX,
+} from '@tabler/icons-react';
 
 const PanelLive = forwardRef((props, ref) => {
   const { shiftSelectedItemUp, shiftSelectedItemDown } = usePlaylist();
@@ -42,27 +42,32 @@ const PanelLive = forwardRef((props, ref) => {
     >
       <BasePanel>
         <BasePanelHeader>
-          <h2 className="px-1">Live</h2>
+          <Title size="h6" weight="normal">
+            Live
+          </Title>
 
           {item && (
-            <Button
-              title="Clear item"
-              icon
-              className="ml-auto"
-              onClick={() => show(null)}
-            >
-              <RiCloseFill className="h-4 w-4" />
-            </Button>
+            <Tooltip label="Clear item">
+              <ActionIcon
+                color="gray"
+                size="md"
+                variant="filled"
+                ml="auto"
+                mr="-6px"
+                onClick={() => show(null)}
+              >
+                <IconX size={18} />
+              </ActionIcon>
+            </Tooltip>
           )}
         </BasePanelHeader>
 
         <BasePanelHeader sub>
-          <h3 className="px-1">{item?.title}</h3>
+          <Text fz={14}>{item?.title}</Text>
         </BasePanelHeader>
 
         {item && (
           <BaseList
-            className="whitespace-pre-line leading-4"
             items={item.content}
             selectedItemIndex={selectedLineIndex}
             onSelectItem={(item, index) => setSelectedLineIndex(index)}
@@ -81,42 +86,53 @@ const PanelLive = forwardRef((props, ref) => {
       </BasePanel>
 
       <BasePanel>
-        <BasePanelHeader>
-          <h2 className="px-1">Live Screen Preview</h2>
+        <BasePanelHeader spacing={4}>
+          <Title size="h6" weight="normal">
+            Live Preview
+          </Title>
+
+          <Tooltip label="Toggle blank screen">
+            <ActionIcon
+              color={settings.hideScreen ? 'red' : 'gray'}
+              size="md"
+              variant="filled"
+              ml="auto"
+              onClick={() =>
+                changeSetting('hideScreen', (prevValue) => !prevValue)
+              }
+            >
+              {settings.hideScreen ? (
+                <IconPresentationOff size={18} />
+              ) : (
+                <IconPresentation size={18} />
+              )}
+            </ActionIcon>
+          </Tooltip>
+
+          <Tooltip label="Toggle text">
+            <ActionIcon
+              color={settings.hideText ? 'yellow' : 'gray'}
+              size="md"
+              variant="filled"
+              onClick={() =>
+                changeSetting('hideText', (prevValue) => !prevValue)
+              }
+            >
+              {settings.hideText ? (
+                <IconTypographyOff size={18} />
+              ) : (
+                <IconTypography size={18} />
+              )}
+            </ActionIcon>
+          </Tooltip>
 
           <Button
-            title="Toggle blank screen"
-            color={settings.hideScreen ? 'red' : 'gray'}
-            icon
-            className="ml-auto"
-            onClick={() =>
-              changeSetting('hideScreen', (prevValue) => !prevValue)
-            }
-          >
-            {settings.hideScreen ? (
-              <RiEyeOffLine className="h-4 w-4" />
-            ) : (
-              <RiEyeLine className="h-4 w-4" />
-            )}
-          </Button>
-
-          <Button
-            title="Toggle screen text"
-            color={settings.hideText ? 'yellow' : 'gray'}
-            icon
-            onClick={() => changeSetting('hideText', (prevValue) => !prevValue)}
-          >
-            {settings.hideText ? (
-              <RiFormatClear className="h-4 w-4" />
-            ) : (
-              <RiText className="h-4 w-4" />
-            )}
-          </Button>
-
-          <Button
-            title="Open new screen"
             color="blue"
-            icon
+            size="xs"
+            variant="filled"
+            ml={8}
+            mr="-6px"
+            rightIcon={<IconExternalLink size={18} />}
             onClick={() =>
               window.open(
                 '/screen',
@@ -124,11 +140,11 @@ const PanelLive = forwardRef((props, ref) => {
                 'location=yes,height=570,width=520,scrollbars=yes,status=yes',
               )
             }
-            className="ml-2"
           >
-            <RiExternalLinkLine className="h-4 w-4" />
+            Screen
           </Button>
         </BasePanelHeader>
+
         <Screen ref={screenRef} line={selectedLine} options={settings} />
       </BasePanel>
     </Split>

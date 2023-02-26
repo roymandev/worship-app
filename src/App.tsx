@@ -1,4 +1,4 @@
-import LoadingFullscreen from '@/components/Fallback/LoadingFullscreen';
+import LoadingFullscreen from '@/components/LoadingFullscreen';
 import { MantineProvider } from '@mantine/core';
 import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';

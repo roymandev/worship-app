@@ -51,7 +51,6 @@ const ContentList = () => {
           renderItem={(item, isSelected) => (
             <BaseListItem
               key={item.id}
-              className="select-none py-1 px-2"
               isSelected={isSelected}
               onClick={() => setSelectedItemId(item.id)}
               onDoubleClick={() => setLiveItemHandler(item)}

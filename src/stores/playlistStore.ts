@@ -3,10 +3,6 @@ import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 
 // State
-export const atomPlaylistPanelContent = atom<'list' | 'addItem' | 'editItem'>(
-  'list',
-);
-
 export const atomPlaylistName = atomWithStorage('playlistName', 'Untitled');
 
 export const atomPlaylistItems = atomWithStorage<PlaylistItem[]>(

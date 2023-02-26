@@ -1,13 +1,18 @@
-import BaseInput from '@/components/BaseInput';
 import BasePanelHeader from '@/components/BasePanelHeader';
-import Button from '@/components/Button';
 import usePlaylist from '@/hooks/usePlaylist';
 import usePreview from '@/hooks/usePreview';
 import { ParsedContentLine, parseItemContent } from '@/lib/parseItemContent';
+import { atomPlaylistPanelContent } from '@/stores/layoutStore';
+import { atomPlaylistSelectedItem } from '@/stores/playlistStore';
 import {
-  atomPlaylistPanelContent,
-  atomPlaylistSelectedItem,
-} from '@/stores/playlistStore';
+  Box,
+  Button,
+  Group,
+  Stack,
+  Textarea,
+  TextInput,
+  Title,
+} from '@mantine/core';
 import { useAtom, useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 
@@ -78,36 +83,46 @@ const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
   return (
     <>
       <BasePanelHeader sub>
-        <h3 className="px-1">Edit Item</h3>
+        <Title size="h6" weight="normal">
+          {newItem ? 'Add new item' : 'Edit item'}
+        </Title>
       </BasePanelHeader>
 
-      <form
-        className="flex flex-1 flex-col gap-1 p-1"
-        onSubmit={onSubmitHandler}
-      >
-        <BaseInput
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+      <Box component="form" onSubmit={onSubmitHandler} sx={{ flexGrow: 1 }}>
+        <Stack p="sm" spacing="xs" h="100%">
+          <TextInput
+            label="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <Textarea
+            label="Content"
+            value={stringContent}
+            onChange={(e) => setStringContent(e.target.value)}
+            onKeyUp={onTextAreaCursorMoveHandler}
+            onMouseUp={onTextAreaCursorMoveHandler}
+            styles={{
+              root: {
+                flexGrow: 1,
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+              },
+              wrapper: { flexGrow: 1 },
+              input: { height: '100%' },
+            }}
+          />
 
-        <textarea
-          className="flex-1 resize-none rounded border border-zinc-700 bg-transparent p-1 outline-none placeholder:text-zinc-500 focus:border-sky-500"
-          spellCheck="false"
-          placeholder="Content"
-          value={stringContent}
-          onChange={(e) => setStringContent(e.target.value)}
-          onKeyUp={onTextAreaCursorMoveHandler}
-          onMouseUp={onTextAreaCursorMoveHandler}
-        />
-
-        <div className="flex justify-end gap-1">
-          <Button onClick={closeEditorHandler}>Cancel</Button>
-          <Button color="blue" type="submit">
-            Save
-          </Button>
-        </div>
-      </form>
+          <Group spacing="xs">
+            <Button color="gray" onClick={closeEditorHandler}>
+              Cancel
+            </Button>
+            <Button color="blue" type="submit">
+              Save
+            </Button>
+          </Group>
+        </Stack>
+      </Box>
     </>
   );
 };

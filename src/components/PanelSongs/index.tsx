@@ -21,13 +21,17 @@ const PanelSongs = () => {
 
         <Tooltip label="Add to playlist">
           <ActionIcon
-            color="blue"
             size="md"
             variant="filled"
             ml="auto"
             mr="-6px"
             disabled={!selectedSong}
             onClick={() => selectedSong && addItem(selectedSong)}
+            sx={{
+              '&[disabled]': {
+                pointerEvents: 'all',
+              },
+            }}
           >
             <IconPlaylistAdd size={18} />
           </ActionIcon>

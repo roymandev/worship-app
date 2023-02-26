@@ -114,10 +114,10 @@ const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
           />
 
           <Group spacing="xs">
-            <Button color="gray" onClick={closeEditorHandler}>
+            <Button size="xs" color="gray" onClick={closeEditorHandler}>
               Cancel
             </Button>
-            <Button color="blue" type="submit">
+            <Button size="xs" color="blue" type="submit">
               Save
             </Button>
           </Group>

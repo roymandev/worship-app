@@ -1,7 +1,7 @@
 import { packSx, UnstyledButton, UnstyledButtonProps } from '@mantine/core';
 import { useEventListener, useMergedRef } from '@mantine/hooks';
 
-type BaseListLineProps = UnstyledButtonProps & {
+export type BaseListLineProps = UnstyledButtonProps & {
   isSelected: boolean;
   onClick?: (event: MouseEvent) => void;
   onDoubleClick?: (event: MouseEvent) => void;

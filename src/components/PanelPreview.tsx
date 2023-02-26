@@ -6,6 +6,7 @@ import Screen, { ScreenRef } from '@/components/Screen';
 import useLive from '@/hooks/useLive';
 import usePreview from '@/hooks/usePreview';
 import { atomPreviewItemContentSelectedLine } from '@/stores/previewStore';
+import { Text, Title } from '@mantine/core';
 import { useAtomValue } from 'jotai';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
@@ -31,16 +32,17 @@ const PanelPreview = forwardRef<ScreenRef>((props, ref) => {
     >
       <BasePanel>
         <BasePanelHeader>
-          <h2 className="px-1">Preview</h2>
+          <Title size="h6" weight="normal">
+            Preview
+          </Title>
         </BasePanelHeader>
 
         <BasePanelHeader sub>
-          <h3 className="px-1">{item?.title}</h3>
+          <Text fz={14}>{item?.title}</Text>
         </BasePanelHeader>
 
         {item && (
           <BaseList
-            className="whitespace-pre-line leading-4"
             items={item.content}
             selectedItemIndex={selectedLineIndex}
             onSelectItem={(item, index) => setSelectedLineIndex(index)}

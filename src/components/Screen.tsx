@@ -1,6 +1,7 @@
 import { scaleScreen } from '@/lib/scaleScreen';
 import { atomScreenSettings } from '@/stores/screenStore';
 import { BaseItemContentLine } from '@/types';
+import { Stack, Text } from '@mantine/core';
 import { useAtomValue } from 'jotai';
 import {
   forwardRef,
@@ -53,19 +54,35 @@ const Screen = forwardRef<ScreenRef, ScreenProps>(
     }));
 
     return (
-      <div
+      <Stack
         ref={containerRef}
-        className="grid flex-1 place-items-center overflow-hidden bg-black font-bold uppercase text-white"
+        sx={{
+          flexGrow: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          backgroundColor: 'black',
+          fontWeight: 'bold',
+          textTransform: 'uppercase',
+          color: 'white',
+        }}
       >
         {!options?.hideScreen && (
-          <p
-            className="grid place-items-center whitespace-pre-line bg-zinc-900 text-center"
-            style={{ ...screenStyle, color: screenSettings.textColor }}
+          <Text
+            sx={(theme) => ({
+              ...screenStyle,
+              color: screenSettings.textColor,
+              display: 'grid',
+              placeItems: 'center',
+              whiteSpace: 'pre-line',
+              textAlign: 'center',
+              backgroundColor: theme.colors.dark[8],
+            })}
           >
             {!line?.type && !options?.hideText && line?.text}
-          </p>
+          </Text>
         )}
-      </div>
+      </Stack>
     );
   },
 );

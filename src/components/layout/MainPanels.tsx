@@ -1,6 +1,9 @@
 import { createStyles } from '@mantine/core';
+import { useEffect, useRef } from 'react';
 import Split from 'react-split';
 import PanelLeft from '../PanelLeft';
+import PanelPreview from '../PanelPreview';
+import { ScreenRef } from '../Screen';
 
 const useStyles = createStyles((theme) => ({
   split: {
@@ -20,10 +23,23 @@ const useStyles = createStyles((theme) => ({
 const MainPanels = () => {
   const { classes } = useStyles();
 
+  const panelPreviewScreenRef = useRef<ScreenRef | null>(null);
+  const panelLiveScreenRef = useRef<ScreenRef | null>(null);
+
+  const dragHandler = () => {
+    panelPreviewScreenRef.current?.resizeScreen();
+    panelLiveScreenRef.current?.resizeScreen();
+  };
+
+  useEffect(() => {
+    window.addEventListener('resize', dragHandler);
+    return () => window.removeEventListener('resize', dragHandler);
+  }, []);
+
   return (
-    <Split className={classes.split} gutterSize={2}>
+    <Split className={classes.split} gutterSize={2} onDrag={dragHandler}>
       <PanelLeft />
-      <div>center</div>
+      <PanelPreview ref={panelLiveScreenRef} />
       <div>right</div>
     </Split>
   );

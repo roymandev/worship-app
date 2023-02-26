@@ -10,7 +10,15 @@ import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 import useLive from '@/hooks/useLive';
 import useScreen from '@/hooks/useScreen';
-import { ActionIcon, Button, Text, Title, Tooltip } from '@mantine/core';
+import {
+  ActionIcon,
+  Button,
+  Divider,
+  Group,
+  Text,
+  Title,
+  Tooltip,
+} from '@mantine/core';
 import {
   IconExternalLink,
   IconPresentation,
@@ -46,20 +54,76 @@ const PanelLive = forwardRef((props, ref) => {
             Live
           </Title>
 
-          {item && (
-            <Tooltip label="Clear item">
+          <Group ml="auto" spacing={4}>
+            {item && (
+              <>
+                <Tooltip label="Clear item">
+                  <ActionIcon
+                    color="gray"
+                    size="md"
+                    variant="filled"
+                    onClick={() => show(null)}
+                  >
+                    <IconX size={18} />
+                  </ActionIcon>
+                </Tooltip>
+                <Divider orientation="vertical"></Divider>
+              </>
+            )}
+
+            <Tooltip label="Toggle blank screen">
               <ActionIcon
-                color="gray"
+                color={settings.hideScreen ? 'red' : 'gray'}
                 size="md"
                 variant="filled"
-                ml="auto"
-                mr="-6px"
-                onClick={() => show(null)}
+                onClick={() =>
+                  changeSetting('hideScreen', (prevValue) => !prevValue)
+                }
               >
-                <IconX size={18} />
+                {settings.hideScreen ? (
+                  <IconPresentationOff size={18} />
+                ) : (
+                  <IconPresentation size={18} />
+                )}
               </ActionIcon>
             </Tooltip>
-          )}
+
+            <Tooltip label="Toggle text">
+              <ActionIcon
+                color={settings.hideText ? 'yellow' : 'gray'}
+                size="md"
+                variant="filled"
+                onClick={() =>
+                  changeSetting('hideText', (prevValue) => !prevValue)
+                }
+              >
+                {settings.hideText ? (
+                  <IconTypographyOff size={18} />
+                ) : (
+                  <IconTypography size={18} />
+                )}
+              </ActionIcon>
+            </Tooltip>
+
+            <Divider orientation="vertical"></Divider>
+
+            <Button
+              color="blue"
+              size="xs"
+              variant="filled"
+              mr="-6px"
+              rightIcon={<IconExternalLink size={18} />}
+              onClick={() =>
+                window.open(
+                  '/screen',
+                  '_blank',
+                  'location=yes,height=570,width=520,scrollbars=yes,status=yes',
+                )
+              }
+            >
+              Screen
+            </Button>
+          </Group>
         </BasePanelHeader>
 
         <BasePanelHeader sub>
@@ -86,65 +150,6 @@ const PanelLive = forwardRef((props, ref) => {
       </BasePanel>
 
       <BasePanel>
-        <BasePanelHeader spacing={4}>
-          <Title size="h6" weight="normal">
-            Live Preview
-          </Title>
-
-          <Tooltip label="Toggle blank screen">
-            <ActionIcon
-              color={settings.hideScreen ? 'red' : 'gray'}
-              size="md"
-              variant="filled"
-              ml="auto"
-              onClick={() =>
-                changeSetting('hideScreen', (prevValue) => !prevValue)
-              }
-            >
-              {settings.hideScreen ? (
-                <IconPresentationOff size={18} />
-              ) : (
-                <IconPresentation size={18} />
-              )}
-            </ActionIcon>
-          </Tooltip>
-
-          <Tooltip label="Toggle text">
-            <ActionIcon
-              color={settings.hideText ? 'yellow' : 'gray'}
-              size="md"
-              variant="filled"
-              onClick={() =>
-                changeSetting('hideText', (prevValue) => !prevValue)
-              }
-            >
-              {settings.hideText ? (
-                <IconTypographyOff size={18} />
-              ) : (
-                <IconTypography size={18} />
-              )}
-            </ActionIcon>
-          </Tooltip>
-
-          <Button
-            color="blue"
-            size="xs"
-            variant="filled"
-            ml={8}
-            mr="-6px"
-            rightIcon={<IconExternalLink size={18} />}
-            onClick={() =>
-              window.open(
-                '/screen',
-                '_blank',
-                'location=yes,height=570,width=520,scrollbars=yes,status=yes',
-              )
-            }
-          >
-            Screen
-          </Button>
-        </BasePanelHeader>
-
         <Screen ref={screenRef} line={selectedLine} options={settings} />
       </BasePanel>
     </Split>

@@ -16,8 +16,6 @@ import {
   Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { showNotification } from '@mantine/notifications';
-import { IconCheck } from '@tabler/icons-react';
 import { useSetAtom } from 'jotai';
 import { useState } from 'react';
 
@@ -82,14 +80,6 @@ const ModalPlaylistImport = ({ isOpen, handler }: ModalPlaylistImportProps) => {
   const importHandler = () => {
     if (playlist) {
       upload(playlist);
-
-      showNotification({
-        color: 'green',
-        icon: <IconCheck size={20} />,
-        title: 'Success import playlist',
-        message: playlist?.name,
-        autoClose: 2000,
-      });
 
       setLeftPanelContent('playlist');
       setPlaylistPanelContent('list');

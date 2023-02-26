@@ -1,30 +1,27 @@
-import { RiGithubFill } from 'react-icons/ri';
-import BaseModal, { ModalProps } from './BaseModal';
+import { Anchor, Modal, Stack, Text, Title } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 
-const ModalAbout = (props: ModalProps) => {
+export type ModalAboutProps = {
+  isOpen: boolean;
+  handler: ReturnType<typeof useDisclosure>[1];
+};
+
+const ModalAbout = ({ isOpen, handler }: ModalAboutProps) => {
   return (
-    <BaseModal title="About" {...props}>
-      <div className="p-4">
-        <h3 className="text-lg font-bold">Worship App</h3>
-        <p className="mt-2">
+    <Modal title="About" opened={isOpen} onClose={handler.close}>
+      <Stack>
+        <Title size="h2">Worship App</Title>
+        <Text>
           Worship App is a web-based application designed to enhance the worship
           experience for churches by providing an easy way to display lyrics
           during services.
-        </p>
+        </Text>
 
-        <div className="mt-6 flex">
-          <a
-            className="flex items-center gap-3 bg-zinc-700 px-3 py-2 hover:bg-zinc-600"
-            href="https://github.com/roymandev/worship-app"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <RiGithubFill className="h-5 w-5" />
-            Repository
-          </a>
-        </div>
-      </div>
-    </BaseModal>
+        <Anchor href="https://github.com/roymandev/worship-app" target="_blank">
+          Repository
+        </Anchor>
+      </Stack>
+    </Modal>
   );
 };
 

@@ -10,6 +10,7 @@ import {
   IconUpload,
 } from '@tabler/icons-react';
 import { useAtom } from 'jotai';
+import ModalAbout from '../Modals/ModalAbout';
 import ModalPlaylistExport from '../Modals/ModalPlaylistExport';
 import ModalPlaylistImport from '../Modals/ModalPlaylistImport';
 
@@ -40,6 +41,7 @@ const MainNavbar = () => {
   const [leftPanelContent, setLeftPanelContent] = useAtom(atomLeftPanelContent);
   const [isOpenImportModal, importModal] = useDisclosure(false);
   const [isOpenExportModal, exportModal] = useDisclosure(false);
+  const [isOpenAboutModal, aboutModal] = useDisclosure(false);
 
   return (
     <Navbar
@@ -97,13 +99,18 @@ const MainNavbar = () => {
       <Navbar.Section>
         <Stack align="center" p={8} spacing={8}>
           <NavItem title="Settings" icon={<IconSettings size={18} />} />
-          <NavItem title="About" icon={<IconInfoCircle size={18} />} />
+          <NavItem
+            title="About"
+            icon={<IconInfoCircle size={18} />}
+            onClick={aboutModal.open}
+          />
         </Stack>
       </Navbar.Section>
 
       {/* Modals */}
       <ModalPlaylistImport isOpen={isOpenImportModal} handler={importModal} />
       <ModalPlaylistExport isOpen={isOpenExportModal} handler={exportModal} />
+      <ModalAbout isOpen={isOpenAboutModal} handler={aboutModal} />
     </Navbar>
   );
 };

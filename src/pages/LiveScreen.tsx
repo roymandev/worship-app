@@ -2,6 +2,7 @@ import Screen from '@/components/Screen';
 import { scaleScreen } from '@/lib/scaleScreen';
 import { atomLiveItemContentSelectedLine } from '@/stores/liveStore';
 import { atomScreenSettings, SCREEN_BASE_SIZE } from '@/stores/screenStore';
+import { Flex } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 
@@ -33,7 +34,7 @@ const LiveScreen = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 flex">
+    <Flex sx={{ position: 'fixed', inset: 0 }}>
       <Screen
         line={selectedLine}
         options={{
@@ -41,7 +42,7 @@ const LiveScreen = () => {
           hideScreen: screenSettings.hideScreen,
         }}
       />
-    </div>
+    </Flex>
   );
 };
 

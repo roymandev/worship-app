@@ -1,32 +1,43 @@
-import Button from '@/components/Button';
-import BaseModal, { ModalProps } from '@/components/Modals/BaseModal';
 import usePlaylist from '@/hooks/usePlaylist';
+import { Button, Code, Group, Modal, Stack, Text } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 
-const ModalPlaylistExport = (props: ModalProps) => {
+export type ModalPlaylistExportProps = {
+  isOpen: boolean;
+  handler: ReturnType<typeof useDisclosure>[1];
+};
+
+const ModalPlaylistExport = ({ isOpen, handler }: ModalPlaylistExportProps) => {
   const { name, download } = usePlaylist();
 
   const downloadHandler = () => {
     download();
-    props.onClose();
+    handler.close();
   };
 
   return (
-    <BaseModal title="Export Playlist" {...props}>
-      <div className="space-y-3 p-3">
-        <p>
-          Download &quot;<b>{name || 'Untitled'}.WORSHIP</b>&quot; playlist.
-        </p>
+    <Modal
+      title="Export Playlist"
+      withCloseButton={false}
+      opened={isOpen}
+      onClose={handler.close}
+    >
+      <Stack>
+        <Text>
+          Download <Code>{name || 'Untitled'}.WORSHIP</Code> playlist.
+        </Text>
 
-        <div className="flex">
-          <Button color="blue" className="ml-auto" onClick={downloadHandler}>
+        <Group spacing="xs" position="right">
+          <Button color="blue" onClick={downloadHandler}>
             Download
           </Button>
-          <Button className="ml-1" onClick={props.onClose}>
+
+          <Button color="gray" onClick={handler.close}>
             Cancel
           </Button>
-        </div>
-      </div>
-    </BaseModal>
+        </Group>
+      </Stack>
+    </Modal>
   );
 };
 

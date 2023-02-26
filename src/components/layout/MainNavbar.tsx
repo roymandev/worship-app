@@ -10,6 +10,7 @@ import {
   IconUpload,
 } from '@tabler/icons-react';
 import { useAtom } from 'jotai';
+import ModalPlaylistExport from '../Modals/ModalPlaylistExport';
 import ModalPlaylistImport from '../Modals/ModalPlaylistImport';
 
 type NavItemProps = {
@@ -38,6 +39,7 @@ const NavItem = ({ title, icon, isActive, ...rest }: NavItemProps) => (
 const MainNavbar = () => {
   const [leftPanelContent, setLeftPanelContent] = useAtom(atomLeftPanelContent);
   const [isOpenImportModal, importModal] = useDisclosure(false);
+  const [isOpenExportModal, exportModal] = useDisclosure(false);
 
   return (
     <Navbar
@@ -82,7 +84,11 @@ const MainNavbar = () => {
             icon={<IconUpload size={18} />}
             onClick={importModal.open}
           />
-          <NavItem title="Export playlist" icon={<IconDownload size={18} />} />
+          <NavItem
+            title="Export playlist"
+            icon={<IconDownload size={18} />}
+            onClick={exportModal.open}
+          />
         </Stack>
       </Navbar.Section>
 
@@ -97,6 +103,7 @@ const MainNavbar = () => {
 
       {/* Modals */}
       <ModalPlaylistImport isOpen={isOpenImportModal} handler={importModal} />
+      <ModalPlaylistExport isOpen={isOpenExportModal} handler={exportModal} />
     </Navbar>
   );
 };

@@ -70,7 +70,7 @@ const BaseList = <T,>({
       ref={mergedRef}
       spacing={0}
       tabIndex={0}
-      sx={{ overflowY: 'auto', whiteSpace: 'pre-line' }}
+      sx={{ overflowY: 'auto', whiteSpace: 'pre-line', flexGrow: 1 }}
     >
       {items.map((item, index) =>
         renderItem(item, selectedItemIndex === index, index),

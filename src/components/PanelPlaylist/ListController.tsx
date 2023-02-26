@@ -1,22 +1,51 @@
-import Button from '@/components/Button';
-import ModalPlaylistExport from '@/components/Modals/ModalPlaylistExport';
-import ModalPlaylistImport from '@/components/Modals/ModalPlaylistImport';
-import useModal from '@/hooks/useModal';
 import usePlaylist from '@/hooks/usePlaylist';
-import { atomPlaylistPanelContent } from '@/stores/playlistStore';
-import { useSetAtom } from 'jotai';
+import { atomPlaylistPanelContent } from '@/stores/layoutStore';
+import { ActionIcon, Divider, Stack, Tooltip } from '@mantine/core';
 import {
-  RiAddLine,
-  RiArrowDownLine,
-  RiArrowUpLine,
-  RiDeleteBin2Line,
-  RiDownload2Line,
-  RiPencilLine,
-  RiUpload2Line,
-} from 'react-icons/ri';
+  IconChevronDown,
+  IconChevronUp,
+  IconPencil,
+  IconPlus,
+  IconTrash,
+} from '@tabler/icons-react';
+import { useSetAtom } from 'jotai';
+
+type ListControllerItem = {
+  onClick: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+  label: string;
+};
+
+const ListControllerItem = ({
+  onClick,
+  disabled,
+  children,
+  label,
+}: ListControllerItem) => {
+  return (
+    <Tooltip label={label} position="right">
+      <ActionIcon
+        size="md"
+        variant="filled"
+        onClick={onClick}
+        disabled={disabled}
+        sx={{
+          '&[disabled]': {
+            pointerEvents: 'all',
+            backgroundColor: 'unset',
+            border: 0,
+          },
+        }}
+      >
+        {children}
+      </ActionIcon>
+    </Tooltip>
+  );
+};
 
 const ListController = () => {
-  const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
+  const setContent = useSetAtom(atomPlaylistPanelContent);
 
   const {
     selectedItemId,
@@ -27,88 +56,55 @@ const ListController = () => {
     deleteSelectedItem,
   } = usePlaylist();
 
-  const {
-    isOpen: isOpenImport,
-    openModal: openModalImport,
-    closeModal: closeModalImport,
-  } = useModal();
-  const {
-    isOpen: isOpenExport,
-    openModal: openModalExport,
-    closeModal: closeModalExport,
-  } = useModal();
-
   return (
-    <>
-      <div className="flex flex-col gap-1 p-1">
-        <Button
-          icon
+    <Stack w={36} p={4} spacing={4}>
+      <Tooltip label="Add item" position="right">
+        <ActionIcon
           color="blue"
-          title="Add Playlist Item"
-          tabIndex={-1}
-          onClick={() => setPlaylistPanelContent('addItem')}
+          size="md"
+          variant="filled"
+          onClick={() => setContent('addItem')}
         >
-          <RiAddLine className="h-4 w-4" />
-        </Button>
+          <IconPlus size={18} />
+        </ActionIcon>
+      </Tooltip>
 
-        <hr className="border-zinc-700" />
+      <Divider />
 
-        <Button
-          icon
-          title="Move Selected Item Up"
-          tabIndex={-1}
-          onClick={moveSelectedItemUp}
-          disabled={!canShiftSelectedItemUp() || !selectedItemId}
-        >
-          <RiArrowUpLine className="h-4 w-4" />
-        </Button>
-        <Button
-          icon
-          title="Move Selected Item Down"
-          tabIndex={-1}
-          onClick={moveSelectedItemDown}
-          disabled={!canShiftSelectedItemDown() || !selectedItemId}
-        >
-          <RiArrowDownLine className="h-4 w-4" />
-        </Button>
+      <ListControllerItem
+        label="Move selected item up"
+        onClick={moveSelectedItemUp}
+        disabled={!canShiftSelectedItemUp() || !selectedItemId}
+      >
+        <IconChevronUp size={18} />
+      </ListControllerItem>
 
-        <hr className="border-zinc-700" />
+      <ListControllerItem
+        label="Move selected item down"
+        onClick={moveSelectedItemDown}
+        disabled={!canShiftSelectedItemDown() || !selectedItemId}
+      >
+        <IconChevronDown size={18} />
+      </ListControllerItem>
 
-        <Button
-          icon
-          title="Edit Selected Item Up"
-          tabIndex={-1}
-          disabled={!selectedItemId}
-          onClick={() => setPlaylistPanelContent('editItem')}
-        >
-          <RiPencilLine className="h-4 w-4" />
-        </Button>
-        <Button
-          icon
-          title="Delete Selected Item Up"
-          tabIndex={-1}
-          disabled={!selectedItemId}
-          onClick={deleteSelectedItem}
-        >
-          <RiDeleteBin2Line className="h-4 w-4" />
-        </Button>
+      <Divider />
 
-        <Button
-          icon
-          title="Import Playlist"
-          className="mt-auto"
-          onClick={openModalImport}
-        >
-          <RiUpload2Line className="h-4 w-4" />
-        </Button>
-        <Button icon title="Export Playlist" onClick={openModalExport}>
-          <RiDownload2Line className="h-4 w-4" />
-        </Button>
-      </div>
+      <ListControllerItem
+        label="Edit selected item"
+        onClick={() => setContent('editItem')}
+        disabled={!selectedItemId}
+      >
+        <IconPencil size={18} />
+      </ListControllerItem>
 
-      <ModalPlaylistImport opened={isOpenImport} onClose={closeModalImport} />
-      <ModalPlaylistExport opened={isOpenExport} onClose={closeModalExport} />
-    </>
+      <ListControllerItem
+        label="Remove selected item"
+        onClick={deleteSelectedItem}
+        disabled={!selectedItemId}
+      >
+        <IconTrash size={18} />
+      </ListControllerItem>
+    </Stack>
   );
 };
 

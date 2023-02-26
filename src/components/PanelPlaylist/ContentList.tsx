@@ -10,7 +10,8 @@ import { useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 import BasePanelHeaderInput from '@/components/BasePanelHeaderInput';
 import { IconPencil } from '@tabler/icons-react';
-import { Text } from '@mantine/core';
+import { Divider, Flex, Text } from '@mantine/core';
+import ListController from './ListController';
 
 const ContentList = () => {
   const preview = usePreview();
@@ -39,27 +40,32 @@ const ContentList = () => {
         />
       </BasePanelHeader>
 
-      <BaseList
-        items={items}
-        selectedItemIndex={items.findIndex(
-          (item) => item.id === selectedItemId,
-        )}
-        onSelectItem={(item) => setSelectedItemId(item.id)}
-        onKeyDownEnter={() => setLiveItemHandler(selectedItem)}
-        renderItem={(item, isSelected) => (
-          <BaseListItem
-            key={item.id}
-            className="select-none py-1 px-2"
-            isSelected={isSelected}
-            onClick={() => setSelectedItemId(item.id)}
-            onDoubleClick={() => setLiveItemHandler(item)}
-          >
-            <Text fz={14} fw={500} lh="inherit">
-              {item.title || '(Untitled)'}
-            </Text>
-          </BaseListItem>
-        )}
-      />
+      <Flex sx={{ flexGrow: 1 }} justify="stretch">
+        <BaseList
+          items={items}
+          selectedItemIndex={items.findIndex(
+            (item) => item.id === selectedItemId,
+          )}
+          onSelectItem={(item) => setSelectedItemId(item.id)}
+          onKeyDownEnter={() => setLiveItemHandler(selectedItem)}
+          renderItem={(item, isSelected) => (
+            <BaseListItem
+              key={item.id}
+              className="select-none py-1 px-2"
+              isSelected={isSelected}
+              onClick={() => setSelectedItemId(item.id)}
+              onDoubleClick={() => setLiveItemHandler(item)}
+            >
+              <Text fz={14} fw={500} lh="inherit">
+                {item.title || '(Untitled)'}
+              </Text>
+            </BaseListItem>
+          )}
+        />
+        <Divider orientation="vertical" />
+
+        <ListController />
+      </Flex>
     </>
   );
 };

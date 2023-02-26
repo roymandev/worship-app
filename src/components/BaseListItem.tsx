@@ -23,12 +23,13 @@ const BaseListItem = ({
       ref={mergedRef}
       sx={[
         {
-          padding: '4px 8px',
+          padding: '4px 6px',
+          lineHeight: '20px',
         },
         isSelected
           ? (theme) => ({
               color: 'white',
-              backgroundColor: theme.colors.blue[8],
+              backgroundColor: theme.colors.blue[9],
             })
           : (theme) => ({
               '&:hover': {

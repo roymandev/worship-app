@@ -54,7 +54,7 @@ const ContentList = () => {
             onClick={() => setSelectedItemId(item.id)}
             onDoubleClick={() => setLiveItemHandler(item)}
           >
-            <Text fz={14} fw={500}>
+            <Text fz={14} fw={500} lh="inherit">
               {item.title || '(Untitled)'}
             </Text>
           </BaseListItem>

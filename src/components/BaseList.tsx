@@ -66,7 +66,12 @@ const BaseList = <T,>({
   }, [selectedItemIndex]);
 
   return (
-    <Stack ref={mergedRef} spacing={0} tabIndex={0} sx={{ overflowY: 'auto' }}>
+    <Stack
+      ref={mergedRef}
+      spacing={0}
+      tabIndex={0}
+      sx={{ overflowY: 'auto', whiteSpace: 'pre-line' }}
+    >
       {items.map((item, index) =>
         renderItem(item, selectedItemIndex === index, index),
       )}

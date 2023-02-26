@@ -109,8 +109,9 @@ const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
                 flexDirection: 'column',
               },
               wrapper: { flexGrow: 1 },
-              input: { height: '100%' },
+              input: { height: '100%', padding: '4px 8px', lineHeight: '1rem' },
             }}
+            spellCheck="false"
           />
 
           <Group spacing="xs">

@@ -13,6 +13,7 @@ import { useAtom } from 'jotai';
 import ModalAbout from '../Modals/ModalAbout';
 import ModalPlaylistExport from '../Modals/ModalPlaylistExport';
 import ModalPlaylistImport from '../Modals/ModalPlaylistImport';
+import ModalSettings from '../Modals/ModalSettings';
 
 type NavItemProps = {
   title: string;
@@ -42,6 +43,7 @@ const MainNavbar = () => {
   const [isOpenImportModal, importModal] = useDisclosure(false);
   const [isOpenExportModal, exportModal] = useDisclosure(false);
   const [isOpenAboutModal, aboutModal] = useDisclosure(false);
+  const [isOpenSettingsModal, settingsModal] = useDisclosure(false);
 
   return (
     <Navbar
@@ -98,7 +100,11 @@ const MainNavbar = () => {
 
       <Navbar.Section>
         <Stack align="center" p={8} spacing={8}>
-          <NavItem title="Settings" icon={<IconSettings size={18} />} />
+          <NavItem
+            title="Settings"
+            icon={<IconSettings size={18} />}
+            onClick={settingsModal.open}
+          />
           <NavItem
             title="About"
             icon={<IconInfoCircle size={18} />}
@@ -111,6 +117,7 @@ const MainNavbar = () => {
       <ModalPlaylistImport isOpen={isOpenImportModal} handler={importModal} />
       <ModalPlaylistExport isOpen={isOpenExportModal} handler={exportModal} />
       <ModalAbout isOpen={isOpenAboutModal} handler={aboutModal} />
+      <ModalSettings isOpen={isOpenSettingsModal} handler={settingsModal} />
     </Navbar>
   );
 };

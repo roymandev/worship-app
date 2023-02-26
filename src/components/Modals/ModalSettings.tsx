@@ -1,21 +1,14 @@
-import { atomScreenSettings } from '@/stores/screenStore';
+import { atomScreenSettings, SCREEN_BASE_SIZE } from '@/stores/screenStore';
+import { ColorInput, Modal, NumberInput, Stack } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { useAtom } from 'jotai';
-import { useId, useState } from 'react';
-import BaseInput from '../BaseInput';
-import Screen from '../Screen';
-import BaseModal, { ModalProps } from './BaseModal';
 
-const ModalSettings = (props: ModalProps) => {
-  const formId = useId();
+export type ModalSettingsProps = {
+  isOpen: boolean;
+  handler: ReturnType<typeof useDisclosure>[1];
+};
 
-  const [previewText, setPreviewText] = useState(
-    'Kuingin hati yang suci murni, Yang memancarkan terang sejati',
-  );
-
-  const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
-  };
-
+const ModalSettings = ({ isOpen, handler }: ModalSettingsProps) => {
   const [screenSettings, setScreenSettings] = useAtom(atomScreenSettings);
 
   const changeScreenSize = <
@@ -34,92 +27,43 @@ const ModalSettings = (props: ModalProps) => {
     }));
 
   return (
-    <BaseModal title="Settings" className="max-w-2xl" {...props}>
-      <div className="grid grid-cols-2 gap-1 p-1">
-        <form className="space-y-2 pl-1" onSubmit={onSubmit}>
-          <fieldset className="flex items-center">
-            <label htmlFor={formId + 'text-size'} className="flex-1">
-              Text Size
-            </label>
-            <BaseInput
-              id={formId + 'text-size'}
-              type="number"
-              className="w-20 px-2"
-              value={screenSettings.mainSize.fontSize}
-              onChange={(e) =>
-                changeScreenSize('fontSize', parseInt(e.target.value))
-              }
-            />
-          </fieldset>
+    <Modal title="Settings" opened={isOpen} onClose={handler.close}>
+      <Stack>
+        <NumberInput
+          label="Font size"
+          value={screenSettings.mainSize.fontSize}
+          onChange={(value) =>
+            changeScreenSize('fontSize', value || SCREEN_BASE_SIZE.fontSize)
+          }
+        />
+        <NumberInput
+          label="Line height"
+          value={screenSettings.mainSize.lineHeight}
+          onChange={(value) =>
+            changeScreenSize('lineHeight', value || SCREEN_BASE_SIZE.lineHeight)
+          }
+        />
+        <NumberInput
+          label="Padding"
+          value={screenSettings.mainSize.padding}
+          onChange={(value) =>
+            changeScreenSize('padding', value || SCREEN_BASE_SIZE.padding)
+          }
+        />
 
-          <fieldset className="flex items-center">
-            <label htmlFor={formId + 'line-height'} className="flex-1">
-              Line height
-            </label>
-            <BaseInput
-              id={formId + 'line-height'}
-              type="number"
-              className="w-20 px-2"
-              value={screenSettings.mainSize.lineHeight}
-              onChange={(e) =>
-                changeScreenSize('lineHeight', parseInt(e.target.value))
-              }
-            />
-          </fieldset>
-
-          <fieldset className="flex items-center justify-between">
-            <label htmlFor={formId + 'padding'} className="flex-1">
-              Padding
-            </label>
-            <BaseInput
-              id={formId + 'padding'}
-              type="number"
-              className="w-20 px-2"
-              value={screenSettings.mainSize.padding}
-              onChange={(e) =>
-                changeScreenSize('padding', parseInt(e.target.value))
-              }
-            />
-          </fieldset>
-
-          <fieldset className="flex items-center gap-1">
-            <label htmlFor={formId + 'text-color'} className="flex flex-1">
-              Text Color
-            </label>
-            <BaseInput
-              id={formId + 'text-color'}
-              type="color"
-              className="w-10 p-1"
-              value={screenSettings.textColor}
-              onChange={(e) =>
-                setScreenSettings((prevSettings) => ({
-                  ...prevSettings,
-                  textColor: e.target.value,
-                }))
-              }
-            />
-            <BaseInput
-              value={screenSettings.textColor}
-              className="w-20 px-2 font-mono"
-              onChange={(e) =>
-                setScreenSettings((prevSettings) => ({
-                  ...prevSettings,
-                  textColor: e.target.value,
-                }))
-              }
-            />
-          </fieldset>
-        </form>
-
-        <div className="flex h-80 flex-col gap-1">
-          <Screen line={{ text: previewText }} />
-          <BaseInput
-            value={previewText}
-            onChange={(e) => setPreviewText(e.target.value)}
-          />
-        </div>
-      </div>
-    </BaseModal>
+        <ColorInput
+          label="Text color"
+          sx={{ input: { fontFamily: 'monospace' } }}
+          value={screenSettings.textColor}
+          onChange={(value) =>
+            setScreenSettings((prevSettings) => ({
+              ...prevSettings,
+              textColor: value,
+            }))
+          }
+        />
+      </Stack>
+    </Modal>
   );
 };
 

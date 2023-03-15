@@ -2163,10 +2163,10 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
 
-jotai@^1.13.0:
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/jotai/-/jotai-1.13.0.tgz#c24f9fe4f18f58a348f042411509ef402b26c045"
-  integrity sha512-SPTO46Jw1aJTp2i18tiKgk++nKNKJTMNw4qYFy9QRTydceWvD2Eys+YgB7cb1S6pzbM9i0Ik/y7Yl7IH8k9Lig==
+jotai@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/jotai/-/jotai-2.0.3.tgz#3b67cda9f6d5feb70a14db0b842a9873aacda8b5"
+  integrity sha512-MMjhSPAL3RoeZD9WbObufRT2quThEAEknHHridf2ma8Ml7ZVQmUiHk0ssdbR3F0h3kcwhYqSGJ59OjhPge7RRg==
 
 js-sdsl@^4.1.4:
   version "4.2.0"
@@ -3315,3 +3315,8 @@ yocto-queue@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
+
+zod@^3.20.6:
+  version "3.20.6"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.20.6.tgz#2f2f08ff81291d47d99e86140fedb4e0db08361a"
+  integrity sha512-oyu0m54SGCtzh6EClBVqDDlAYRz4jrVtKwQ7ZnsEmMI9HnzuZFj8QFwAY1M5uniIYACdGvv0PBWPF2kO0aNofA==

@@ -21,14 +21,15 @@
     "@supabase/supabase-js": "^2.4.0",
     "@tabler/icons-react": "^2.5.0",
     "clsx": "^1.2.1",
-    "jotai": "^1.13.0",
+    "jotai": "^2.0.3",
     "nanoid": "^4.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.7.1",
     "react-router-dom": "^6.6.2",
     "react-split": "^2.0.14",
-    "tailwind-merge": "^1.8.1"
+    "tailwind-merge": "^1.8.1",
+    "zod": "^3.20.6"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",

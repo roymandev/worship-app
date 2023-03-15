@@ -7,11 +7,11 @@ export const atomSongs = atom<SongItem[]>([]);
 export const atomSongsSelectedSongId = atom<SongItem['id'] | null>(null);
 
 // Getter
-export const atomSongsSelectedSong = atom<SongItem | null, SongItem>(
+export const atomSongsSelectedSong = atom(
   (get) =>
     get(atomSongs).find((item) => item.id === get(atomSongsSelectedSongId)) ||
     null,
-  (get, set, update) => {
+  (get, set, update: SongItem) => {
     set(
       atomSongs,
       get(atomSongs).map((item) =>

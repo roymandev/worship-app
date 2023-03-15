@@ -1,24 +1,29 @@
-import { PlaylistItem } from '@/types';
+import { atomWithLocalStorage } from '@/lib/atomWithLocalStorage';
+import { PlaylistItem, PlaylistSchema } from '@/schemas';
 import { atom } from 'jotai';
-import { atomWithStorage } from 'jotai/utils';
 
 // State
-export const atomPlaylistName = atomWithStorage('playlistName', 'Untitled');
+export const atomPlaylistName = atomWithLocalStorage(
+  'playlistName',
+  'Untitled',
+  (value) => PlaylistSchema.shape.name.parse(value),
+);
 
-export const atomPlaylistItems = atomWithStorage<PlaylistItem[]>(
-  'playlistItem',
+export const atomPlaylistItems = atomWithLocalStorage<PlaylistItem[]>(
+  'playlistItems',
   [],
+  (storageValue) => PlaylistSchema.shape.items.parse(storageValue),
 );
 
 export const atomPlaylistSelectedItemId = atom<PlaylistItem['id'] | null>(null);
 
 // Getter
-export const atomPlaylistSelectedItem = atom<PlaylistItem | null, PlaylistItem>(
+export const atomPlaylistSelectedItem = atom(
   (get) =>
     get(atomPlaylistItems).find(
       (item) => item.id === get(atomPlaylistSelectedItemId),
     ) || null,
-  (get, set, update) => {
+  (get, set, update: PlaylistItem) => {
     set(
       atomPlaylistItems,
       get(atomPlaylistItems).map((item) =>

@@ -1,5 +1,6 @@
 import { createStyles } from '@mantine/core';
-import { useEffect, useRef } from 'react';
+import { useWindowEvent } from '@mantine/hooks';
+import { useRef } from 'react';
 import Split from 'react-split';
 import PanelLeft from '../PanelLeft';
 import PanelLive from '../PanelLive';
@@ -32,10 +33,7 @@ const MainPanels = () => {
     panelLiveScreenRef.current?.resizeScreen();
   };
 
-  useEffect(() => {
-    window.addEventListener('resize', dragHandler);
-    return () => window.removeEventListener('resize', dragHandler);
-  }, []);
+  useWindowEvent('resize', dragHandler);
 
   return (
     <Split className={classes.split} gutterSize={2} onDrag={dragHandler}>

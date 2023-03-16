@@ -6,7 +6,7 @@ export const PlaylistItemContentSchema = z.object({
 });
 
 export const PlaylistItemSchema = z.object({
-  id: z.string(),
+  id: z.string().catch(crypto.randomUUID()),
   title: z.string().catch('Untitled'),
   content: z.array(PlaylistItemContentSchema).catch([]),
 });

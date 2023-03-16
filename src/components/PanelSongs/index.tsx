@@ -3,13 +3,13 @@ import SearchInput from '@/components/PanelSongs/SearchInput';
 import BasePanelHeader from '../BasePanelHeader';
 import { IconMusic, IconPlaylistAdd } from '@tabler/icons-react';
 import { ActionIcon, Title, Tooltip } from '@mantine/core';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { atomSongsSelectedSong } from '@/stores/songsStore';
-import usePlaylist from '@/hooks/usePlaylist';
+import { playlistAtom } from '@/stores/playlistStore';
 
 const PanelSongs = () => {
   const selectedSong = useAtomValue(atomSongsSelectedSong);
-  const { addItem } = usePlaylist();
+  const addItem = useSetAtom(playlistAtom.addItem);
 
   return (
     <>

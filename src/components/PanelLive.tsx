@@ -1,11 +1,10 @@
 import BaseList from '@/components/BaseList';
 import BasePanel from '@/components/BasePanel';
 import BasePanelHeader from '@/components/BasePanelHeader';
-import usePlaylist from '@/hooks/usePlaylist';
 import ItemContentLine from '@/components/ItemContentLine';
 import Screen, { ScreenRef } from '@/components/Screen';
 import { atomLiveItemContentSelectedLine } from '@/stores/liveStore';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 import useLive from '@/hooks/useLive';
@@ -27,9 +26,11 @@ import {
   IconTypographyOff,
   IconX,
 } from '@tabler/icons-react';
+import { playlistAtom } from '@/stores/playlistStore';
 
 const PanelLive = forwardRef((props, ref) => {
-  const { shiftSelectedItemUp, shiftSelectedItemDown } = usePlaylist();
+  const shiftSelectedItemUp = useSetAtom(playlistAtom.shiftSelectedItemUp);
+  const shiftSelectedItemDown = useSetAtom(playlistAtom.shiftSelectedItemDown);
 
   const { settings, changeSetting } = useScreen();
 

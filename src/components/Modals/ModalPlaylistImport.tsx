@@ -1,10 +1,9 @@
 import { PLAYLIST_FILE_EXT } from '@/constant';
-import usePlaylist from '@/hooks/usePlaylist';
-import { validatePlaylistItems } from '@/lib/validatePlaylistItems';
 import {
   atomLeftPanelContent,
   atomPlaylistPanelContent,
 } from '@/stores/layoutStore';
+import { playlistAtom } from '@/stores/playlistStore';
 import { PlaylistFile } from '@/types';
 import {
   Button,
@@ -32,7 +31,7 @@ const ModalPlaylistImport = ({ isOpen, handler }: ModalPlaylistImportProps) => {
 
   const [errorMsg, setErrorMsg] = useState('');
   const [playlist, setPlaylist] = useState<PlaylistFile | null>(null);
-  const { upload } = usePlaylist();
+  const importFromFile = useSetAtom(playlistAtom.importFromFile);
 
   const fileChangeHandler = (file: File | null) => {
     setErrorMsg('');
@@ -58,11 +57,9 @@ const ModalPlaylistImport = ({ isOpen, handler }: ModalPlaylistImportProps) => {
           evt.target.result as string,
         ) as PlaylistFile;
 
-        const validatedItems = validatePlaylistItems(playlistData.items);
-
         setPlaylist({
           name: fileName.join(),
-          items: validatedItems ?? [],
+          items: playlistData.items,
         });
       } catch {
         setErrorMsg(ERROR_UNKNOWN_FILE);
@@ -79,7 +76,7 @@ const ModalPlaylistImport = ({ isOpen, handler }: ModalPlaylistImportProps) => {
 
   const importHandler = () => {
     if (playlist) {
-      upload(playlist);
+      importFromFile(playlist);
 
       setLeftPanelContent('playlist');
       setPlaylistPanelContent('list');

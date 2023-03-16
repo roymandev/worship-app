@@ -1,5 +1,5 @@
-import usePlaylist from '@/hooks/usePlaylist';
 import { atomPlaylistPanelContent } from '@/stores/layoutStore';
+import { playlistAtom } from '@/stores/playlistStore';
 import { ActionIcon, Divider, Stack, Tooltip } from '@mantine/core';
 import {
   IconChevronDown,
@@ -8,7 +8,7 @@ import {
   IconPlus,
   IconTrash,
 } from '@tabler/icons-react';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 type ListControllerItem = {
   onClick: () => void;
@@ -47,14 +47,16 @@ const ListControllerItem = ({
 const ListController = () => {
   const setContent = useSetAtom(atomPlaylistPanelContent);
 
-  const {
-    selectedItemId,
-    canShiftSelectedItemUp,
-    canShiftSelectedItemDown,
-    moveSelectedItemUp,
-    moveSelectedItemDown,
-    deleteSelectedItem,
-  } = usePlaylist();
+  const selectedItem = useAtomValue(playlistAtom.selectedItem);
+  const canShiftSelectedItemUp = useAtomValue(
+    playlistAtom.canShiftSelectedItemUp,
+  );
+  const canShiftSelectedItemDown = useAtomValue(
+    playlistAtom.canShiftSelectedItemDown,
+  );
+  const moveSelectedItemUp = useSetAtom(playlistAtom.moveSelectedItemUp);
+  const moveSelectedItemDown = useSetAtom(playlistAtom.moveSelectedItemDown);
+  const deleteSelectedItem = useSetAtom(playlistAtom.deleteSelectedItem);
 
   return (
     <Stack w={36} p={4} spacing={4}>
@@ -74,7 +76,7 @@ const ListController = () => {
       <ListControllerItem
         label="Move selected item up"
         onClick={moveSelectedItemUp}
-        disabled={!canShiftSelectedItemUp() || !selectedItemId}
+        disabled={!canShiftSelectedItemUp || !selectedItem}
       >
         <IconChevronUp size={18} />
       </ListControllerItem>
@@ -82,7 +84,7 @@ const ListController = () => {
       <ListControllerItem
         label="Move selected item down"
         onClick={moveSelectedItemDown}
-        disabled={!canShiftSelectedItemDown() || !selectedItemId}
+        disabled={!canShiftSelectedItemDown || !selectedItem}
       >
         <IconChevronDown size={18} />
       </ListControllerItem>
@@ -92,7 +94,7 @@ const ListController = () => {
       <ListControllerItem
         label="Edit selected item"
         onClick={() => setContent('editItem')}
-        disabled={!selectedItemId}
+        disabled={!selectedItem}
       >
         <IconPencil size={18} />
       </ListControllerItem>
@@ -100,7 +102,7 @@ const ListController = () => {
       <ListControllerItem
         label="Remove selected item"
         onClick={deleteSelectedItem}
-        disabled={!selectedItemId}
+        disabled={!selectedItem}
       >
         <IconTrash size={18} />
       </ListControllerItem>

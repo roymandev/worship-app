@@ -1,9 +1,8 @@
 import BasePanelHeader from '@/components/BasePanelHeader';
-import usePlaylist from '@/hooks/usePlaylist';
 import usePreview from '@/hooks/usePreview';
 import { ParsedContentLine, parseItemContent } from '@/lib/parseItemContent';
 import { atomPlaylistPanelContent } from '@/stores/layoutStore';
-import { atomPlaylistSelectedItem } from '@/stores/playlistStore';
+import { playlistAtom } from '@/stores/playlistStore';
 import {
   Box,
   Button,
@@ -22,14 +21,15 @@ export type ContentItemEditorProps = {
 
 const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
   const setPlaylistContent = useSetAtom(atomPlaylistPanelContent);
-  const { addItem: addPlaylistItem } = usePlaylist();
   const preview = usePreview();
+
+  const [selectedItem, setSelectedItem] = useAtom(playlistAtom.selectedItem);
+  const addPlaylistItem = useSetAtom(playlistAtom.addItem);
 
   const [title, setTitle] = useState('');
   const [stringContent, setStringContent] = useState('');
   const [content, setContent] = useState<ParsedContentLine[]>([]);
   const [selectedContentLineIndex, setSelectedContentLineIndex] = useState(0);
-  const [selectedItem, setSelectedItem] = useAtom(atomPlaylistSelectedItem);
 
   // Set form initial value
   useEffect(() => {

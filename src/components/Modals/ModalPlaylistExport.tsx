@@ -1,6 +1,7 @@
-import usePlaylist from '@/hooks/usePlaylist';
+import { playlistAtom } from '@/stores/playlistStore';
 import { Button, Code, Group, Modal, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 export type ModalPlaylistExportProps = {
   isOpen: boolean;
@@ -8,10 +9,11 @@ export type ModalPlaylistExportProps = {
 };
 
 const ModalPlaylistExport = ({ isOpen, handler }: ModalPlaylistExportProps) => {
-  const { name, download } = usePlaylist();
+  const name = useAtomValue(playlistAtom.name);
+  const downloadToFile = useSetAtom(playlistAtom.downloadToFile);
 
   const downloadHandler = () => {
-    download();
+    downloadToFile();
     handler.close();
   };
 

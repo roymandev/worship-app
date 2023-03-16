@@ -69,15 +69,15 @@ const Screen = forwardRef<ScreenRef, ScreenProps>(
       >
         {!options?.hideScreen && (
           <Text
-            sx={(theme) => ({
+            sx={{
               ...screenStyle,
               color: screenSettings.textColor,
               display: 'grid',
               placeItems: 'center',
               whiteSpace: 'pre-line',
               textAlign: 'center',
-              backgroundColor: theme.colors.dark[8],
-            })}
+              backgroundColor: screenSettings.backgroundColor,
+            }}
           >
             {!line?.type && !options?.hideText && line?.text}
           </Text>

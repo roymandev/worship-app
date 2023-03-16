@@ -1,6 +1,6 @@
 import { BASE_SCREEN_SETTINGS } from '@/schemas/screenSchema';
 import { atomScreenSettings } from '@/stores/screenStore';
-import { ColorInput, Modal, NumberInput, Stack } from '@mantine/core';
+import { Button, ColorInput, Modal, NumberInput, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useAtom } from 'jotai';
 
@@ -26,6 +26,8 @@ const ModalSettings = ({ isOpen, handler }: ModalSettingsProps) => {
         [key]: value,
       },
     }));
+
+  const resetHandler = () => setScreenSettings(BASE_SCREEN_SETTINGS);
 
   return (
     <Modal title="Settings" opened={isOpen} onClose={handler.close}>
@@ -72,6 +74,22 @@ const ModalSettings = ({ isOpen, handler }: ModalSettingsProps) => {
             }))
           }
         />
+
+        <ColorInput
+          label="Background color"
+          sx={{ input: { fontFamily: 'monospace' } }}
+          value={screenSettings.backgroundColor}
+          onChange={(value) =>
+            setScreenSettings((prevSettings) => ({
+              ...prevSettings,
+              backgroundColor: value,
+            }))
+          }
+        />
+
+        <Button color="gray" onClick={resetHandler}>
+          Reset to default
+        </Button>
       </Stack>
     </Modal>
   );

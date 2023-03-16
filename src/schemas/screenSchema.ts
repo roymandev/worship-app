@@ -11,6 +11,7 @@ export const BASE_SCREEN_SETTINGS = {
   hideText: false,
   hideScreen: false,
   textColor: '#ffffff',
+  backgroundColor: '#141517',
 };
 
 export const ScreenSizeSchema = z
@@ -29,5 +30,7 @@ export const ScreenSchema = z
     hideText: z.boolean(),
     hideScreen: z.boolean(),
     textColor: z.string(),
+    backgroundColor: z.string(),
+    backgroundImage: z.string().optional(),
   })
   .catch(BASE_SCREEN_SETTINGS);

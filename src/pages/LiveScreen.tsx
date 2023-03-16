@@ -1,13 +1,13 @@
 import Screen from '@/components/Screen';
 import { scaleScreen } from '@/lib/scaleScreen';
-import { atomLiveItemContentSelectedLine } from '@/stores/liveStore';
+import { liveStore } from '@/stores/liveStore';
 import { atomScreenSettings, SCREEN_BASE_SIZE } from '@/stores/screenStore';
 import { Flex } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 
 const LiveScreen = () => {
-  const selectedLine = useAtomValue(atomLiveItemContentSelectedLine);
+  const selectedLine = useAtomValue(liveStore.selectedLine);
   const [screenSettings, setScreenSettings] = useAtom(atomScreenSettings);
 
   const resizeHandler = () => {

@@ -1,8 +1,6 @@
 import BaseList from '@/components/BaseList';
 import BaseListItem from '@/components/BaseListItem';
 import BasePanelHeader from '@/components/BasePanelHeader';
-import useLive from '@/hooks/useLive';
-import { BaseItem } from '@/types';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useEffect } from 'react';
 import BasePanelHeaderInput from '@/components/BasePanelHeaderInput';
@@ -11,10 +9,11 @@ import { Divider, Flex, Text } from '@mantine/core';
 import ListController from './ListController';
 import { playlistStore } from '@/stores/playlistStore';
 import { previewStore } from '@/stores/previewStore';
+import { liveStore } from '@/stores/liveStore';
 
 const ContentList = () => {
   const showPreview = useSetAtom(previewStore.show);
-  const live = useLive();
+  const showLive = useSetAtom(liveStore.show);
   const [name, setName] = useAtom(playlistStore.name);
   const items = useAtomValue(playlistStore.items);
   const [selectedItemIndex, setSelectedItemIndex] = useAtom(
@@ -25,10 +24,6 @@ const ContentList = () => {
   useEffect(() => {
     showPreview(selectedItem);
   }, [selectedItem]);
-
-  const setLiveItemHandler = (item: BaseItem | null) => {
-    live.show(item);
-  };
 
   return (
     <>
@@ -46,13 +41,13 @@ const ContentList = () => {
           items={items}
           selectedItemIndex={selectedItemIndex}
           onSelectItem={(item, index) => setSelectedItemIndex(index)}
-          onKeyDownEnter={() => setLiveItemHandler(selectedItem)}
+          onKeyDownEnter={() => showLive(selectedItem)}
           renderItem={(item, isSelected, index) => (
             <BaseListItem
               key={item.id}
               isSelected={isSelected}
               onClick={() => setSelectedItemIndex(index)}
-              onDoubleClick={() => setLiveItemHandler(item)}
+              onDoubleClick={() => showLive(item)}
             >
               <Text fz={14} fw={500} lh="inherit">
                 {item.title || '(Untitled)'}

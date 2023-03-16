@@ -3,11 +3,9 @@ import BasePanel from '@/components/BasePanel';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import ItemContentLine from '@/components/ItemContentLine';
 import Screen, { ScreenRef } from '@/components/Screen';
-import { atomLiveItemContentSelectedLine } from '@/stores/liveStore';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
-import useLive from '@/hooks/useLive';
 import useScreen from '@/hooks/useScreen';
 import {
   ActionIcon,
@@ -27,6 +25,7 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import { playlistStore } from '@/stores/playlistStore';
+import { liveStore } from '@/stores/liveStore';
 
 const PanelLive = forwardRef((props, ref) => {
   const shiftSelectedItemUp = useSetAtom(playlistStore.shiftSelectedItemUp);
@@ -34,8 +33,12 @@ const PanelLive = forwardRef((props, ref) => {
 
   const { settings, changeSetting } = useScreen();
 
-  const { item, show, selectedLineIndex, setSelectedLineIndex } = useLive();
-  const selectedLine = useAtomValue(atomLiveItemContentSelectedLine);
+  const item = useAtomValue(liveStore.item);
+  const [selectedLineIndex, setSelectedLineIndex] = useAtom(
+    liveStore.selectedLineIndex,
+  );
+  const selectedLine = useAtomValue(liveStore.selectedLine);
+  const showLive = useSetAtom(liveStore.show);
 
   const screenRef = useRef<ScreenRef | null>(null);
 
@@ -63,7 +66,7 @@ const PanelLive = forwardRef((props, ref) => {
                     color="gray"
                     size="md"
                     variant="filled"
-                    onClick={() => show(null)}
+                    onClick={() => showLive(null)}
                   >
                     <IconX size={18} />
                   </ActionIcon>

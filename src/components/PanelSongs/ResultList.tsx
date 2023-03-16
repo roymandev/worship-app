@@ -1,6 +1,6 @@
 import BaseList from '@/components/BaseList';
 import BaseListItem from '@/components/BaseListItem';
-import useLive from '@/hooks/useLive';
+import { liveStore } from '@/stores/liveStore';
 import { previewStore } from '@/stores/previewStore';
 import {
   atomSearchQuery,
@@ -17,7 +17,7 @@ import { useEffect } from 'react';
 const ResultList = () => {
   const searchQuery = useAtomValue(atomSearchQuery);
   const showPreview = useSetAtom(previewStore.show);
-  const live = useLive();
+  const showLive = useSetAtom(liveStore.show);
 
   const result = useAtomValue(atomSongs);
   const [selectedSongId, setSelectedSongId] = useAtom(atomSongsSelectedSongId);
@@ -43,13 +43,13 @@ const ResultList = () => {
       items={result}
       selectedItemIndex={result.findIndex((item) => item.id === selectedSongId)}
       onSelectItem={(item) => setSelectedSongId(item.id)}
-      onKeyDownEnter={() => live.show(selectedSong)}
+      onKeyDownEnter={() => showLive(selectedSong)}
       renderItem={(item, isSelected) => (
         <BaseListItem
           key={item.id}
           isSelected={isSelected}
           onClick={() => setSelectedSongId(item.id)}
-          onDoubleClick={() => live.show(item)}
+          onDoubleClick={() => showLive(item)}
         >
           <Text fz={14} fw={500}>
             {item.title || '(Untitled)'}

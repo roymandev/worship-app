@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 
 type SetStateAction<Value> = Value | ((prev: Value) => Value);
 
@@ -12,7 +13,7 @@ export const atomWithLocalStorage = <Value>(
     return storageValue === null ? initialValue : validate(storageValue);
   };
 
-  const baseAtom = atom(getInitialValue());
+  const baseAtom = atomWithStorage(key, getInitialValue());
 
   const derivedAtom = atom(
     (get) => get(baseAtom),
@@ -23,8 +24,6 @@ export const atomWithLocalStorage = <Value>(
           : update;
 
       set(baseAtom, nextValue);
-
-      localStorage.setItem(key, JSON.stringify(nextValue));
     },
   );
 

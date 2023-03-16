@@ -4,13 +4,27 @@ import { BaseItem } from '@/types';
 export type PreviewItem = Pick<BaseItem, 'title' | 'content'>;
 
 // State
-export const atomPreviewItem = atom<PreviewItem | null>(null);
-export const atomPreviewItemContentSelectedLineIndex = atom(-1);
+const item = atom<PreviewItem | null>(null);
+const selectedLineIndex = atom(-1);
 
 // Getter
-export const atomPreviewItemContentSelectedLine = atom(
-  (get) =>
-    get(atomPreviewItem)?.content[
-      get(atomPreviewItemContentSelectedLineIndex)
-    ] || null,
+const selectedLine = atom(
+  (get) => get(item)?.content[get(selectedLineIndex)] || null,
 );
+
+// Setter
+const show = atom<
+  null,
+  [newItem: PreviewItem | null, lineIndex?: number],
+  void
+>(null, (get, set, newItem, lineIndex = 0) => {
+  set(item, newItem);
+  set(selectedLineIndex, lineIndex);
+});
+
+export const previewStore = {
+  item,
+  selectedLineIndex,
+  selectedLine,
+  show,
+};

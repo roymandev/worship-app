@@ -1,7 +1,7 @@
 import BaseList from '@/components/BaseList';
 import BaseListItem from '@/components/BaseListItem';
 import useLive from '@/hooks/useLive';
-import usePreview from '@/hooks/usePreview';
+import { previewStore } from '@/stores/previewStore';
 import {
   atomSearchQuery,
   atomSongs,
@@ -11,12 +11,12 @@ import {
 import { SongItem } from '@/types';
 import { Group, Text, ThemeIcon } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useEffect } from 'react';
 
 const ResultList = () => {
   const searchQuery = useAtomValue(atomSearchQuery);
-  const preview = usePreview();
+  const showPreview = useSetAtom(previewStore.show);
   const live = useLive();
 
   const result = useAtomValue(atomSongs);
@@ -25,7 +25,7 @@ const ResultList = () => {
 
   // Set Preview
   useEffect(() => {
-    preview.show(selectedSong);
+    showPreview(selectedSong);
   }, [selectedSong]);
 
   if (searchQuery && !result.length)

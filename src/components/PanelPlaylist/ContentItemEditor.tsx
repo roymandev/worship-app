@@ -1,8 +1,8 @@
 import BasePanelHeader from '@/components/BasePanelHeader';
-import usePreview from '@/hooks/usePreview';
 import { ParsedContentLine, parseItemContent } from '@/lib/parseItemContent';
 import { atomPlaylistPanelContent } from '@/stores/layoutStore';
 import { playlistAtom } from '@/stores/playlistStore';
+import { previewStore } from '@/stores/previewStore';
 import {
   Box,
   Button,
@@ -21,7 +21,7 @@ export type ContentItemEditorProps = {
 
 const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
   const setPlaylistContent = useSetAtom(atomPlaylistPanelContent);
-  const preview = usePreview();
+  const showPreview = useSetAtom(previewStore.show);
 
   const [selectedItem, setSelectedItem] = useAtom(playlistAtom.selectedItem);
   const addPlaylistItem = useSetAtom(playlistAtom.addItem);
@@ -48,7 +48,7 @@ const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
 
   // Handle Preview
   useEffect(() => {
-    preview.show({ title, content: content }, selectedContentLineIndex);
+    showPreview({ title, content: content }, selectedContentLineIndex);
   }, [title, content, selectedContentLineIndex]);
 
   const closeEditorHandler = () => setPlaylistContent('list');

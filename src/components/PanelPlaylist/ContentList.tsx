@@ -2,18 +2,18 @@ import BaseList from '@/components/BaseList';
 import BaseListItem from '@/components/BaseListItem';
 import BasePanelHeader from '@/components/BasePanelHeader';
 import useLive from '@/hooks/useLive';
-import usePreview from '@/hooks/usePreview';
 import { BaseItem } from '@/types';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useEffect } from 'react';
 import BasePanelHeaderInput from '@/components/BasePanelHeaderInput';
 import { IconPencil } from '@tabler/icons-react';
 import { Divider, Flex, Text } from '@mantine/core';
 import ListController from './ListController';
 import { playlistAtom } from '@/stores/playlistStore';
+import { previewStore } from '@/stores/previewStore';
 
 const ContentList = () => {
-  const preview = usePreview();
+  const showPreview = useSetAtom(previewStore.show);
   const live = useLive();
   const [name, setName] = useAtom(playlistAtom.name);
   const items = useAtomValue(playlistAtom.items);
@@ -23,7 +23,7 @@ const ContentList = () => {
   const selectedItem = useAtomValue(playlistAtom.selectedItem);
 
   useEffect(() => {
-    preview.show(selectedItem);
+    showPreview(selectedItem);
   }, [selectedItem]);
 
   const setLiveItemHandler = (item: BaseItem | null) => {

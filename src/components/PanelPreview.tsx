@@ -4,16 +4,19 @@ import BasePanelHeader from '@/components/BasePanelHeader';
 import ItemContentLine from '@/components/ItemContentLine';
 import Screen, { ScreenRef } from '@/components/Screen';
 import useLive from '@/hooks/useLive';
-import usePreview from '@/hooks/usePreview';
-import { atomPreviewItemContentSelectedLine } from '@/stores/previewStore';
+import { previewStore } from '@/stores/previewStore';
 import { Text, Title } from '@mantine/core';
-import { useAtomValue } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
 
 const PanelPreview = forwardRef<ScreenRef>((props, ref) => {
-  const { item, selectedLineIndex, setSelectedLineIndex } = usePreview();
-  const selectedLine = useAtomValue(atomPreviewItemContentSelectedLine);
+  const item = useAtomValue(previewStore.item);
+  const [selectedLineIndex, setSelectedLineIndex] = useAtom(
+    previewStore.selectedLineIndex,
+  );
+  const selectedLine = useAtomValue(previewStore.selectedLine);
+
   const screenRef = useRef<ScreenRef | null>(null);
 
   // Set live item

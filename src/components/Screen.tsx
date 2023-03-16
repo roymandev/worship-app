@@ -1,5 +1,5 @@
 import { scaleScreen } from '@/lib/scaleScreen';
-import { BaseItemLine } from '@/schemas/ItemSchema';
+import { BaseItemLine } from '@/schemas/itemSchema';
 import { atomScreenSettings } from '@/stores/screenStore';
 import { Stack, Text } from '@mantine/core';
 import { useAtomValue } from 'jotai';

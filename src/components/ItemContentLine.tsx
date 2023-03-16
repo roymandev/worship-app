@@ -1,5 +1,5 @@
 import BaseListItem, { BaseListLineProps } from '@/components/BaseListItem';
-import { BaseItemLine } from '@/schemas/ItemSchema';
+import { BaseItemLine } from '@/schemas/itemSchema';
 import { Text } from '@mantine/core';
 
 interface ItemContentLineProps extends BaseListLineProps {

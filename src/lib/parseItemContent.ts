@@ -1,4 +1,4 @@
-import { BaseItemLine } from '@/schemas/ItemSchema';
+import { BaseItemLine } from '@/schemas/itemSchema';
 
 export interface ParsedContentLine extends BaseItemLine {
   indexs?: Array<number>;

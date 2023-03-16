@@ -1,4 +1,4 @@
-import { BaseItem } from '@/schemas/ItemSchema';
+import { BaseItem } from '@/schemas/itemSchema';
 import { atom } from 'jotai';
 
 // State

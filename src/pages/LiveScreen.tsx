@@ -1,7 +1,8 @@
 import Screen from '@/components/Screen';
 import { scaleScreen } from '@/lib/scaleScreen';
+import { BASE_SCREEN_SETTINGS } from '@/schemas/screenSchema';
 import { liveStore } from '@/stores/liveStore';
-import { atomScreenSettings, SCREEN_BASE_SIZE } from '@/stores/screenStore';
+import { atomScreenSettings } from '@/stores/screenStore';
 import { Flex } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
@@ -19,7 +20,8 @@ const LiveScreen = () => {
     setScreenSettings((prevSettings) => ({
       ...prevSettings,
       mainSize: {
-        ...scaleScreen(SCREEN_BASE_SIZE, containerSizes).scaledSize,
+        ...scaleScreen(BASE_SCREEN_SETTINGS.mainSize, containerSizes)
+          .scaledSize,
         ...containerSizes,
       },
     }));

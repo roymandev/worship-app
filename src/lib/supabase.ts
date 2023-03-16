@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { parseItemContent } from '@/lib/parseItemContent';
-import { BaseItem } from '@/schemas/ItemSchema';
+import { BaseItem } from '@/schemas/itemSchema';
 
 // Create a single supabase client for interacting with your database
 const supabase = createClient(

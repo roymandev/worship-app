@@ -1,4 +1,5 @@
-import { atomScreenSettings, SCREEN_BASE_SIZE } from '@/stores/screenStore';
+import { BASE_SCREEN_SETTINGS } from '@/schemas/screenSchema';
+import { atomScreenSettings } from '@/stores/screenStore';
 import { ColorInput, Modal, NumberInput, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useAtom } from 'jotai';
@@ -33,21 +34,30 @@ const ModalSettings = ({ isOpen, handler }: ModalSettingsProps) => {
           label="Font size"
           value={screenSettings.mainSize.fontSize}
           onChange={(value) =>
-            changeScreenSize('fontSize', value || SCREEN_BASE_SIZE.fontSize)
+            changeScreenSize(
+              'fontSize',
+              value || BASE_SCREEN_SETTINGS.mainSize.fontSize,
+            )
           }
         />
         <NumberInput
           label="Line height"
           value={screenSettings.mainSize.lineHeight}
           onChange={(value) =>
-            changeScreenSize('lineHeight', value || SCREEN_BASE_SIZE.lineHeight)
+            changeScreenSize(
+              'lineHeight',
+              value || BASE_SCREEN_SETTINGS.mainSize.lineHeight,
+            )
           }
         />
         <NumberInput
           label="Padding"
           value={screenSettings.mainSize.padding}
           onChange={(value) =>
-            changeScreenSize('padding', value || SCREEN_BASE_SIZE.padding)
+            changeScreenSize(
+              'padding',
+              value || BASE_SCREEN_SETTINGS.mainSize.padding,
+            )
           }
         />
 

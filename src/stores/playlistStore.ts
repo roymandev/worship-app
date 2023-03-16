@@ -1,7 +1,7 @@
 import { PLAYLIST_FILE_EXT } from '@/constant';
 import { atomWithLocalStorage } from '@/lib/atomWithLocalStorage';
 import { downloadObject } from '@/lib/downloadObject';
-import { BaseItem, BaseItemSchema } from '@/schemas/ItemSchema';
+import { BaseItem, BaseItemSchema } from '@/schemas/itemSchema';
 import { showNotification } from '@mantine/notifications';
 import { IconCheck } from '@tabler/icons-react';
 import { atom } from 'jotai';

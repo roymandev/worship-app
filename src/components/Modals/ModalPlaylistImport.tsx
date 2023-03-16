@@ -3,8 +3,7 @@ import {
   atomLeftPanelContent,
   atomPlaylistPanelContent,
 } from '@/stores/layoutStore';
-import { playlistStore } from '@/stores/playlistStore';
-import { PlaylistFile } from '@/types';
+import { Playlist, playlistStore } from '@/stores/playlistStore';
 import {
   Button,
   Code,
@@ -30,7 +29,7 @@ const ModalPlaylistImport = ({ isOpen, handler }: ModalPlaylistImportProps) => {
   const setPlaylistPanelContent = useSetAtom(atomPlaylistPanelContent);
 
   const [errorMsg, setErrorMsg] = useState('');
-  const [playlist, setPlaylist] = useState<PlaylistFile | null>(null);
+  const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const importFromFile = useSetAtom(playlistStore.importFromFile);
 
   const fileChangeHandler = (file: File | null) => {
@@ -55,7 +54,7 @@ const ModalPlaylistImport = ({ isOpen, handler }: ModalPlaylistImportProps) => {
       try {
         const playlistData = JSON.parse(
           evt.target.result as string,
-        ) as PlaylistFile;
+        ) as Playlist;
 
         setPlaylist({
           name: fileName.join(),

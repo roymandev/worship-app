@@ -1,17 +1,17 @@
-import { SongItem } from '@/types';
+import { BaseItem } from '@/schemas/ItemSchema';
 import { atom } from 'jotai';
 
 // State
 export const atomSearchQuery = atom('');
-export const atomSongs = atom<SongItem[]>([]);
-export const atomSongsSelectedSongId = atom<SongItem['id'] | null>(null);
+export const atomSongs = atom<BaseItem[]>([]);
+export const atomSongsSelectedSongId = atom<BaseItem['id'] | null>(null);
 
 // Getter
 export const atomSongsSelectedSong = atom(
   (get) =>
     get(atomSongs).find((item) => item.id === get(atomSongsSelectedSongId)) ||
     null,
-  (get, set, update: SongItem) => {
+  (get, set, update: BaseItem) => {
     set(
       atomSongs,
       get(atomSongs).map((item) =>

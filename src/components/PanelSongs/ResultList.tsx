@@ -8,7 +8,6 @@ import {
   atomSongsSelectedSong,
   atomSongsSelectedSongId,
 } from '@/stores/songsStore';
-import { SongItem } from '@/types';
 import { Group, Text, ThemeIcon } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -39,7 +38,7 @@ const ResultList = () => {
     );
 
   return (
-    <BaseList<SongItem>
+    <BaseList
       items={result}
       selectedItemIndex={result.findIndex((item) => item.id === selectedSongId)}
       onSelectItem={(item) => setSelectedSongId(item.id)}

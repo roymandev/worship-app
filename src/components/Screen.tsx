@@ -1,6 +1,6 @@
 import { scaleScreen } from '@/lib/scaleScreen';
+import { BaseItemLine } from '@/schemas/ItemSchema';
 import { atomScreenSettings } from '@/stores/screenStore';
-import { BaseItemContentLine } from '@/types';
 import { Stack, Text } from '@mantine/core';
 import { useAtomValue } from 'jotai';
 import {
@@ -12,7 +12,7 @@ import {
 } from 'react';
 
 export interface ScreenProps {
-  line: BaseItemContentLine | null;
+  line: BaseItemLine | null;
   options?: {
     hideText?: boolean;
     hideScreen?: boolean;

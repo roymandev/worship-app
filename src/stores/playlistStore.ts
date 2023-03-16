@@ -1,21 +1,22 @@
 import { PLAYLIST_FILE_EXT } from '@/constant';
 import { atomWithLocalStorage } from '@/lib/atomWithLocalStorage';
 import { downloadObject } from '@/lib/downloadObject';
-import { Playlist, PlaylistItem, PlaylistSchema } from '@/schemas';
+import { BaseItem, BaseItemSchema } from '@/schemas/ItemSchema';
 import { showNotification } from '@mantine/notifications';
 import { IconCheck } from '@tabler/icons-react';
 import { atom } from 'jotai';
 import React, { SetStateAction } from 'react';
+import { z } from 'zod';
 
 // State
 const name = atomWithLocalStorage('playlistName', 'Untitled', (value) =>
-  PlaylistSchema.shape.name.parse(value),
+  z.string().catch('Untitled').parse(value),
 );
 
-const items = atomWithLocalStorage<PlaylistItem[]>(
+const items = atomWithLocalStorage<BaseItem[]>(
   'playlistItems',
   [],
-  (storageValue) => PlaylistSchema.shape.items.parse(storageValue),
+  (storageValue) => z.array(BaseItemSchema).catch([]).parse(storageValue),
 );
 
 const selectedItemIndex = atom(
@@ -32,11 +33,10 @@ const selectedItemIndex = atom(
 
 // Getter
 const selectedItem = atom(
-  (get): PlaylistItem | null => get(items)[get(selectedItemIndex)] || null,
-  (get, set, update: PlaylistItem) => {
-    set(
-      items,
-      get(items).map((item, index) =>
+  (get): BaseItem | null => get(items)[get(selectedItemIndex)] || null,
+  (get, set, update: BaseItem) => {
+    set(items, (prevItems) =>
+      prevItems.map((item, index) =>
         index === get(selectedItemIndex) ? update : item,
       ),
     );
@@ -50,9 +50,10 @@ const canShiftSelectedItemDown = atom(
 );
 
 // Setter
+export type Playlist = { name: string; items: BaseItem[] };
 const importFromFile = atom(null, (get, set, playlist: Playlist) => {
-  set(name, PlaylistSchema.shape.name.parse(playlist.name));
-  set(items, PlaylistSchema.shape.items.parse(playlist.items));
+  set(name, z.string().catch('Untitled').parse(playlist.name));
+  set(items, z.array(BaseItemSchema).catch([]).parse(playlist.items));
 
   showNotification({
     color: 'green',
@@ -69,7 +70,7 @@ const downloadToFile = atom(null, (get) => {
     (playlistName || 'Untitled') + PLAYLIST_FILE_EXT,
   );
 });
-const addItem = atom(null, (get, set, item: Omit<PlaylistItem, 'id'>) => {
+const addItem = atom(null, (get, set, item: Omit<BaseItem, 'id'>) => {
   set(items, (prevItems) => [
     ...prevItems,
     { ...item, id: crypto.randomUUID() },

@@ -1,7 +1,7 @@
+import { BaseItem } from '@/schemas/ItemSchema';
 import { atom } from 'jotai';
-import { BaseItem } from '@/types';
 
-export type PreviewItem = Pick<BaseItem, 'title' | 'content'>;
+type PreviewItem = Omit<BaseItem, 'id'>;
 
 // State
 const item = atom<PreviewItem | null>(null);

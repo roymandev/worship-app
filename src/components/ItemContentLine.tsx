@@ -1,9 +1,9 @@
 import BaseListItem, { BaseListLineProps } from '@/components/BaseListItem';
-import { BaseItemContentLine } from '@/types';
+import { BaseItemLine } from '@/schemas/ItemSchema';
 import { Text } from '@mantine/core';
 
 interface ItemContentLineProps extends BaseListLineProps {
-  line: BaseItemContentLine;
+  line: BaseItemLine;
 }
 
 const lineColor: Record<string, string> = {

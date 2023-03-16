@@ -1,9 +1,11 @@
-import { PreviewItem } from '@/stores/previewStore';
+import { BaseItem } from '@/schemas/ItemSchema';
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 
+type LiveItem = Omit<BaseItem, 'id'>;
+
 // State
-const item = atomWithStorage<PreviewItem | null>('liveItem', null);
+const item = atomWithStorage<LiveItem | null>('liveItem', null);
 const selectedLineIndex = atomWithStorage('liveItemSelectedLineIndex', -1);
 
 // Getter
@@ -12,14 +14,13 @@ const selectedLine = atom(
 );
 
 // Setter
-const show = atom<
+const show = atom<null, [newItem: LiveItem | null, lineIndex?: number], void>(
   null,
-  [newItem: PreviewItem | null, lineIndex?: number],
-  void
->(null, (get, set, newItem, lineIndex = 0) => {
-  set(item, newItem);
-  set(selectedLineIndex, lineIndex);
-});
+  (get, set, newItem, lineIndex = 0) => {
+    set(item, newItem);
+    set(selectedLineIndex, lineIndex);
+  },
+);
 
 export const liveStore = {
   item,

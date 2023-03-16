@@ -9,18 +9,18 @@ import BasePanelHeaderInput from '@/components/BasePanelHeaderInput';
 import { IconPencil } from '@tabler/icons-react';
 import { Divider, Flex, Text } from '@mantine/core';
 import ListController from './ListController';
-import { playlistAtom } from '@/stores/playlistStore';
+import { playlistStore } from '@/stores/playlistStore';
 import { previewStore } from '@/stores/previewStore';
 
 const ContentList = () => {
   const showPreview = useSetAtom(previewStore.show);
   const live = useLive();
-  const [name, setName] = useAtom(playlistAtom.name);
-  const items = useAtomValue(playlistAtom.items);
+  const [name, setName] = useAtom(playlistStore.name);
+  const items = useAtomValue(playlistStore.items);
   const [selectedItemIndex, setSelectedItemIndex] = useAtom(
-    playlistAtom.selectedItemIndex,
+    playlistStore.selectedItemIndex,
   );
-  const selectedItem = useAtomValue(playlistAtom.selectedItem);
+  const selectedItem = useAtomValue(playlistStore.selectedItem);
 
   useEffect(() => {
     showPreview(selectedItem);

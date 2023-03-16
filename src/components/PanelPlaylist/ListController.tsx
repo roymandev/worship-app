@@ -1,5 +1,5 @@
 import { atomPlaylistPanelContent } from '@/stores/layoutStore';
-import { playlistAtom } from '@/stores/playlistStore';
+import { playlistStore } from '@/stores/playlistStore';
 import { ActionIcon, Divider, Stack, Tooltip } from '@mantine/core';
 import {
   IconChevronDown,
@@ -47,16 +47,16 @@ const ListControllerItem = ({
 const ListController = () => {
   const setContent = useSetAtom(atomPlaylistPanelContent);
 
-  const selectedItem = useAtomValue(playlistAtom.selectedItem);
+  const selectedItem = useAtomValue(playlistStore.selectedItem);
   const canShiftSelectedItemUp = useAtomValue(
-    playlistAtom.canShiftSelectedItemUp,
+    playlistStore.canShiftSelectedItemUp,
   );
   const canShiftSelectedItemDown = useAtomValue(
-    playlistAtom.canShiftSelectedItemDown,
+    playlistStore.canShiftSelectedItemDown,
   );
-  const moveSelectedItemUp = useSetAtom(playlistAtom.moveSelectedItemUp);
-  const moveSelectedItemDown = useSetAtom(playlistAtom.moveSelectedItemDown);
-  const deleteSelectedItem = useSetAtom(playlistAtom.deleteSelectedItem);
+  const moveSelectedItemUp = useSetAtom(playlistStore.moveSelectedItemUp);
+  const moveSelectedItemDown = useSetAtom(playlistStore.moveSelectedItemDown);
+  const deleteSelectedItem = useSetAtom(playlistStore.deleteSelectedItem);
 
   return (
     <Stack w={36} p={4} spacing={4}>

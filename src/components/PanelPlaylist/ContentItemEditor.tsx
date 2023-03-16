@@ -1,7 +1,7 @@
 import BasePanelHeader from '@/components/BasePanelHeader';
 import { ParsedContentLine, parseItemContent } from '@/lib/parseItemContent';
 import { atomPlaylistPanelContent } from '@/stores/layoutStore';
-import { playlistAtom } from '@/stores/playlistStore';
+import { playlistStore } from '@/stores/playlistStore';
 import { previewStore } from '@/stores/previewStore';
 import {
   Box,
@@ -23,8 +23,8 @@ const ContentItemEditor = ({ newItem }: ContentItemEditorProps) => {
   const setPlaylistContent = useSetAtom(atomPlaylistPanelContent);
   const showPreview = useSetAtom(previewStore.show);
 
-  const [selectedItem, setSelectedItem] = useAtom(playlistAtom.selectedItem);
-  const addPlaylistItem = useSetAtom(playlistAtom.addItem);
+  const [selectedItem, setSelectedItem] = useAtom(playlistStore.selectedItem);
+  const addPlaylistItem = useSetAtom(playlistStore.addItem);
 
   const [title, setTitle] = useState('');
   const [stringContent, setStringContent] = useState('');

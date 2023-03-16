@@ -26,11 +26,11 @@ import {
   IconTypographyOff,
   IconX,
 } from '@tabler/icons-react';
-import { playlistAtom } from '@/stores/playlistStore';
+import { playlistStore } from '@/stores/playlistStore';
 
 const PanelLive = forwardRef((props, ref) => {
-  const shiftSelectedItemUp = useSetAtom(playlistAtom.shiftSelectedItemUp);
-  const shiftSelectedItemDown = useSetAtom(playlistAtom.shiftSelectedItemDown);
+  const shiftSelectedItemUp = useSetAtom(playlistStore.shiftSelectedItemUp);
+  const shiftSelectedItemDown = useSetAtom(playlistStore.shiftSelectedItemDown);
 
   const { settings, changeSetting } = useScreen();
 

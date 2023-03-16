@@ -5,11 +5,11 @@ import { IconMusic, IconPlaylistAdd } from '@tabler/icons-react';
 import { ActionIcon, Title, Tooltip } from '@mantine/core';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { atomSongsSelectedSong } from '@/stores/songsStore';
-import { playlistAtom } from '@/stores/playlistStore';
+import { playlistStore } from '@/stores/playlistStore';
 
 const PanelSongs = () => {
   const selectedSong = useAtomValue(atomSongsSelectedSong);
-  const addItem = useSetAtom(playlistAtom.addItem);
+  const addItem = useSetAtom(playlistStore.addItem);
 
   return (
     <>

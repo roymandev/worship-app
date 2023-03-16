@@ -119,7 +119,7 @@ const deleteSelectedItem = atom(null, (get, set) => {
   else set(selectedItemIndex, -1);
 });
 
-export const playlistAtom = {
+export const playlistStore = {
   name,
   items,
   selectedItemIndex,

@@ -38,7 +38,7 @@ const MainPanels = () => {
   return (
     <Split className={classes.split} gutterSize={2} onDrag={dragHandler}>
       <PanelLeft />
-      <PanelPreview ref={panelLiveScreenRef} />
+      <PanelPreview ref={panelPreviewScreenRef} />
       <PanelLive ref={panelLiveScreenRef} />
     </Split>
   );

@@ -1,23 +1,31 @@
 import { PLAYLIST_FILE_EXT } from '@/constant';
-import { atomWithLocalStorage } from '@/lib/atomWithLocalStorage';
 import { downloadObject } from '@/lib/downloadObject';
 import { BaseItem, BaseItemSchema } from '@/schemas/itemSchema';
 import { showNotification } from '@mantine/notifications';
 import { IconCheck } from '@tabler/icons-react';
 import { atom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 import React, { SetStateAction } from 'react';
 import { z } from 'zod';
 
 // State
-const name = atomWithLocalStorage('playlistName', 'Untitled', (value) =>
-  z.string().catch('Untitled').parse(value),
-);
+const INITIAL_NAME = 'Untitled';
+const name = atomWithStorage('playlistName', INITIAL_NAME);
+name.onMount = (setAtom) => {
+  setAtom((val) =>
+    z.string().catch('Untitled').safeParse(val).success ? val : INITIAL_NAME,
+  );
+};
 
-const items = atomWithLocalStorage<BaseItem[]>(
-  'playlistItems',
-  [],
-  (storageValue) => z.array(BaseItemSchema).catch([]).parse(storageValue),
-);
+const items = atomWithStorage<BaseItem[]>('playlistItems', []);
+items.onMount = (setAtom) => {
+  console.log('validated');
+  setAtom((storageValue) =>
+    z.array(BaseItemSchema).catch([]).safeParse(storageValue).success
+      ? storageValue
+      : [],
+  );
+};
 
 const selectedItemIndex = atom(
   -1,

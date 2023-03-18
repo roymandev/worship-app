@@ -3,7 +3,7 @@ import MainNavbar from '@/components/layout/MainNavbar';
 import MainPanels from '@/components/layout/MainPanels';
 import { NotificationsProvider } from '@mantine/notifications';
 
-const Home = () => {
+const AppHome = () => {
   return (
     <NotificationsProvider position="bottom-left">
       <Flex>
@@ -15,4 +15,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default AppHome;

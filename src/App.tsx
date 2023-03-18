@@ -3,8 +3,8 @@ import { MantineProvider } from '@mantine/core';
 import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-const Home = lazy(() => import('@/pages/Home'));
-const LiveScreen = lazy(() => import('@/pages/LiveScreen'));
+const AppHome = lazy(() => import('@/pages/AppHome'));
+const AppLiveScreen = lazy(() => import('@/pages/AppLiveScreen'));
 
 function App() {
   return (
@@ -21,9 +21,9 @@ function App() {
     >
       <Suspense fallback={<LoadingFullscreen />}>
         <Routes>
-          <Route index element={<Home />} />
+          <Route index element={<AppHome />} />
 
-          <Route path="/screen" element={<LiveScreen />} />
+          <Route path="/screen" element={<AppLiveScreen />} />
         </Routes>
       </Suspense>
     </MantineProvider>

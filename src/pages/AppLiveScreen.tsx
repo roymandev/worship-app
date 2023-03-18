@@ -7,7 +7,7 @@ import { Flex } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 
-const LiveScreen = () => {
+const AppLiveScreen = () => {
   const selectedLine = useAtomValue(liveStore.selectedLine);
   const [screenSettings, setScreenSettings] = useAtom(atomScreenSettings);
 
@@ -48,4 +48,4 @@ const LiveScreen = () => {
   );
 };
 
-export default LiveScreen;
+export default AppLiveScreen;

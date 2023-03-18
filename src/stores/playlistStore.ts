@@ -91,24 +91,32 @@ const shiftSelectedItemDown = atom(null, (get, set) =>
   set(selectedItemIndex, (prevIndex) => prevIndex + 1),
 );
 const moveSelectedItemUp = atom(null, (get, set) => {
-  set(items, (prevItems) => {
-    const newItems = [...prevItems];
-    [newItems[get(selectedItemIndex)], newItems[get(selectedItemIndex) - 1]] = [
-      newItems[get(selectedItemIndex) - 1],
-      newItems[get(selectedItemIndex)],
-    ];
-    return newItems;
-  });
+  if (get(canShiftSelectedItemUp)) {
+    set(items, (prevItems) => {
+      const newItems = [...prevItems];
+      [newItems[get(selectedItemIndex)], newItems[get(selectedItemIndex) - 1]] =
+        [
+          newItems[get(selectedItemIndex) - 1],
+          newItems[get(selectedItemIndex)],
+        ];
+      return newItems;
+    });
+    set(shiftSelectedItemUp);
+  }
 });
 const moveSelectedItemDown = atom(null, (get, set) => {
-  set(items, (prevItems) => {
-    const newItems = [...prevItems];
-    [newItems[get(selectedItemIndex)], newItems[get(selectedItemIndex) + 1]] = [
-      newItems[get(selectedItemIndex) + 1],
-      newItems[get(selectedItemIndex)],
-    ];
-    return newItems;
-  });
+  if (get(canShiftSelectedItemDown)) {
+    set(items, (prevItems) => {
+      const newItems = [...prevItems];
+      [newItems[get(selectedItemIndex)], newItems[get(selectedItemIndex) + 1]] =
+        [
+          newItems[get(selectedItemIndex) + 1],
+          newItems[get(selectedItemIndex)],
+        ];
+      return newItems;
+    });
+    set(shiftSelectedItemDown);
+  }
 });
 const deleteSelectedItem = atom(null, (get, set) => {
   set(items, (prevItems) =>

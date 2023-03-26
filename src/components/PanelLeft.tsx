@@ -3,6 +3,7 @@ import PanelPlaylist from '@/components/PanelPlaylist';
 import PanelSongs from '@/components/PanelSongs';
 import { useAtomValue } from 'jotai';
 import { atomLeftPanelContent } from '@/stores/layoutStore';
+import PanelSettings from './PanelSettings';
 
 const PanelLeft = () => {
   const leftPanelContent = useAtomValue(atomLeftPanelContent);
@@ -11,6 +12,7 @@ const PanelLeft = () => {
     <BasePanel>
       {leftPanelContent === 'playlist' && <PanelPlaylist />}
       {leftPanelContent === 'song-database' && <PanelSongs />}
+      {leftPanelContent === 'settings' && <PanelSettings />}
     </BasePanel>
   );
 };

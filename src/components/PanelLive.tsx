@@ -6,7 +6,6 @@ import Screen, { ScreenRef } from '@/components/Screen';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import Split from 'react-split';
-import useScreen from '@/hooks/useScreen';
 import {
   ActionIcon,
   Button,
@@ -26,12 +25,14 @@ import {
 } from '@tabler/icons-react';
 import { playlistStore } from '@/stores/playlistStore';
 import { liveStore } from '@/stores/liveStore';
+import { screenStore } from '@/stores/screenStore';
 
 const PanelLive = forwardRef((props, ref) => {
   const shiftSelectedItemUp = useSetAtom(playlistStore.shiftSelectedItemUp);
   const shiftSelectedItemDown = useSetAtom(playlistStore.shiftSelectedItemDown);
 
-  const { settings, changeSetting } = useScreen();
+  const settings = useAtomValue(screenStore.settings);
+  const updateSettings = useSetAtom(screenStore.updateSettings);
 
   const item = useAtomValue(liveStore.item);
   const [selectedLineIndex, setSelectedLineIndex] = useAtom(
@@ -81,7 +82,9 @@ const PanelLive = forwardRef((props, ref) => {
                 size="md"
                 variant="filled"
                 onClick={() =>
-                  changeSetting('hideScreen', (prevValue) => !prevValue)
+                  updateSettings((prevSettings) => ({
+                    hideScreen: !prevSettings.hideScreen,
+                  }))
                 }
               >
                 {settings.hideScreen ? (
@@ -98,7 +101,9 @@ const PanelLive = forwardRef((props, ref) => {
                 size="md"
                 variant="filled"
                 onClick={() =>
-                  changeSetting('hideText', (prevValue) => !prevValue)
+                  updateSettings((prevSettings) => ({
+                    hideText: !prevSettings.hideText,
+                  }))
                 }
               >
                 {settings.hideText ? (

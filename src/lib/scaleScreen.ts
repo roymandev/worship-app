@@ -1,11 +1,11 @@
-import { BASE_SCREEN_SETTINGS } from '@/schemas/screenSchema';
+import { BASE_SCREEN_SETTINGS } from '@/stores/screenStore';
 
 interface Container {
   width: number;
   height: number;
 }
 
-type ScreenSize = typeof BASE_SCREEN_SETTINGS.mainSize;
+type ScreenSize = typeof BASE_SCREEN_SETTINGS.sizes;
 
 export const scaleScreen = (screenSize: ScreenSize, container: Container) => {
   const zoom = calculateZoom(screenSize, container);

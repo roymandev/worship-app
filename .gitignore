@@ -31,3 +31,14 @@ Thumbs.db
 coverage/
 .turbo/
 .cache/
+
+
+# Agent
+.scratch
+.slim/
+.opencode
+AGENTS.md
+GLOSSARY.md
+/docs/agents
+/docs/adr
+/docs/convention

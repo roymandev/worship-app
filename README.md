@@ -1,18 +1,5 @@
-# <p align="center">Worship App</p>
+# Worship App (v2)
 
-Worship App is a web-based application designed to enhance the worship experience for churches by providing an easy way to display lyrics during services.
+Under active re-architecture.
 
-## Key features
-
-- No installation is needed, allowing users to easily switch devices.
-- Import and export functionality for creating and sharing playlists.
-- Built-in search functionality for quickly finding lyrics in the database.
-
-## Tech stack
-
-- React.js
-- Typescript
-- TailwindCSS
-- Jotai
-- Supabase
-- Vite
+- Legacy v1 codebase is archived at branch [`archive/v1`](../../tree/archive/v1) and release tag [`v1.0.0`](../../releases/tag/v1.0.0).

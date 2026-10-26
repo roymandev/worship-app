@@ -9,7 +9,13 @@
     "preview": "vite preview",
     "format": "biome format",
     "lint": "biome lint",
-    "check": "biome check"
+    "check": "biome check",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,ts,cjs,mjs,jsx,tsx,json}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
   },
   "intent": {
     "skills": [
@@ -32,6 +38,8 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "typescript": "^6.0.2",
     "vite": "^8.0.0"
   },

@@ -11,6 +11,11 @@
     "lint": "biome lint",
     "check": "biome check"
   },
+  "intent": {
+    "skills": [
+      "@tanstack/*"
+    ]
+  },
   "dependencies": {
     "@tanstack/react-router": "1.170.46",
     "react": "^19.2.0",
@@ -20,6 +25,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
     "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/intent": "^0.5.6",
     "@tanstack/router-cli": "^1.167.46",
     "@tanstack/router-plugin": "^1.168.48",
     "@types/node": "^22.10.2",

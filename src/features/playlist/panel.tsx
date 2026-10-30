@@ -2,6 +2,14 @@ import { IconList, IconPlus } from "@tabler/icons-react";
 import { useEffect, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
+import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "@/components/ui/empty";
 import { PlaylistItemRow } from "@/features/playlist/item-row";
 import { usePlaylistStore } from "@/features/playlist/store";
 
@@ -18,8 +26,18 @@ export function PlaylistPanel() {
 
 	const gridRef = useRef<HTMLDivElement | null>(null);
 	const organizeButtonRef = useRef<HTMLButtonElement | null>(null);
+	const emptyAddButtonRef = useRef<HTMLButtonElement | null>(null);
 
 	const isEditMode = mode === "edit";
+
+	const focusActiveRow = () => {
+		requestAnimationFrame(() => {
+			const activeRow = gridRef.current?.querySelector<HTMLElement>(
+				'[role="row"][aria-selected="true"]',
+			);
+			activeRow?.focus();
+		});
+	};
 
 	// Scroll newly selected or added item into view
 	useEffect(() => {
@@ -34,6 +52,7 @@ export function PlaylistPanel() {
 
 	const handleAdd = () => {
 		usePlaylistStore.getState().addItem();
+		focusActiveRow();
 	};
 
 	const handleToggleMode = () => {
@@ -41,8 +60,13 @@ export function PlaylistPanel() {
 	};
 
 	const handleDeleteItem = (id: string) => {
+		const isLastItem = items.length === 1;
 		usePlaylistStore.getState().deleteItem(id);
 		requestAnimationFrame(() => {
+			if (isLastItem) {
+				emptyAddButtonRef.current?.focus();
+				return;
+			}
 			const activeRow = gridRef.current?.querySelector<HTMLElement>(
 				'[role="row"][aria-selected="true"]',
 			);
@@ -56,22 +80,12 @@ export function PlaylistPanel() {
 
 	const handleSelectNext = () => {
 		usePlaylistStore.getState().selectNext();
-		requestAnimationFrame(() => {
-			const activeRow = gridRef.current?.querySelector<HTMLElement>(
-				'[role="row"][aria-selected="true"]',
-			);
-			activeRow?.focus();
-		});
+		focusActiveRow();
 	};
 
 	const handleSelectPrevious = () => {
 		usePlaylistStore.getState().selectPrevious();
-		requestAnimationFrame(() => {
-			const activeRow = gridRef.current?.querySelector<HTMLElement>(
-				'[role="row"][aria-selected="true"]',
-			);
-			activeRow?.focus();
-		});
+		focusActiveRow();
 	};
 
 	const handleGridKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -134,6 +148,7 @@ export function PlaylistPanel() {
 						variant={isEditMode ? "secondary" : "ghost"}
 						size="sm"
 						onClick={handleToggleMode}
+						disabled={items.length === 0}
 						aria-pressed={isEditMode}
 						className="h-7 px-2 text-xs"
 					>
@@ -144,20 +159,28 @@ export function PlaylistPanel() {
 
 			<div className="min-h-0 flex-1 overflow-y-auto p-2">
 				{items.length === 0 ? (
-					<div className="flex h-full flex-col items-center justify-center gap-3 p-4 text-center">
-						<p className="text-muted-foreground text-xs">
-							No items in playlist
-						</p>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={handleAdd}
-							className="text-xs"
-						>
-							<IconPlus className="mr-1 size-3.5" />
-							Add Item
-						</Button>
-					</div>
+					<Empty className="border-none">
+						<EmptyHeader>
+							<EmptyMedia variant="icon">
+								<IconList className="size-4" />
+							</EmptyMedia>
+							<EmptyTitle>Playlist is empty</EmptyTitle>
+							<EmptyDescription>
+								Add items to build your worship service order.
+							</EmptyDescription>
+						</EmptyHeader>
+						<EmptyContent>
+							<Button
+								ref={emptyAddButtonRef}
+								variant="default"
+								size="sm"
+								onClick={handleAdd}
+							>
+								<IconPlus className="mr-1 size-3.5" />
+								Add Item
+							</Button>
+						</EmptyContent>
+					</Empty>
 				) : (
 					// biome-ignore lint/a11y/useSemanticElements: APG Composite Grid
 					<div

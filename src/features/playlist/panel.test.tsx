@@ -135,14 +135,20 @@ describe("PlaylistPanel", () => {
 		expect(usePlaylistStore.getState().mode).toBe("view");
 	});
 
-	it("renders empty state when all items deleted, and '+ Add Item' restores an item", async () => {
+	it("renders empty state when all items deleted, and '+ Add Item' restores an item and focuses row", async () => {
 		const user = userEvent.setup();
 		usePlaylistStore.setState({ items: [], selectedItemId: null });
 
 		render(<PlaylistPanel />);
 
-		expect(screen.getByText("No items in playlist")).toBeInTheDocument();
+		expect(screen.getByText("Playlist is empty")).toBeInTheDocument();
+		expect(
+			screen.getByText("Add items to build your worship service order."),
+		).toBeInTheDocument();
 		expect(screen.queryByRole("grid")).not.toBeInTheDocument();
+
+		const organizeBtn = screen.getByRole("button", { name: "Organize" });
+		expect(organizeBtn).toBeDisabled();
 
 		const addFallbackBtn = screen.getByRole("button", { name: "Add Item" });
 		await user.click(addFallbackBtn);
@@ -152,6 +158,86 @@ describe("PlaylistPanel", () => {
 			screen.getByRole("grid", { name: "Playlist items" }),
 		).toBeInTheDocument();
 		expect(screen.getByText("(Untitled)")).toBeInTheDocument();
+
+		await waitFor(() => {
+			const activeRow = screen.getByRole("row", { selected: true });
+			expect(activeRow).toHaveFocus();
+		});
+	});
+
+	it("activates empty state Add Item button via Enter key and restores playlist item", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ items: [], selectedItemId: null });
+
+		render(<PlaylistPanel />);
+
+		const addFallbackBtn = screen.getByRole("button", { name: "Add Item" });
+		addFallbackBtn.focus();
+		expect(addFallbackBtn).toHaveFocus();
+
+		await user.keyboard("{Enter}");
+
+		expect(usePlaylistStore.getState().items).toHaveLength(1);
+		expect(
+			screen.getByRole("grid", { name: "Playlist items" }),
+		).toBeInTheDocument();
+
+		await waitFor(() => {
+			const activeRow = screen.getByRole("row", { selected: true });
+			expect(activeRow).toHaveFocus();
+		});
+	});
+
+	it("activates empty state Add Item button via Space key and restores playlist item", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ items: [], selectedItemId: null });
+
+		render(<PlaylistPanel />);
+
+		const addFallbackBtn = screen.getByRole("button", { name: "Add Item" });
+		addFallbackBtn.focus();
+		expect(addFallbackBtn).toHaveFocus();
+
+		await user.keyboard(" ");
+
+		expect(usePlaylistStore.getState().items).toHaveLength(1);
+		expect(
+			screen.getByRole("grid", { name: "Playlist items" }),
+		).toBeInTheDocument();
+
+		await waitFor(() => {
+			const activeRow = screen.getByRole("row", { selected: true });
+			expect(activeRow).toHaveFocus();
+		});
+	});
+
+	it("shifts focus to empty state Add Item button and resets mode to view when deleting the last item", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({
+			items: [
+				{
+					id: "item-only",
+					title: "Single Item",
+					content: "Solo",
+				},
+			],
+			selectedItemId: "item-only",
+			mode: "edit",
+		});
+
+		render(<PlaylistPanel />);
+
+		const deleteBtn = screen.getByRole("button", { name: "Delete item" });
+		await user.click(deleteBtn);
+
+		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
+		await user.click(confirmDeleteBtn);
+
+		expect(usePlaylistStore.getState().mode).toBe("view");
+		await waitFor(() => {
+			const emptyAddBtn = screen.getByRole("button", { name: "Add Item" });
+			expect(emptyAddBtn).toHaveFocus();
+		});
 	});
 
 	it("reordering items via Move Up / Move Down buttons", async () => {
@@ -248,6 +334,33 @@ describe("PlaylistPanel", () => {
 		expect(remainingRows[0]).toHaveFocus();
 	});
 
+	it("confirms deletion via keyboard Enter on Delete button and transfers focus to neighbor row", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-2" });
+
+		render(<PlaylistPanel />);
+
+		// Item 2 is "Psalm 23"
+		const deleteBtns = screen.getAllByRole("button", { name: "Delete item" });
+		await user.click(deleteBtns[1]);
+
+		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
+		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
+		await waitFor(() => expect(cancelBtn).toHaveFocus());
+
+		// Tab to Delete button and actuate with Enter
+		await user.keyboard("{Tab}");
+		expect(confirmDeleteBtn).toHaveFocus();
+
+		await user.keyboard("{Enter}");
+
+		const remainingRows = screen.getAllByRole("row");
+		expect(remainingRows).toHaveLength(2);
+		expect(screen.queryByText("Psalm 23")).not.toBeInTheDocument();
+		// Neighbor row should receive focus (index 1 which is "10,000 Reasons", or fallback index 0)
+		expect(remainingRows[1]).toHaveFocus();
+	});
+
 	it("retaining focus when reordering item to boundary index 0 (top)", async () => {
 		const user = userEvent.setup();
 		usePlaylistStore.setState({ mode: "edit" });
@@ -317,7 +430,7 @@ describe("PlaylistPanel", () => {
 		}
 	});
 
-	it("dismissing delete confirmation popover restores focus to trigger or originating row", async () => {
+	it("dismissing delete confirmation popover in edit mode restores focus to trigger button", async () => {
 		const user = userEvent.setup();
 		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-2" });
 
@@ -339,9 +452,14 @@ describe("PlaylistPanel", () => {
 		// Popover should close and focus should be restored to trigger button
 		expect(screen.queryByText("Delete this item?")).not.toBeInTheDocument();
 		expect(triggerBtn).toHaveFocus();
+	});
 
-		// Now test dismissal via Escape in view mode
+	it("dismissing delete confirmation popover in view mode restores focus to originating row", async () => {
+		const user = userEvent.setup();
 		usePlaylistStore.setState({ mode: "view", selectedItemId: "item-1" });
+
+		render(<PlaylistPanel />);
+
 		const rows = screen.getAllByRole("row");
 		rows[0].focus();
 		expect(rows[0]).toHaveFocus();
@@ -377,7 +495,7 @@ describe("PlaylistPanel", () => {
 		expect(document.activeElement).toBe(doneBtn);
 	});
 
-	it("traps focus inside the delete confirmation popover and prevents focus from leaking to playlist rows", async () => {
+	it("traps focus inside the delete confirmation popover, prevents focus leakage, and ignores ArrowUp/ArrowDown", async () => {
 		const user = userEvent.setup();
 		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-1" });
 
@@ -386,22 +504,26 @@ describe("PlaylistPanel", () => {
 		const deleteBtns = screen.getAllByRole("button", { name: "Delete item" });
 		await user.click(deleteBtns[0]);
 
+		expect(screen.getByRole("alertdialog")).toBeInTheDocument();
 		expect(screen.getByText("Delete this item?")).toBeInTheDocument();
 		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
-		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
 
 		await waitFor(() => expect(cancelBtn).toHaveFocus());
 
-		// Tab to Delete button
-		await user.keyboard("{Tab}");
-		expect(confirmDeleteBtn).toHaveFocus();
-
-		// Tab wraps back to Cancel button (not background rows or header)
-		await user.keyboard("{Tab}");
+		// Verify pressing ArrowDown inside popover leaves selected item unchanged and focus within popover
+		await user.keyboard("{ArrowDown}");
+		expect(usePlaylistStore.getState().selectedItemId).toBe("item-1");
 		expect(cancelBtn).toHaveFocus();
 
-		// Shift+Tab wraps backwards to Delete button
+		// Verify pressing ArrowUp inside popover leaves selected item unchanged and focus within popover
+		await user.keyboard("{ArrowUp}");
+		expect(usePlaylistStore.getState().selectedItemId).toBe("item-1");
+		expect(cancelBtn).toHaveFocus();
+
+		// Verify pressing Shift+Tab inside popover leaves selected item unchanged and focus remains contained
 		await user.keyboard("{Shift>}{Tab}{/Shift}");
+		expect(usePlaylistStore.getState().selectedItemId).toBe("item-1");
+		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
 		expect(confirmDeleteBtn).toHaveFocus();
 
 		// Background rows must not have focus

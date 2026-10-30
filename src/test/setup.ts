@@ -52,3 +52,42 @@ const { expect } = await import("bun:test");
 const matchers = (await import("@testing-library/jest-dom/matchers")) as any;
 
 expect.extend(matchers);
+
+function formatElement(el: unknown): string {
+	if (!el || typeof el !== "object" || !("tagName" in el)) {
+		return String(el);
+	}
+	const node = el as Element;
+	const parts: string[] = [node.tagName?.toLowerCase() || "element"];
+	const role = node.getAttribute?.("role");
+	if (role) parts.push(`role="${role}"`);
+	const ariaLabel = node.getAttribute?.("aria-label");
+	if (ariaLabel) parts.push(`aria-label="${ariaLabel}"`);
+	const testId = node.getAttribute?.("data-testid");
+	if (testId) parts.push(`data-testid="${testId}"`);
+	if (node.id) parts.push(`id="${node.id}"`);
+	if (node.className && typeof node.className === "string") {
+		parts.push(`class="${node.className}"`);
+	}
+	return `<${parts.join(" ")}>`;
+}
+
+expect.extend({
+	toHaveFocus(received: unknown) {
+		const el = (
+			received && typeof received === "object" && "ownerDocument" in received
+				? received
+				: null
+		) as Element | null;
+		const doc = el?.ownerDocument ?? globalThis.document;
+		const activeElement = doc?.activeElement;
+		const pass = Boolean(el && doc && el === activeElement);
+		return {
+			pass,
+			message: () =>
+				pass
+					? `expected element not to have focus, but it has focus: ${formatElement(received)}`
+					: `expected element to have focus: ${formatElement(received)}\nreceived: ${formatElement(activeElement)}`,
+		};
+	},
+});

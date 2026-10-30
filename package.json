@@ -12,7 +12,10 @@
     "lint": "biome lint",
     "check": "biome check",
     "test": "bun test",
-    "typecheck": "tsc --noEmit",
+    "test:coverage": "bun test --coverage",
+    "audit": "bun audit --audit-level=moderate",
+    "dedupe:check": "bun dedupe --check",
+    "typecheck": "bun check --no-script",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -32,7 +35,7 @@
     "@tanstack/react-hotkeys": "^0.17.0",
     "@tanstack/react-router": "1.170.46",
     "class-variance-authority": "^0.7.1",
-    "cn": "^0.5.0",
+    "cn": "^0.5.1",
     "nanoid": "^6.0.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -63,10 +66,8 @@
     "typescript": "^6.0.2",
     "vite": "^8.0.0"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "lightningcss"
-    ]
-  }
+  "trustedDependencies": [
+    "esbuild",
+    "lightningcss"
+  ]
 }

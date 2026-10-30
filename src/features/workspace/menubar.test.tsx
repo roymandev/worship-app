@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WorkspaceMenubar } from "./menubar";
 import { useWorkspaceStore } from "./store";
@@ -68,10 +68,14 @@ describe("WorkspaceMenubar", () => {
 		expect(resetLayoutItem).toHaveAttribute("data-variant", "destructive");
 
 		// Keyboard roving focus verification
-		toggleLayoutItem.focus();
+		act(() => {
+			toggleLayoutItem.focus();
+		});
 		expect(toggleLayoutItem).toHaveFocus();
 
-		resetLayoutItem.focus();
+		act(() => {
+			resetLayoutItem.focus();
+		});
 		expect(resetLayoutItem).toHaveFocus();
 	});
 

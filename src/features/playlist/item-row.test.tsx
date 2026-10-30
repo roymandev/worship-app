@@ -192,6 +192,67 @@ describe("PlaylistItemRow", () => {
 		expect(onDelete).toHaveBeenCalledTimes(1);
 	});
 
+	it("confirms deletion via Enter or Space key on the Delete confirmation button", async () => {
+		const user = userEvent.setup();
+		const onDelete = mock(() => {});
+
+		const { rerender } = render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalCount={3}
+				isSelected={true}
+				mode="edit"
+				onSelect={() => {}}
+				onMoveUp={() => {}}
+				onMoveDown={() => {}}
+				onDelete={onDelete}
+			/>,
+		);
+
+		const deleteBtn = screen.getByRole("button", { name: "Delete item" });
+		await user.click(deleteBtn);
+
+		const confirmBtn = screen.getByRole("button", { name: "Delete" });
+		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
+		await waitFor(() => expect(cancelBtn).toHaveFocus());
+
+		// Tab to Delete button
+		await user.keyboard("{Tab}");
+		expect(confirmBtn).toHaveFocus();
+
+		// Actuate via Enter
+		await user.keyboard("{Enter}");
+		expect(onDelete).toHaveBeenCalledTimes(1);
+
+		// Render fresh row and actuate via Space
+		rerender(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalCount={3}
+				isSelected={true}
+				mode="edit"
+				onSelect={() => {}}
+				onMoveUp={() => {}}
+				onMoveDown={() => {}}
+				onDelete={onDelete}
+			/>,
+		);
+
+		const newDeleteBtn = screen.getByRole("button", { name: "Delete item" });
+		await user.click(newDeleteBtn);
+
+		const newCancelBtn = screen.getByRole("button", { name: "Cancel" });
+		const newConfirmBtn = screen.getByRole("button", { name: "Delete" });
+		await waitFor(() => expect(newCancelBtn).toHaveFocus());
+
+		await user.keyboard("{Tab}");
+		expect(newConfirmBtn).toHaveFocus();
+		await user.keyboard(" ");
+		expect(onDelete).toHaveBeenCalledTimes(2);
+	});
+
 	it("opens delete confirmation when Backspace or Delete key is pressed on the row", async () => {
 		const user = userEvent.setup();
 		const onDelete = mock(() => {});
@@ -443,7 +504,7 @@ describe("PlaylistItemRow", () => {
 		expect(deleteBtn.parentElement?.tagName).not.toBe("SPAN");
 	});
 
-	it("traps focus within delete confirmation popover with Tab and Shift+Tab cycling", async () => {
+	it("renders delete confirmation popover with alertdialog semantics, initial Cancel focus, and focus restoration upon Escape", async () => {
 		const user = userEvent.setup();
 
 		render(
@@ -463,29 +524,126 @@ describe("PlaylistItemRow", () => {
 		const deleteBtn = screen.getByRole("button", { name: "Delete item" });
 		await user.click(deleteBtn);
 
+		// Popover container should have role="alertdialog"
+		const alertdialog = screen.getByRole("alertdialog");
+		expect(alertdialog).toBeInTheDocument();
 		expect(screen.getByText("Delete this item?")).toBeInTheDocument();
+
+		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
+		expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
+
+		// Verify initial autofocus on Cancel button
+		await waitFor(() => expect(cancelBtn).toHaveFocus());
+
+		// Press Escape -> dismisses popover and restores focus to trigger button
+		await user.keyboard("{Escape}");
+		expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+		expect(deleteBtn).toHaveFocus();
+	});
+
+	it("contains Shift+Tab within delete confirmation popover without triggering onExitToHeader", async () => {
+		const user = userEvent.setup();
+		const onExitToHeader = mock(() => {});
+
+		render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalCount={3}
+				isSelected={true}
+				mode="edit"
+				onExitToHeader={onExitToHeader}
+				onSelect={() => {}}
+				onMoveUp={() => {}}
+				onMoveDown={() => {}}
+				onDelete={() => {}}
+			/>,
+		);
+
+		const deleteBtn = screen.getByRole("button", { name: "Delete item" });
+		await user.click(deleteBtn);
+
+		expect(screen.getByRole("alertdialog")).toBeInTheDocument();
 		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
 		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
 
-		// Verify Cancel button receives initial focus
 		await waitFor(() => expect(cancelBtn).toHaveFocus());
 
-		// Press Tab -> verify Delete button receives focus
-		await user.keyboard("{Tab}");
-		expect(confirmDeleteBtn).toHaveFocus();
-
-		// Press Tab -> verify focus wraps back to Cancel button
-		await user.keyboard("{Tab}");
-		expect(cancelBtn).toHaveFocus();
-
-		// Press Shift+Tab -> verify focus wraps back to Delete button
+		// Shift+Tab from Cancel button wraps backwards to Delete button (and does NOT trigger onExitToHeader)
 		await user.keyboard("{Shift>}{Tab}{/Shift}");
 		expect(confirmDeleteBtn).toHaveFocus();
+		expect(onExitToHeader).not.toHaveBeenCalled();
+	});
 
-		// Press Escape -> verify popover closes and focus returns to the trigger button
+	it("suppresses vertical arrow keys inside delete confirmation popover so onSelectNext and onSelectPrevious are not called", async () => {
+		const user = userEvent.setup();
+		const onSelectNext = mock(() => {});
+		const onSelectPrevious = mock(() => {});
+
+		render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalCount={3}
+				isSelected={true}
+				mode="edit"
+				onSelectNext={onSelectNext}
+				onSelectPrevious={onSelectPrevious}
+				onSelect={() => {}}
+				onMoveUp={() => {}}
+				onMoveDown={() => {}}
+				onDelete={() => {}}
+			/>,
+		);
+
+		const deleteBtn = screen.getByRole("button", { name: "Delete item" });
+		await user.click(deleteBtn);
+
+		expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
+		await waitFor(() => expect(cancelBtn).toHaveFocus());
+
+		// ArrowDown and ArrowUp on Cancel do not call onSelectNext/onSelectPrevious
+		await user.keyboard("{ArrowDown}");
+		expect(onSelectNext).not.toHaveBeenCalled();
+		expect(cancelBtn).toHaveFocus();
+
+		await user.keyboard("{ArrowUp}");
+		expect(onSelectPrevious).not.toHaveBeenCalled();
+		expect(cancelBtn).toHaveFocus();
+	});
+
+	it("restores focus to originating row when Escape dismisses delete popover in view mode", async () => {
+		const user = userEvent.setup();
+
+		render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalCount={3}
+				isSelected={true}
+				mode="view"
+				onSelect={() => {}}
+				onMoveUp={() => {}}
+				onMoveDown={() => {}}
+				onDelete={() => {}}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		row.focus();
+		expect(row).toHaveFocus();
+
+		// Trigger delete confirmation via Delete key in view mode
+		await user.keyboard("{Delete}");
+		expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
+		await waitFor(() => expect(cancelBtn).toHaveFocus());
+
+		// Dismiss via Escape
 		await user.keyboard("{Escape}");
-		expect(screen.queryByText("Delete this item?")).not.toBeInTheDocument();
-		expect(deleteBtn).toHaveFocus();
+		expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+		expect(row).toHaveFocus();
 	});
 
 	it("intercepts Shift+Tab from an action button and calls onExitToHeader", async () => {
@@ -513,7 +671,7 @@ describe("PlaylistItemRow", () => {
 		// Rove to the first action button
 		await user.keyboard("{ArrowRight}");
 		const moveUpBtn = screen.getByRole("button", { name: "Move up" });
-		expect(document.activeElement).toBe(moveUpBtn);
+		expect(moveUpBtn).toHaveFocus();
 
 		// Press Shift+Tab
 		await user.keyboard("{Shift>}{Tab}{/Shift}");

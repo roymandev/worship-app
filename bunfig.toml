@@ -1,2 +1,9 @@
 [test]
 preload = ["./src/test/setup.ts"]
+coverageReporter = ["text", "lcov"]
+coveragePathIgnorePatterns = [
+  "src/routeTree.gen.ts",
+  "src/test/**",
+  "**/*.test.ts",
+  "**/*.test.tsx",
+]

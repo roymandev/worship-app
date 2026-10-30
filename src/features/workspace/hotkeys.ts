@@ -1,10 +1,10 @@
 import { defineAppHotkeys } from "@tanstack/react-hotkeys";
 
-export interface AppHotkeyMeta {
+export type AppHotkeyMeta = {
 	name: string;
 	group: "Workspace" | "Presentation" | "Help";
 	description: string;
-}
+};
 
 export const appHotkeys = defineAppHotkeys({
 	"workspace.toggleLayoutMode": {
@@ -16,7 +16,7 @@ export const appHotkeys = defineAppHotkeys({
 		},
 	},
 	"workspace.resetLayout": {
-		hotkey: "Mod+Alt+R",
+		hotkey: "Mod+Shift+R",
 		meta: {
 			name: "Reset layout to defaults",
 			group: "Workspace",

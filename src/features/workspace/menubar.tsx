@@ -37,6 +37,7 @@ export function WorkspaceMenubar({ className }: WorkspaceMenubarProps = {}) {
 					</MenubarItem>
 					<MenubarSeparator />
 					<MenubarItem
+						variant="destructive"
 						onClick={() => useWorkspaceStore.getState().openResetConfirmation()}
 						className="flex items-center justify-between gap-4"
 					>

@@ -7,8 +7,17 @@ import {
 	within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { PlaylistItemRow } from "./item-row";
+import { PlaylistItemRow, type PlaylistItemRowProps } from "./item-row";
 import type { PlaylistItem } from "./store";
+
+function renderPlaylistItemRow(props: PlaylistItemRowProps) {
+	return render(
+		// biome-ignore lint/a11y/useSemanticElements: APG Composite Grid
+		<div role="grid" aria-label="Playlist items">
+			<PlaylistItemRow {...props} />
+		</div>,
+	);
+}
 
 describe("PlaylistItemRow", () => {
 	const sampleItem: PlaylistItem = {
@@ -22,19 +31,15 @@ describe("PlaylistItemRow", () => {
 	});
 
 	it("renders row with title in view mode with Go Live action", () => {
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={true}
-				mode="view"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isSelected: true,
+			mode: "view",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: () => {},
+		});
 
 		const row = screen.getByRole("row");
 		expect(row).toBeInTheDocument();
@@ -47,19 +52,17 @@ describe("PlaylistItemRow", () => {
 	});
 
 	it("renders row in edit mode with Move Up (disabled on 1st), Move Down, Edit, Delete", () => {
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={false}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: true,
+			isLast: false,
+			isSelected: false,
+			mode: "edit",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: () => {},
+		});
 
 		const moveUpBtn = screen.getByRole("button", { name: "Move up" });
 		const moveDownBtn = screen.getByRole("button", { name: "Move down" });
@@ -78,19 +81,17 @@ describe("PlaylistItemRow", () => {
 	});
 
 	it("disables Move Down on last item in edit mode", () => {
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={2}
-				totalCount={3}
-				isSelected={false}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: false,
+			isLast: true,
+			isSelected: false,
+			mode: "edit",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: () => {},
+		});
 
 		const moveUpBtn = screen.getByRole("button", { name: "Move up" });
 		const moveDownBtn = screen.getByRole("button", { name: "Move down" });
@@ -104,19 +105,17 @@ describe("PlaylistItemRow", () => {
 		const onMoveUp = mock(() => {});
 		const onMoveDown = mock(() => {});
 
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={1}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={onMoveUp}
-				onMoveDown={onMoveDown}
-				onDelete={() => {}}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: false,
+			isLast: false,
+			isSelected: true,
+			mode: "edit",
+			onSelect: () => {},
+			onMoveUp: onMoveUp,
+			onMoveDown: onMoveDown,
+			onDelete: () => {},
+		});
 
 		const moveUpBtn = screen.getByRole("button", { name: "Move up" });
 		const moveDownBtn = screen.getByRole("button", { name: "Move down" });
@@ -133,19 +132,17 @@ describe("PlaylistItemRow", () => {
 		const onMoveUp = mock(() => {});
 		const onMoveDown = mock(() => {});
 
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={1}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={onMoveUp}
-				onMoveDown={onMoveDown}
-				onDelete={() => {}}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: false,
+			isLast: false,
+			isSelected: true,
+			mode: "edit",
+			onSelect: () => {},
+			onMoveUp: onMoveUp,
+			onMoveDown: onMoveDown,
+			onDelete: () => {},
+		});
 
 		const row = screen.getByRole("row");
 		row.focus();
@@ -162,19 +159,17 @@ describe("PlaylistItemRow", () => {
 		const user = userEvent.setup();
 		const onDelete = mock(() => {});
 
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={onDelete}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: true,
+			isLast: false,
+			isSelected: true,
+			mode: "edit",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: onDelete,
+		});
 
 		const deleteBtn = screen.getByRole("button", { name: "Delete item" });
 		await user.click(deleteBtn);
@@ -196,19 +191,17 @@ describe("PlaylistItemRow", () => {
 		const user = userEvent.setup();
 		const onDelete = mock(() => {});
 
-		const { rerender } = render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={onDelete}
-			/>,
-		);
+		const { rerender } = renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: true,
+			isLast: false,
+			isSelected: true,
+			mode: "edit",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: onDelete,
+		});
 
 		const deleteBtn = screen.getByRole("button", { name: "Delete item" });
 		await user.click(deleteBtn);
@@ -227,17 +220,20 @@ describe("PlaylistItemRow", () => {
 
 		// Render fresh row and actuate via Space
 		rerender(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={onDelete}
-			/>,
+			// biome-ignore lint/a11y/useSemanticElements: APG Composite Grid
+			<div role="grid" aria-label="Playlist items">
+				<PlaylistItemRow
+					item={sampleItem}
+					isFirst={true}
+					isLast={false}
+					isSelected={true}
+					mode="edit"
+					onSelect={() => {}}
+					onMoveUp={() => {}}
+					onMoveDown={() => {}}
+					onDelete={onDelete}
+				/>
+			</div>,
 		);
 
 		const newDeleteBtn = screen.getByRole("button", { name: "Delete item" });
@@ -255,21 +251,18 @@ describe("PlaylistItemRow", () => {
 
 	it("opens delete confirmation when Backspace or Delete key is pressed on the row", async () => {
 		const user = userEvent.setup();
-		const onDelete = mock(() => {});
 
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={onDelete}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: true,
+			isLast: false,
+			isSelected: true,
+			mode: "edit",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: () => {},
+		});
 
 		const row = screen.getByRole("row");
 		row.focus();
@@ -287,21 +280,18 @@ describe("PlaylistItemRow", () => {
 
 	it("opens delete confirmation when Backspace or Delete key is pressed on the row in view mode", async () => {
 		const user = userEvent.setup();
-		const onDelete = mock(() => {});
 
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={true}
-				mode="view"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={onDelete}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: true,
+			isLast: false,
+			isSelected: true,
+			mode: "view",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: () => {},
+		});
 
 		const row = screen.getByRole("row");
 		row.focus();
@@ -320,19 +310,17 @@ describe("PlaylistItemRow", () => {
 	it("supports roving focus between row and action buttons via ArrowRight and ArrowLeft", async () => {
 		const user = userEvent.setup();
 
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={1}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: false,
+			isLast: false,
+			isSelected: true,
+			mode: "edit",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: () => {},
+		});
 
 		const row = screen.getByRole("row");
 		row.focus();
@@ -380,19 +368,17 @@ describe("PlaylistItemRow", () => {
 	it("skips disabled buttons when roving with ArrowRight on boundary row (index 0)", async () => {
 		const user = userEvent.setup();
 
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: true,
+			isLast: false,
+			isSelected: true,
+			mode: "edit",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: () => {},
+		});
 
 		const row = screen.getByRole("row");
 		row.focus();
@@ -410,19 +396,17 @@ describe("PlaylistItemRow", () => {
 	it("pressing Escape while focused on an action button returns focus to the row", async () => {
 		const user = userEvent.setup();
 
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={1}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: false,
+			isLast: false,
+			isSelected: true,
+			mode: "edit",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: () => {},
+		});
 
 		const row = screen.getByRole("row");
 		row.focus();
@@ -435,55 +419,18 @@ describe("PlaylistItemRow", () => {
 		expect(document.activeElement).toBe(row);
 	});
 
-	it("delegates ArrowDown and ArrowUp from action button to onSelectNext and onSelectPrevious", async () => {
-		const user = userEvent.setup();
-		const onSelectNext = mock(() => {});
-		const onSelectPrevious = mock(() => {});
-
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={1}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onSelect={() => {}}
-				onSelectNext={onSelectNext}
-				onSelectPrevious={onSelectPrevious}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
-
-		const row = screen.getByRole("row");
-		row.focus();
-
-		await user.keyboard("{ArrowRight}");
-		const moveUpBtn = screen.getByRole("button", { name: "Move up" });
-		expect(document.activeElement).toBe(moveUpBtn);
-
-		await user.keyboard("{ArrowDown}");
-		expect(onSelectNext).toHaveBeenCalledTimes(1);
-
-		await user.keyboard("{ArrowUp}");
-		expect(onSelectPrevious).toHaveBeenCalledTimes(1);
-	});
-
 	it("ensures no button is nested inside another button or role='button' and trigger renders directly onto the button", () => {
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={false}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: true,
+			isLast: false,
+			isSelected: false,
+			mode: "edit",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: () => {},
+		});
 
 		// Check all buttons in the row
 		const row = screen.getByRole("row");
@@ -507,19 +454,17 @@ describe("PlaylistItemRow", () => {
 	it("renders delete confirmation popover with alertdialog semantics, initial Cancel focus, and focus restoration upon Escape", async () => {
 		const user = userEvent.setup();
 
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: true,
+			isLast: false,
+			isSelected: true,
+			mode: "edit",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: () => {},
+		});
 
 		const deleteBtn = screen.getByRole("button", { name: "Delete item" });
 		await user.click(deleteBtn);
@@ -541,94 +486,20 @@ describe("PlaylistItemRow", () => {
 		expect(deleteBtn).toHaveFocus();
 	});
 
-	it("contains Shift+Tab within delete confirmation popover without triggering onExitToHeader", async () => {
-		const user = userEvent.setup();
-		const onExitToHeader = mock(() => {});
-
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onExitToHeader={onExitToHeader}
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
-
-		const deleteBtn = screen.getByRole("button", { name: "Delete item" });
-		await user.click(deleteBtn);
-
-		expect(screen.getByRole("alertdialog")).toBeInTheDocument();
-		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
-		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
-
-		await waitFor(() => expect(cancelBtn).toHaveFocus());
-
-		// Shift+Tab from Cancel button wraps backwards to Delete button (and does NOT trigger onExitToHeader)
-		await user.keyboard("{Shift>}{Tab}{/Shift}");
-		expect(confirmDeleteBtn).toHaveFocus();
-		expect(onExitToHeader).not.toHaveBeenCalled();
-	});
-
-	it("suppresses vertical arrow keys inside delete confirmation popover so onSelectNext and onSelectPrevious are not called", async () => {
-		const user = userEvent.setup();
-		const onSelectNext = mock(() => {});
-		const onSelectPrevious = mock(() => {});
-
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onSelectNext={onSelectNext}
-				onSelectPrevious={onSelectPrevious}
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
-
-		const deleteBtn = screen.getByRole("button", { name: "Delete item" });
-		await user.click(deleteBtn);
-
-		expect(screen.getByRole("alertdialog")).toBeInTheDocument();
-		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
-		await waitFor(() => expect(cancelBtn).toHaveFocus());
-
-		// ArrowDown and ArrowUp on Cancel do not call onSelectNext/onSelectPrevious
-		await user.keyboard("{ArrowDown}");
-		expect(onSelectNext).not.toHaveBeenCalled();
-		expect(cancelBtn).toHaveFocus();
-
-		await user.keyboard("{ArrowUp}");
-		expect(onSelectPrevious).not.toHaveBeenCalled();
-		expect(cancelBtn).toHaveFocus();
-	});
-
 	it("restores focus to originating row when Escape dismisses delete popover in view mode", async () => {
 		const user = userEvent.setup();
 
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={0}
-				totalCount={3}
-				isSelected={true}
-				mode="view"
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
+		renderPlaylistItemRow({
+			item: sampleItem,
+			isFirst: true,
+			isLast: false,
+			isSelected: true,
+			mode: "view",
+			onSelect: () => {},
+			onMoveUp: () => {},
+			onMoveDown: () => {},
+			onDelete: () => {},
+		});
 
 		const row = screen.getByRole("row");
 		row.focus();
@@ -644,37 +515,5 @@ describe("PlaylistItemRow", () => {
 		await user.keyboard("{Escape}");
 		expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 		expect(row).toHaveFocus();
-	});
-
-	it("intercepts Shift+Tab from an action button and calls onExitToHeader", async () => {
-		const user = userEvent.setup();
-		const onExitToHeader = mock(() => {});
-
-		render(
-			<PlaylistItemRow
-				item={sampleItem}
-				index={1}
-				totalCount={3}
-				isSelected={true}
-				mode="edit"
-				onExitToHeader={onExitToHeader}
-				onSelect={() => {}}
-				onMoveUp={() => {}}
-				onMoveDown={() => {}}
-				onDelete={() => {}}
-			/>,
-		);
-
-		const row = screen.getByRole("row");
-		row.focus();
-
-		// Rove to the first action button
-		await user.keyboard("{ArrowRight}");
-		const moveUpBtn = screen.getByRole("button", { name: "Move up" });
-		expect(moveUpBtn).toHaveFocus();
-
-		// Press Shift+Tab
-		await user.keyboard("{Shift>}{Tab}{/Shift}");
-		expect(onExitToHeader).toHaveBeenCalledTimes(1);
 	});
 });

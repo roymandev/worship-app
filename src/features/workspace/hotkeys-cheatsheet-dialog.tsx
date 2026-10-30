@@ -8,17 +8,14 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import {
-	AppHotkeyKbd,
-	HotkeyChordKbd,
-} from "@/features/workspace/app-hotkey-kbd";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { appHotkeys } from "@/features/workspace/hotkeys";
 import {
-	type AppHotkeyItem,
-	filterHotkeys,
-	groupHotkeys,
+	detectPlatform,
+	type HotkeyMatchGroup,
+	type HotkeyPlatform,
+	queryHotkeyCatalog,
 } from "@/features/workspace/hotkeys-search";
-import { useWorkspaceStore } from "@/features/workspace/store";
 
 type CheatsheetBodyProps = {
 	onClose: () => void;
@@ -31,47 +28,17 @@ function CheatsheetBody({ onClose }: CheatsheetBodyProps) {
 	useHotkey("Escape", onClose);
 	useHotkey(appHotkeys["help.shortcuts"], onClose);
 
-	const filteredItems = useMemo(() => {
-		return filterHotkeys(appHotkeys, searchQuery);
-	}, [searchQuery]);
+	const platform: HotkeyPlatform = useMemo(() => {
+		return detectPlatform();
+	}, []);
 
-	const groupedItems = useMemo(() => {
-		return groupHotkeys(filteredItems);
-	}, [filteredItems]);
+	const groups: readonly HotkeyMatchGroup[] = useMemo(() => {
+		return queryHotkeyCatalog(appHotkeys, searchQuery, platform);
+	}, [searchQuery, platform]);
 
-	const groupNames = Object.keys(groupedItems);
-	const totalResults = filteredItems.length;
-
-	const renderShortcutKbd = (item: AppHotkeyItem) => {
-		if (item.id in appHotkeys) {
-			return (
-				<AppHotkeyKbd
-					id={item.id as keyof typeof appHotkeys}
-					className="shrink-0"
-				/>
-			);
-		}
-
-		if (item.hotkey) {
-			if (typeof item.hotkey === "string") {
-				return <HotkeyChordKbd chord={item.hotkey} className="shrink-0" />;
-			}
-
-			if (Array.isArray(item.hotkey)) {
-				return (
-					<div className="flex shrink-0 items-center gap-1">
-						{item.hotkey.map((step) => (
-							<HotkeyChordKbd key={`${item.id}-step-${step}`} chord={step} />
-						))}
-					</div>
-				);
-			}
-		}
-
-		return (
-			<span className="text-[0.625rem] text-muted-foreground">Unassigned</span>
-		);
-	};
+	const totalResults = useMemo(() => {
+		return groups.reduce((acc, g) => acc + g.items.length, 0);
+	}, [groups]);
 
 	return (
 		<div className="flex max-h-[calc(85vh-5rem)] flex-col gap-4">
@@ -97,7 +64,7 @@ function CheatsheetBody({ onClose }: CheatsheetBodyProps) {
 			</span>
 
 			<div className="min-h-0 flex-1 overflow-y-auto pr-1">
-				{groupNames.length === 0 ? (
+				{groups.length === 0 ? (
 					<output
 						className="flex flex-col items-center justify-center py-10 text-center"
 						aria-live="polite"
@@ -108,13 +75,13 @@ function CheatsheetBody({ onClose }: CheatsheetBodyProps) {
 					</output>
 				) : (
 					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-						{groupNames.map((group) => (
-							<div key={group} className="flex flex-col gap-1.5">
+						{groups.map((group) => (
+							<div key={group.group} className="flex flex-col gap-1.5">
 								<h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-									{group}
+									{group.group}
 								</h3>
 								<div className="flex flex-col divide-y divide-border/40 rounded-md border border-border/40 bg-muted/20 px-3 py-1">
-									{groupedItems[group].map((item) => (
+									{group.items.map((item) => (
 										<div
 											key={item.id}
 											className="flex items-center justify-between gap-2 py-2"
@@ -129,7 +96,14 @@ function CheatsheetBody({ onClose }: CheatsheetBodyProps) {
 													</span>
 												)}
 											</div>
-											{renderShortcutKbd(item)}
+											{item.formattedTokens.length > 0 && (
+												<KbdGroup className="shrink-0">
+													{item.formattedTokens.map((token, idx) => (
+														// biome-ignore lint/suspicious/noArrayIndexKey: tokens within a chord are static sequential keys
+														<Kbd key={`${item.id}-token-${idx}`}>{token}</Kbd>
+													))}
+												</KbdGroup>
+											)}
 										</div>
 									))}
 								</div>
@@ -142,34 +116,39 @@ function CheatsheetBody({ onClose }: CheatsheetBodyProps) {
 	);
 }
 
-export function HotkeysCheatsheetDialog() {
+export type HotkeysCheatsheetDialogProps = {
+	open?: boolean;
+	onOpenChange?: (open: boolean) => void;
+};
+
+export function HotkeysCheatsheetDialog({
+	open: controlledOpen,
+	onOpenChange: setControlledOpen,
+}: HotkeysCheatsheetDialogProps = {}) {
 	const dialogScopeId = useId();
-	const isCheatsheetOpen = useWorkspaceStore((state) => state.isCheatsheetOpen);
-	const openCheatsheet = useWorkspaceStore((state) => state.openCheatsheet);
-	const closeCheatsheet = useWorkspaceStore((state) => state.closeCheatsheet);
+	const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+
+	const isControlled = controlledOpen !== undefined;
+	const open = isControlled ? controlledOpen : uncontrolledOpen;
+
+	const handleOpenChange = (nextOpen: boolean) => {
+		if (isControlled) {
+			setControlledOpen?.(nextOpen);
+		} else {
+			setUncontrolledOpen(nextOpen);
+		}
+	};
 
 	useHotkey(
 		appHotkeys["help.shortcuts"],
 		() => {
-			if (isCheatsheetOpen) {
-				closeCheatsheet();
-			} else {
-				openCheatsheet();
-			}
+			handleOpenChange(!open);
 		},
 		{ ignoreInputs: "auto" },
 	);
 
-	const handleOpenChange = (nextOpen: boolean) => {
-		if (!nextOpen) {
-			closeCheatsheet();
-		} else {
-			openCheatsheet();
-		}
-	};
-
 	return (
-		<Dialog open={isCheatsheetOpen} onOpenChange={handleOpenChange}>
+		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogContent className="flex max-h-[85vh] flex-col gap-4 sm:max-w-2xl md:max-w-3xl">
 				<DialogHeader>
 					<DialogTitle>Keyboard Shortcuts</DialogTitle>

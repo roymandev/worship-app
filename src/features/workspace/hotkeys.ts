@@ -1,5 +1,7 @@
 import { defineAppHotkeys } from "@tanstack/react-hotkeys";
 
+export type AppHotkeys = typeof appHotkeys;
+
 export type AppHotkeyMeta = {
 	name: string;
 	group: "Workspace" | "Presentation" | "Help";

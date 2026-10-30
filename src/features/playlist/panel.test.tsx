@@ -305,8 +305,8 @@ describe("PlaylistPanel", () => {
 		expect(screen.queryByText("Psalm 23")).not.toBeInTheDocument();
 		expect(rows[0]).toHaveTextContent("Amazing Grace");
 		expect(rows[1]).toHaveTextContent("10,000 Reasons");
-		// In test 1, item-1 was selected when deleting item-2, so selection stayed on item-1
-		expect(rows[0]).toHaveFocus();
+		// Deleting item-2 via its delete popover transfers focus to neighbor row
+		expect(rows[1]).toHaveFocus();
 	});
 
 	it("deleting an item in view mode via Backspace triggers popover and focuses neighbor upon delete", async () => {
@@ -474,7 +474,7 @@ describe("PlaylistPanel", () => {
 		expect(rows[0]).toHaveFocus();
 	});
 
-	it("pressing Shift+Tab from an action button exits directly to the header Organize/Done button", async () => {
+	it("pressing Shift+Tab exits from item row towards header buttons", async () => {
 		const user = userEvent.setup();
 		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-1" });
 
@@ -485,12 +485,7 @@ describe("PlaylistPanel", () => {
 		rows[0].focus();
 		expect(rows[0]).toHaveFocus();
 
-		// Move focus to action button
-		await user.keyboard("{ArrowRight}");
-		const moveDownBtn = screen.getAllByRole("button", { name: "Move down" })[0];
-		expect(document.activeElement).toBe(moveDownBtn);
-
-		// Press Shift+Tab
+		// Shift+Tab from the active row navigates back to Done button
 		await user.keyboard("{Shift>}{Tab}{/Shift}");
 		expect(document.activeElement).toBe(doneBtn);
 	});

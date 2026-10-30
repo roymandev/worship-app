@@ -12,38 +12,36 @@ import { Button } from "@/components/ui/button";
 import { PlaylistDeleteConfirmPopover } from "@/features/playlist/delete-confirm-popover";
 import type { PlaylistItem, PlaylistMode } from "@/features/playlist/store";
 
-type PlaylistItemRowProps = {
+export type PlaylistItemRowProps = {
 	item: PlaylistItem;
-	index: number;
-	totalCount: number;
 	isSelected: boolean;
+	isFocused?: boolean;
+	isFirst?: boolean;
+	isLast?: boolean;
 	mode: PlaylistMode;
 	open?: boolean;
 	onDeleteConfirmOpenChange?: (open: boolean) => void;
-	onExitToHeader?: () => void;
 	onSelect: () => void;
-	onSelectNext?: () => void;
-	onSelectPrevious?: () => void;
 	onMoveUp: () => void;
 	onMoveDown: () => void;
 	onDelete: () => void;
+	asCellContent?: boolean;
 };
 
 export function PlaylistItemRow({
 	item,
-	index,
-	totalCount,
 	isSelected,
+	isFocused: _isFocused = false,
+	isFirst = false,
+	isLast = false,
 	mode,
 	open,
 	onDeleteConfirmOpenChange,
-	onExitToHeader,
 	onSelect,
-	onSelectNext,
-	onSelectPrevious,
 	onMoveUp,
 	onMoveDown,
 	onDelete,
+	asCellContent = false,
 }: PlaylistItemRowProps) {
 	const rowRef = useRef<HTMLDivElement | null>(null);
 	const deleteTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -62,12 +60,20 @@ export function PlaylistItemRow({
 		}
 	};
 
+	const rowTargetRef = useRef<HTMLElement | null>(null);
+
+	const focusRow = () => {
+		const row =
+			rowRef.current?.closest<HTMLElement>('[role="row"]') ?? rowRef.current;
+		row?.focus();
+	};
+
 	const handleRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
 		// Alt+ArrowUp: Move Up
 		if (e.altKey && e.key === "ArrowUp") {
 			e.preventDefault();
 			e.stopPropagation();
-			if (index > 0) {
+			if (!isFirst) {
 				onMoveUp();
 			}
 			return;
@@ -77,7 +83,7 @@ export function PlaylistItemRow({
 		if (e.altKey && e.key === "ArrowDown") {
 			e.preventDefault();
 			e.stopPropagation();
-			if (index < totalCount - 1) {
+			if (!isLast) {
 				onMoveDown();
 			}
 			return;
@@ -87,6 +93,8 @@ export function PlaylistItemRow({
 		if (e.key === "Backspace" || e.key === "Delete") {
 			e.preventDefault();
 			e.stopPropagation();
+			rowTargetRef.current =
+				rowRef.current?.closest<HTMLElement>('[role="row"]') ?? rowRef.current;
 			handleOpenChange(true);
 			return;
 		}
@@ -109,41 +117,28 @@ export function PlaylistItemRow({
 	const handleMoveUpClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		onMoveUp();
-		// If moving up places item at boundary (index 1 -> index 0), moveUp button will become disabled
-		if (index === 1) {
-			requestAnimationFrame(() => {
-				if (moveDownRef.current && !moveDownRef.current.disabled) {
-					moveDownRef.current.focus();
-				} else {
-					rowRef.current?.focus();
-				}
-			});
-		}
+		requestAnimationFrame(() => {
+			if (moveDownRef.current && !moveDownRef.current.disabled) {
+				moveDownRef.current.focus();
+			} else {
+				focusRow();
+			}
+		});
 	};
 
 	const handleMoveDownClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		onMoveDown();
-		// If moving down places item at boundary (index totalCount - 2 -> totalCount - 1), moveDown button will become disabled
-		if (index === totalCount - 2) {
-			requestAnimationFrame(() => {
-				if (moveUpRef.current && !moveUpRef.current.disabled) {
-					moveUpRef.current.focus();
-				} else {
-					rowRef.current?.focus();
-				}
-			});
-		}
+		requestAnimationFrame(() => {
+			if (moveUpRef.current && !moveUpRef.current.disabled) {
+				moveUpRef.current.focus();
+			} else {
+				focusRow();
+			}
+		});
 	};
 
 	const handleActionCellKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-		if (e.shiftKey && e.key === "Tab") {
-			e.preventDefault();
-			e.stopPropagation();
-			onExitToHeader?.();
-			return;
-		}
-
 		const enabledButtons = Array.from(
 			actionCellRef.current?.querySelectorAll<HTMLButtonElement>(
 				"button:not([disabled])",
@@ -171,7 +166,7 @@ export function PlaylistItemRow({
 			if (currentIndex > 0) {
 				enabledButtons[currentIndex - 1].focus();
 			} else {
-				rowRef.current?.focus();
+				focusRow();
 			}
 			return;
 		}
@@ -179,37 +174,25 @@ export function PlaylistItemRow({
 		if (e.key === "Escape") {
 			e.preventDefault();
 			e.stopPropagation();
-			rowRef.current?.focus();
-			return;
-		}
-
-		if (e.key === "ArrowDown") {
-			e.preventDefault();
-			e.stopPropagation();
-			onSelectNext?.();
-			return;
-		}
-
-		if (e.key === "ArrowUp") {
-			e.preventDefault();
-			e.stopPropagation();
-			onSelectPrevious?.();
+			focusRow();
 			return;
 		}
 	};
 
 	return (
-		// biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Row
+		// biome-ignore lint/a11y/noStaticElementInteractions: Keyboard and click handled for standalone row
+		// biome-ignore lint/a11y/useAriaPropsSupportedByRole: Dynamic role support for composite grid
 		<div
 			ref={rowRef}
-			role="row"
-			tabIndex={isSelected ? 0 : -1}
-			aria-selected={isSelected}
+			role={asCellContent ? undefined : "row"}
+			tabIndex={asCellContent ? undefined : isSelected ? 0 : -1}
+			aria-selected={asCellContent ? undefined : isSelected}
 			onClick={onSelect}
 			onKeyDown={handleRowKeyDown}
 			className={cn(
 				"group flex items-center justify-between gap-2 rounded-md px-3 py-2 text-xs transition-colors",
-				"focus-ring-inset select-none",
+				!asCellContent && "focus-ring-inset",
+				"select-none",
 				isSelected
 					? "bg-accent text-accent-foreground font-medium"
 					: "hover:bg-muted/50 text-foreground",
@@ -250,7 +233,7 @@ export function PlaylistItemRow({
 							open={isConfirmOpen}
 							onOpenChange={handleOpenChange}
 							onConfirm={onDelete}
-							triggerRef={rowRef}
+							triggerRef={rowTargetRef}
 							trigger={null}
 						/>
 					</>
@@ -261,7 +244,7 @@ export function PlaylistItemRow({
 							variant="ghost"
 							size="icon-xs"
 							tabIndex={-1}
-							disabled={index === 0}
+							disabled={isFirst}
 							title="Move up"
 							aria-label="Move up"
 							onClick={handleMoveUpClick}
@@ -273,7 +256,7 @@ export function PlaylistItemRow({
 							variant="ghost"
 							size="icon-xs"
 							tabIndex={-1}
-							disabled={index === totalCount - 1}
+							disabled={isLast}
 							title="Move down"
 							aria-label="Move down"
 							onClick={handleMoveDownClick}

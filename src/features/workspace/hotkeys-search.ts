@@ -1,80 +1,113 @@
-export type AppHotkeyItem = {
-	id: string;
-	hotkey?: string | readonly string[] | string[] | null;
-	name?: string;
-	description?: string;
-	group?: string;
-	meta?: {
-		name?: string;
-		description?: string;
-		group?: string;
-		[key: string]: unknown;
-	};
-	[key: string]: unknown;
+import type { AppHotkeyMeta, AppHotkeys } from "@/features/workspace/hotkeys";
+
+export type HotkeyPlatform = "mac" | "other";
+
+export type HotkeyMatchItem = {
+	readonly id: string;
+	readonly name: string;
+	readonly description: string;
+	readonly group: string;
+	/**
+	 * Pre-formatted chord tokens ready for rendering in <Kbd> elements.
+	 * Chords are split into steps (for sequences) and tokens (for chords).
+	 * Example for "Mod+Shift+R" on mac: [["⌘", "⇧", "R"]]
+	 * Example for "Mod+Shift+R" on other: [["Ctrl", "Shift", "R"]]
+	 */
+	readonly chordTokens: readonly (readonly string[])[];
+	/** Flat list of formatted tokens for simple single-chord display */
+	readonly formattedTokens: readonly string[];
+	readonly rawHotkey: string | readonly string[] | null;
+	/** Alias for rawHotkey to ensure backwards compatibility with components expecting .hotkey */
+	readonly hotkey: string | readonly string[] | null;
 };
 
-export type AppHotkeyCatalogInput =
-	| AppHotkeyItem[]
-	| {
-			[key: string]: {
-				hotkey?: unknown;
-				meta?: unknown;
-				[key: string]: unknown;
-			};
-	  }
-	| object;
+export type HotkeyMatchGroup = {
+	readonly group: string;
+	readonly items: readonly HotkeyMatchItem[];
+};
 
-function normalizeCatalog(catalog: AppHotkeyCatalogInput): AppHotkeyItem[] {
-	if (Array.isArray(catalog)) {
-		return catalog;
+const MAC_KEY_SYMBOLS: Record<string, string> = {
+	mod: "⌘",
+	meta: "⌘",
+	cmd: "⌘",
+	command: "⌘",
+	alt: "⌥",
+	opt: "⌥",
+	option: "⌥",
+	shift: "⇧",
+	ctrl: "⌃",
+	control: "⌃",
+	enter: "↵",
+	return: "↵",
+	backspace: "⌫",
+	escape: "Esc",
+	esc: "Esc",
+};
+
+const STANDARD_KEY_SYMBOLS: Record<string, string> = {
+	mod: "Ctrl",
+	ctrl: "Ctrl",
+	control: "Ctrl",
+	alt: "Alt",
+	opt: "Alt",
+	option: "Alt",
+	shift: "Shift",
+	enter: "Enter",
+	return: "Enter",
+	backspace: "Backspace",
+	escape: "Esc",
+	esc: "Esc",
+};
+
+export function detectPlatform(): HotkeyPlatform {
+	if (typeof navigator === "undefined") {
+		return "other";
+	}
+	const nav = navigator as unknown as {
+		userAgentData?: { platform?: string };
+		platform?: string;
+	};
+	const platformString =
+		nav.userAgentData?.platform || nav.platform || navigator.userAgent;
+	return /(Mac|iPhone|iPod|iPad)/i.test(platformString) ? "mac" : "other";
+}
+
+function formatKeySymbol(key: string, platform: HotkeyPlatform): string {
+	const normalized = key.trim();
+	const lower = normalized.toLowerCase();
+	const symbolMap = platform === "mac" ? MAC_KEY_SYMBOLS : STANDARD_KEY_SYMBOLS;
+
+	return symbolMap[lower] ?? normalized;
+}
+
+export function formatChordTokens(
+	hotkey: string | readonly string[] | null | undefined,
+	platform: HotkeyPlatform,
+): readonly (readonly string[])[] {
+	if (!hotkey) {
+		return [];
 	}
 
-	return Object.entries(catalog).map(([key, rawValue]) => {
-		if (rawValue && typeof rawValue === "object") {
-			const item = rawValue as {
-				id?: unknown;
-				name?: unknown;
-				description?: unknown;
-				group?: unknown;
-				hotkey?: unknown;
-				meta?: unknown;
-			};
-			const rawMeta = item.meta as
-				| { name?: unknown; description?: unknown; group?: unknown }
-				| undefined;
-			return {
-				id: typeof item.id === "string" ? item.id : key,
-				hotkey:
-					typeof item.hotkey === "string" || Array.isArray(item.hotkey)
-						? (item.hotkey as string | string[] | readonly string[])
-						: null,
-				name:
-					typeof item.name === "string"
-						? item.name
-						: typeof rawMeta?.name === "string"
-							? rawMeta.name
-							: undefined,
-				description:
-					typeof item.description === "string"
-						? item.description
-						: typeof rawMeta?.description === "string"
-							? rawMeta.description
-							: undefined,
-				group:
-					typeof item.group === "string"
-						? item.group
-						: typeof rawMeta?.group === "string"
-							? rawMeta.group
-							: undefined,
-				meta: rawMeta as AppHotkeyItem["meta"],
-			};
-		}
-		return { id: key };
+	const chords: readonly string[] = Array.isArray(hotkey) ? hotkey : [hotkey];
+
+	return chords.map((chord: string) => {
+		return chord
+			.split("+")
+			.map((k: string) => k.trim())
+			.filter(Boolean)
+			.map((key: string) => formatKeySymbol(key, platform));
 	});
 }
 
+function normalizeSearchTerm(term: string): string {
+	return term
+		.toLowerCase()
+		.replace(/\b(cmd|command)\b/g, "mod")
+		.replace(/\b(ctrl|control)\b/g, "mod");
+}
+
 function getHotkeySearchString(
-	hotkey: AppHotkeyItem["hotkey"] | undefined,
+	hotkey: string | readonly string[] | null | undefined,
 ): string {
 	if (!hotkey) {
 		return "";
@@ -88,59 +121,66 @@ function getHotkeySearchString(
 	return "";
 }
 
-function normalizeSearchTerm(term: string): string {
-	return term
-		.toLowerCase()
-		.replace(/\b(cmd|command)\b/g, "mod")
-		.replace(/\b(ctrl|control)\b/g, "mod");
-}
-
-export function filterHotkeys(
-	catalog: AppHotkeyCatalogInput,
+export function queryHotkeyCatalog(
+	catalog: AppHotkeys,
 	query: string,
-): AppHotkeyItem[] {
-	const items = normalizeCatalog(catalog);
+	platform: HotkeyPlatform = detectPlatform(),
+): readonly HotkeyMatchGroup[] {
 	const rawQuery = query.trim().toLowerCase();
-
-	if (!rawQuery) {
-		return items;
-	}
-
 	const normalizedQuery = normalizeSearchTerm(rawQuery);
 
-	return items.filter((item) => {
-		const name = (item.name ?? item.meta?.name ?? "").toLowerCase();
-		const description = (
-			item.description ??
-			item.meta?.description ??
-			""
-		).toLowerCase();
-		const group = (item.group ?? item.meta?.group ?? "").toLowerCase();
-		const hotkeyStr = getHotkeySearchString(item.hotkey).toLowerCase();
+	const groupsMap = new Map<string, HotkeyMatchItem[]>();
+
+	for (const [id, definition] of Object.entries(catalog)) {
+		const meta = (definition.meta as AppHotkeyMeta | undefined) ?? {
+			name: id,
+			description: "",
+			group: "General" as const,
+		};
+
+		const name = meta.name || id;
+		const description = meta.description || "";
+		const group = meta.group || "General";
+		const rawHotkey = definition.hotkey ?? null;
+		const hotkeyStr = getHotkeySearchString(rawHotkey).toLowerCase();
 		const normalizedHotkeyStr = normalizeSearchTerm(hotkeyStr);
 
-		return (
-			name.includes(rawQuery) ||
-			description.includes(rawQuery) ||
-			group.includes(rawQuery) ||
+		const chordTokens = formatChordTokens(rawHotkey, platform);
+		const formattedTokens = chordTokens.flat();
+
+		const matches =
+			!rawQuery ||
+			id.toLowerCase().includes(rawQuery) ||
+			name.toLowerCase().includes(rawQuery) ||
+			description.toLowerCase().includes(rawQuery) ||
+			group.toLowerCase().includes(rawQuery) ||
 			hotkeyStr.includes(rawQuery) ||
-			normalizedHotkeyStr.includes(normalizedQuery)
-		);
-	});
-}
+			normalizedHotkeyStr.includes(normalizedQuery) ||
+			formattedTokens.some((token) => token.toLowerCase().includes(rawQuery));
 
-export function groupHotkeys(
-	items: AppHotkeyItem[],
-): Record<string, AppHotkeyItem[]> {
-	const groups: Record<string, AppHotkeyItem[]> = {};
+		if (matches) {
+			const item: HotkeyMatchItem = {
+				id,
+				name,
+				description,
+				group,
+				rawHotkey,
+				hotkey: rawHotkey,
+				chordTokens,
+				formattedTokens,
+			};
 
-	for (const item of items) {
-		const group = item.group || item.meta?.group || "General";
-		if (!groups[group]) {
-			groups[group] = [];
+			let groupItems = groupsMap.get(group);
+			if (!groupItems) {
+				groupItems = [];
+				groupsMap.set(group, groupItems);
+			}
+			groupItems.push(item);
 		}
-		groups[group].push(item);
 	}
 
-	return groups;
+	return Array.from(groupsMap.entries()).map(([group, items]) => ({
+		group,
+		items,
+	}));
 }

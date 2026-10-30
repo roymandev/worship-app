@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WorkspaceMenubar } from "./menubar";
@@ -8,8 +8,6 @@ describe("WorkspaceMenubar", () => {
 	beforeEach(() => {
 		useWorkspaceStore.setState({
 			mode: "view",
-			isResetDialogOpen: false,
-			isCheatsheetOpen: false,
 		});
 	});
 
@@ -97,9 +95,10 @@ describe("WorkspaceMenubar", () => {
 		expect(useWorkspaceStore.getState().mode).toBe("view");
 	});
 
-	it("opens reset confirmation dialog when clicking reset layout item", async () => {
+	it("opens reset confirmation dialog when clicking reset layout item and triggers onResetLayout upon confirm", async () => {
 		const user = userEvent.setup();
-		render(<WorkspaceMenubar />);
+		const onResetLayout = vi.fn();
+		render(<WorkspaceMenubar onResetLayout={onResetLayout} />);
 
 		const viewTrigger = screen.getByRole("menuitem", { name: "View" });
 		await user.click(viewTrigger);
@@ -110,12 +109,25 @@ describe("WorkspaceMenubar", () => {
 		expect(resetLayoutItem).toHaveAttribute("data-variant", "destructive");
 
 		await user.click(resetLayoutItem);
-		expect(useWorkspaceStore.getState().isResetDialogOpen).toBe(true);
+
+		// AlertDialog should now be visible
+		const dialog = screen.getByRole("alertdialog");
+		expect(dialog).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", { name: "Reset workspace layout?" }),
+		).toBeInTheDocument();
+
+		const confirmButton = screen.getByRole("button", { name: "Reset layout" });
+		await user.click(confirmButton);
+
+		expect(onResetLayout).toHaveBeenCalledTimes(1);
+		expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 	});
 
-	it("opens cheatsheet when clicking help menu item", async () => {
+	it("opens cheatsheet via onOpenCheatsheet callback when clicking help menu item", async () => {
 		const user = userEvent.setup();
-		render(<WorkspaceMenubar />);
+		const onOpenCheatsheet = vi.fn();
+		render(<WorkspaceMenubar onOpenCheatsheet={onOpenCheatsheet} />);
 
 		const helpTrigger = screen.getByRole("menuitem", { name: "Help" });
 		await user.click(helpTrigger);
@@ -126,6 +138,6 @@ describe("WorkspaceMenubar", () => {
 		expect(shortcutsItem).toBeInTheDocument();
 
 		await user.click(shortcutsItem);
-		expect(useWorkspaceStore.getState().isCheatsheetOpen).toBe(true);
+		expect(onOpenCheatsheet).toHaveBeenCalledTimes(1);
 	});
 });

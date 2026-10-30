@@ -1,6 +1,7 @@
 import { IconList, IconPlus } from "@tabler/icons-react";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { RowList } from "@/components/row-list";
 import { Button } from "@/components/ui/button";
 import {
 	Empty,
@@ -24,35 +25,19 @@ export function PlaylistPanel() {
 			})),
 		);
 
-	const gridRef = useRef<HTMLDivElement | null>(null);
 	const organizeButtonRef = useRef<HTMLButtonElement | null>(null);
 	const emptyAddButtonRef = useRef<HTMLButtonElement | null>(null);
 
 	const isEditMode = mode === "edit";
 
-	const focusActiveRow = () => {
+	const handleAdd = () => {
+		usePlaylistStore.getState().addItem();
 		requestAnimationFrame(() => {
-			const activeRow = gridRef.current?.querySelector<HTMLElement>(
+			const activeRow = document.querySelector<HTMLElement>(
 				'[role="row"][aria-selected="true"]',
 			);
 			activeRow?.focus();
 		});
-	};
-
-	// Scroll newly selected or added item into view
-	useEffect(() => {
-		if (!selectedItemId || !gridRef.current) return;
-		const activeRow = gridRef.current.querySelector<HTMLElement>(
-			'[role="row"][aria-selected="true"]',
-		);
-		if (activeRow) {
-			activeRow.scrollIntoView({ block: "nearest", behavior: "smooth" });
-		}
-	}, [selectedItemId]);
-
-	const handleAdd = () => {
-		usePlaylistStore.getState().addItem();
-		focusActiveRow();
 	};
 
 	const handleToggleMode = () => {
@@ -65,66 +50,36 @@ export function PlaylistPanel() {
 		requestAnimationFrame(() => {
 			if (isLastItem) {
 				emptyAddButtonRef.current?.focus();
-				return;
-			}
-			const activeRow = gridRef.current?.querySelector<HTMLElement>(
-				'[role="row"][aria-selected="true"]',
-			);
-			if (activeRow) {
-				activeRow.focus();
 			} else {
-				organizeButtonRef.current?.focus();
+				const activeRow =
+					document.querySelector<HTMLElement>(
+						'[role="row"][aria-selected="true"]',
+					) ?? document.querySelector<HTMLElement>('[role="row"]');
+				activeRow?.focus();
 			}
 		});
-	};
-
-	const handleSelectNext = () => {
-		usePlaylistStore.getState().selectNext();
-		focusActiveRow();
-	};
-
-	const handleSelectPrevious = () => {
-		usePlaylistStore.getState().selectPrevious();
-		focusActiveRow();
-	};
-
-	const handleGridKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-		// Scoped arrow keys on grid
-		if (e.key === "ArrowDown") {
-			e.preventDefault();
-			handleSelectNext();
-			return;
-		}
-
-		if (e.key === "ArrowUp") {
-			e.preventDefault();
-			handleSelectPrevious();
-			return;
-		}
-
-		if (e.key === "Escape") {
-			if (isEditMode) {
-				e.preventDefault();
-				usePlaylistStore.getState().setMode("view");
-				// Restore focus to active row, or organize button if no items
-				requestAnimationFrame(() => {
-					const activeRow = gridRef.current?.querySelector<HTMLElement>(
-						'[role="row"][aria-selected="true"]',
-					);
-					if (activeRow) {
-						activeRow.focus();
-					} else {
-						organizeButtonRef.current?.focus();
-					}
-				});
-			}
-		}
 	};
 
 	return (
 		<section
 			aria-label="Playlist panel"
 			className="flex h-full w-full flex-col overflow-hidden bg-background text-foreground"
+			onKeyDown={(e) => {
+				if (e.key === "Escape" && isEditMode) {
+					e.preventDefault();
+					usePlaylistStore.getState().setMode("view");
+					requestAnimationFrame(() => {
+						const activeRow = document.querySelector<HTMLElement>(
+							'[role="row"][aria-selected="true"]',
+						);
+						if (activeRow) {
+							activeRow.focus();
+						} else {
+							organizeButtonRef.current?.focus();
+						}
+					});
+				}
+			}}
 		>
 			<header className="flex h-10 shrink-0 items-center justify-between border-b px-3">
 				<div className="flex items-center gap-2">
@@ -182,43 +137,88 @@ export function PlaylistPanel() {
 						</EmptyContent>
 					</Empty>
 				) : (
-					// biome-ignore lint/a11y/useSemanticElements: APG Composite Grid
-					<div
-						ref={gridRef}
-						role="grid"
-						aria-label="Playlist items"
-						tabIndex={-1}
-						onKeyDown={handleGridKeyDown}
+					<RowList
+						items={items}
+						selectedId={selectedItemId}
+						onSelect={(item) => usePlaylistStore.getState().selectItem(item.id)}
+						getKey={(item) => item.id}
+						ariaLabel="Playlist items"
 						className="flex flex-col gap-1"
-					>
-						{items.map((item, index) => (
-							<PlaylistItemRow
-								key={item.id}
-								item={item}
-								index={index}
-								totalCount={items.length}
-								isSelected={item.id === selectedItemId}
-								mode={mode}
-								open={activeConfirmDeleteId === item.id}
-								onDeleteConfirmOpenChange={(open) => {
-									if (open) {
-										usePlaylistStore.getState().openDeleteConfirm(item.id);
-									} else {
-										usePlaylistStore.getState().closeDeleteConfirm();
-									}
-								}}
-								onExitToHeader={() => organizeButtonRef.current?.focus()}
-								onSelect={() => usePlaylistStore.getState().selectItem(item.id)}
-								onSelectNext={handleSelectNext}
-								onSelectPrevious={handleSelectPrevious}
-								onMoveUp={() => usePlaylistStore.getState().moveItemUp(item.id)}
-								onMoveDown={() =>
-									usePlaylistStore.getState().moveItemDown(item.id)
+						onRowKeyDown={(item, e) => {
+							const itemIndex = items.findIndex((i) => i.id === item.id);
+							const isFirst = itemIndex === 0;
+							const isLast = itemIndex === items.length - 1;
+
+							if (e.altKey && e.key === "ArrowUp") {
+								e.preventDefault();
+								e.stopPropagation();
+								if (!isFirst) {
+									usePlaylistStore.getState().moveItemUp(item.id);
 								}
-								onDelete={() => handleDeleteItem(item.id)}
-							/>
-						))}
-					</div>
+								return;
+							}
+
+							if (e.altKey && e.key === "ArrowDown") {
+								e.preventDefault();
+								e.stopPropagation();
+								if (!isLast) {
+									usePlaylistStore.getState().moveItemDown(item.id);
+								}
+								return;
+							}
+
+							if (e.key === "Backspace" || e.key === "Delete") {
+								e.preventDefault();
+								e.stopPropagation();
+								usePlaylistStore.getState().openDeleteConfirm(item.id);
+								return;
+							}
+
+							if (e.key === "ArrowRight") {
+								const rowEl = e.currentTarget;
+								const firstButton = rowEl.querySelector<HTMLButtonElement>(
+									'div[role="gridcell"] button:not([disabled])',
+								);
+								if (firstButton) {
+									e.preventDefault();
+									e.stopPropagation();
+									firstButton.focus();
+								}
+							}
+						}}
+						renderRow={(item, { isSelected, isFocused }) => {
+							const itemIndex = items.findIndex((i) => i.id === item.id);
+							return (
+								<PlaylistItemRow
+									item={item}
+									isSelected={isSelected}
+									isFocused={isFocused}
+									isFirst={itemIndex === 0}
+									isLast={itemIndex === items.length - 1}
+									mode={mode}
+									open={activeConfirmDeleteId === item.id}
+									onDeleteConfirmOpenChange={(open) => {
+										if (open) {
+											usePlaylistStore.getState().openDeleteConfirm(item.id);
+										} else {
+											usePlaylistStore.getState().closeDeleteConfirm();
+										}
+									}}
+									onSelect={() =>
+										usePlaylistStore.getState().selectItem(item.id)
+									}
+									onMoveUp={() =>
+										usePlaylistStore.getState().moveItemUp(item.id)
+									}
+									onMoveDown={() =>
+										usePlaylistStore.getState().moveItemDown(item.id)
+									}
+									onDelete={() => handleDeleteItem(item.id)}
+									asCellContent
+								/>
+							);
+						}}
+					/>
 				)}
 			</div>
 		</section>

@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PlaylistPanel } from "@/features/playlist/panel";
 import { HotkeysCheatsheetDialog } from "@/features/workspace/hotkeys-cheatsheet-dialog";
-import { WorkspaceLayout } from "@/features/workspace/layout";
+import {
+	WorkspaceLayout,
+	type WorkspaceLayoutHandle,
+} from "@/features/workspace/layout";
 import { WorkspaceMenubar } from "@/features/workspace/menubar";
 import { useWorkspaceStore } from "@/features/workspace/store";
 import { APP_VERSION } from "@/utils/version";
@@ -30,6 +34,8 @@ function LiveScreenPanel() {
 }
 
 function Home() {
+	const layoutRef = useRef<WorkspaceLayoutHandle | null>(null);
+	const [isCheatsheetOpen, setIsCheatsheetOpen] = useState(false);
 	const mode = useWorkspaceStore((state) => state.mode);
 	const isEditMode = mode === "edit";
 	const toggleMode = useWorkspaceStore((s) => s.toggleMode);
@@ -46,7 +52,10 @@ function Home() {
 						v{APP_VERSION}
 					</span>
 				</div>
-				<WorkspaceMenubar />
+				<WorkspaceMenubar
+					onResetLayout={() => layoutRef.current?.resetLayout()}
+					onOpenCheatsheet={() => setIsCheatsheetOpen(true)}
+				/>
 				{isEditMode && (
 					<div className="ml-auto">
 						<Button size="sm" variant="outline" onClick={toggleMode}>
@@ -56,11 +65,15 @@ function Home() {
 				)}
 			</header>
 			<WorkspaceLayout
+				ref={layoutRef}
 				left={<PlaylistPanel />}
 				center={<SlidesPanel />}
 				right={<LiveScreenPanel />}
 			/>
-			<HotkeysCheatsheetDialog />
+			<HotkeysCheatsheetDialog
+				open={isCheatsheetOpen}
+				onOpenChange={setIsCheatsheetOpen}
+			/>
 		</main>
 	);
 }

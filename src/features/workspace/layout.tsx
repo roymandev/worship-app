@@ -1,16 +1,6 @@
-import { HotkeysProvider, useHotkey } from "@tanstack/react-hotkeys";
+import { useHotkey } from "@tanstack/react-hotkeys";
 import { cn } from "cn";
-import { useRef } from "react";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useImperativeHandle, useRef } from "react";
 import {
 	type GroupImperativeHandle,
 	ResizableHandle,
@@ -20,14 +10,19 @@ import {
 import { appHotkeys } from "@/features/workspace/hotkeys";
 import { useWorkspaceStore } from "@/features/workspace/store";
 
+export type WorkspaceLayoutHandle = {
+	resetLayout: () => void;
+};
+
 export type WorkspaceLayoutProps = {
 	left: React.ReactNode;
 	center: React.ReactNode;
 	right: React.ReactNode;
 	className?: string;
+	ref?: React.Ref<WorkspaceLayoutHandle>;
 };
 
-const DEFAULT_LAYOUT = {
+export const DEFAULT_WORKSPACE_LAYOUT = {
 	left: 33.33,
 	center: 33.34,
 	right: 33.33,
@@ -38,12 +33,10 @@ export function WorkspaceLayout({
 	center,
 	right,
 	className,
+	ref,
 }: WorkspaceLayoutProps) {
 	const groupRef = useRef<GroupImperativeHandle | null>(null);
 	const mode = useWorkspaceStore((state) => state.mode);
-	const isResetDialogOpen = useWorkspaceStore(
-		(state) => state.isResetDialogOpen,
-	);
 
 	useHotkey(
 		appHotkeys["workspace.toggleLayoutMode"],
@@ -51,24 +44,17 @@ export function WorkspaceLayout({
 		{ ignoreInputs: "auto" },
 	);
 
-	useHotkey(
-		appHotkeys["workspace.resetLayout"],
-		() => useWorkspaceStore.getState().openResetConfirmation(),
-		{ ignoreInputs: "auto" },
+	useImperativeHandle(
+		ref,
+		() => ({
+			resetLayout: () => {
+				groupRef.current?.setLayout(DEFAULT_WORKSPACE_LAYOUT);
+			},
+		}),
+		[],
 	);
 
 	const isEditMode = mode === "edit";
-
-	const handleReset = () => {
-		groupRef.current?.setLayout(DEFAULT_LAYOUT);
-		useWorkspaceStore.getState().closeResetConfirmation();
-	};
-
-	const handleOpenChange = (open: boolean) => {
-		if (!open) {
-			useWorkspaceStore.getState().closeResetConfirmation();
-		}
-	};
 
 	return (
 		<div className={cn("min-h-0 w-full flex-1", className)}>
@@ -90,30 +76,6 @@ export function WorkspaceLayout({
 					{right}
 				</ResizablePanel>
 			</ResizablePanelGroup>
-
-			<AlertDialog open={isResetDialogOpen} onOpenChange={handleOpenChange}>
-				<AlertDialogContent>
-					<HotkeysProvider
-						scope="workspace:reset-dialog"
-						exclusive
-						enabled={isResetDialogOpen}
-					>
-						<AlertDialogHeader>
-							<AlertDialogTitle>Reset workspace layout?</AlertDialogTitle>
-							<AlertDialogDescription>
-								This will reset all panels to their default 33% width
-								proportions. Your content will not be affected.
-							</AlertDialogDescription>
-						</AlertDialogHeader>
-						<AlertDialogFooter>
-							<AlertDialogCancel>Cancel</AlertDialogCancel>
-							<AlertDialogAction onClick={handleReset}>
-								Reset layout
-							</AlertDialogAction>
-						</AlertDialogFooter>
-					</HotkeysProvider>
-				</AlertDialogContent>
-			</AlertDialog>
 		</div>
 	);
 }

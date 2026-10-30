@@ -248,6 +248,33 @@ describe("PlaylistPanel", () => {
 		expect(remainingRows[0]).toHaveFocus();
 	});
 
+	it("confirms deletion via keyboard Enter on Delete button and transfers focus to neighbor row", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-2" });
+
+		render(<PlaylistPanel />);
+
+		// Item 2 is "Psalm 23"
+		const deleteBtns = screen.getAllByRole("button", { name: "Delete item" });
+		await user.click(deleteBtns[1]);
+
+		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
+		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
+		await waitFor(() => expect(cancelBtn).toHaveFocus());
+
+		// Tab to Delete button and actuate with Enter
+		await user.keyboard("{Tab}");
+		expect(confirmDeleteBtn).toHaveFocus();
+
+		await user.keyboard("{Enter}");
+
+		const remainingRows = screen.getAllByRole("row");
+		expect(remainingRows).toHaveLength(2);
+		expect(screen.queryByText("Psalm 23")).not.toBeInTheDocument();
+		// Neighbor row should receive focus (index 1 which is "10,000 Reasons", or fallback index 0)
+		expect(remainingRows[1]).toHaveFocus();
+	});
+
 	it("retaining focus when reordering item to boundary index 0 (top)", async () => {
 		const user = userEvent.setup();
 		usePlaylistStore.setState({ mode: "edit" });
@@ -377,7 +404,7 @@ describe("PlaylistPanel", () => {
 		expect(document.activeElement).toBe(doneBtn);
 	});
 
-	it("traps focus inside the delete confirmation popover and prevents focus from leaking to playlist rows", async () => {
+	it("traps focus inside the delete confirmation popover, prevents focus leakage, and ignores ArrowUp/ArrowDown", async () => {
 		const user = userEvent.setup();
 		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-1" });
 
@@ -386,22 +413,26 @@ describe("PlaylistPanel", () => {
 		const deleteBtns = screen.getAllByRole("button", { name: "Delete item" });
 		await user.click(deleteBtns[0]);
 
+		expect(screen.getByRole("alertdialog")).toBeInTheDocument();
 		expect(screen.getByText("Delete this item?")).toBeInTheDocument();
 		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
-		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
 
 		await waitFor(() => expect(cancelBtn).toHaveFocus());
 
-		// Tab to Delete button
-		await user.keyboard("{Tab}");
-		expect(confirmDeleteBtn).toHaveFocus();
-
-		// Tab wraps back to Cancel button (not background rows or header)
-		await user.keyboard("{Tab}");
+		// Verify pressing ArrowDown inside popover leaves selected item unchanged and focus within popover
+		await user.keyboard("{ArrowDown}");
+		expect(usePlaylistStore.getState().selectedItemId).toBe("item-1");
 		expect(cancelBtn).toHaveFocus();
 
-		// Shift+Tab wraps backwards to Delete button
+		// Verify pressing ArrowUp inside popover leaves selected item unchanged and focus within popover
+		await user.keyboard("{ArrowUp}");
+		expect(usePlaylistStore.getState().selectedItemId).toBe("item-1");
+		expect(cancelBtn).toHaveFocus();
+
+		// Verify pressing Shift+Tab inside popover leaves selected item unchanged and focus remains contained
 		await user.keyboard("{Shift>}{Tab}{/Shift}");
+		expect(usePlaylistStore.getState().selectedItemId).toBe("item-1");
+		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
 		expect(confirmDeleteBtn).toHaveFocus();
 
 		// Background rows must not have focus

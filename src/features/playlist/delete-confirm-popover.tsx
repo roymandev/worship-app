@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Popover,
@@ -30,16 +30,7 @@ export function PlaylistDeleteConfirmPopover({
 	anchor,
 }: PlaylistDeleteConfirmPopoverProps) {
 	const cancelButtonRef = useRef<HTMLButtonElement | null>(null);
-
-	// Automatically focus Cancel button upon opening for safety
-	useEffect(() => {
-		if (open) {
-			const timer = setTimeout(() => {
-				cancelButtonRef.current?.focus();
-			}, 0);
-			return () => clearTimeout(timer);
-		}
-	}, [open]);
+	const confirmButtonRef = useRef<HTMLButtonElement | null>(null);
 
 	const handleOpenChange = (nextOpen: boolean) => {
 		onOpenChange(nextOpen);
@@ -67,6 +58,8 @@ export function PlaylistDeleteConfirmPopover({
 		<Popover open={open} onOpenChange={handleOpenChange} modal="trap-focus">
 			{trigger ? <PopoverTrigger render={trigger} /> : null}
 			<PopoverContent
+				role="alertdialog"
+				initialFocus={cancelButtonRef}
 				data-item-id={itemId}
 				anchor={trigger ? undefined : popoverAnchor}
 				side="bottom"
@@ -80,35 +73,44 @@ export function PlaylistDeleteConfirmPopover({
 						return;
 					}
 
+					if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+						e.preventDefault();
+						e.stopPropagation();
+						return;
+					}
+
+					if (e.key === "ArrowRight") {
+						e.preventDefault();
+						e.stopPropagation();
+						if (document.activeElement === cancelButtonRef.current) {
+							confirmButtonRef.current?.focus();
+						}
+						return;
+					}
+
+					if (e.key === "ArrowLeft") {
+						e.preventDefault();
+						e.stopPropagation();
+						if (document.activeElement === confirmButtonRef.current) {
+							cancelButtonRef.current?.focus();
+						}
+						return;
+					}
+
 					if (e.key === "Tab") {
-						const container = e.currentTarget;
-						const focusableElements = Array.from(
-							container.querySelectorAll<HTMLElement>(
-								'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-							),
-						).filter(
-							(el) =>
-								el.offsetParent !== null || el.getClientRects().length >= 0,
-						);
-
-						if (focusableElements.length > 0) {
-							const first = focusableElements[0];
-							const last = focusableElements[focusableElements.length - 1];
-
-							if (e.shiftKey) {
-								if (document.activeElement === first) {
-									e.preventDefault();
-									e.stopPropagation();
-									last.focus();
-								}
-							} else {
-								if (document.activeElement === last) {
-									e.preventDefault();
-									e.stopPropagation();
-									first.focus();
-								}
+						e.stopPropagation();
+						if (e.shiftKey) {
+							if (document.activeElement !== confirmButtonRef.current) {
+								e.preventDefault();
+								confirmButtonRef.current?.focus();
+							}
+						} else {
+							if (document.activeElement !== cancelButtonRef.current) {
+								e.preventDefault();
+								cancelButtonRef.current?.focus();
 							}
 						}
+						return;
 					}
 				}}
 			>
@@ -135,6 +137,7 @@ export function PlaylistDeleteConfirmPopover({
 						}
 					/>
 					<Button
+						ref={confirmButtonRef}
 						type="button"
 						variant="destructive"
 						size="sm"

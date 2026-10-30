@@ -1,9 +1,24 @@
-import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "cn";
 
-export type EmptyProps = React.ComponentProps<"div">;
+export type EmptyStateProps = {
+	title: React.ReactNode;
+	description?: React.ReactNode;
+	icon?: React.ReactNode;
+	startSlot?: React.ReactNode;
+	action?: React.ReactNode;
+	className?: string;
+};
 
-function Empty({ className, ...props }: EmptyProps) {
+export function EmptyState({
+	icon,
+	startSlot,
+	title,
+	description,
+	action,
+	className,
+}: EmptyStateProps) {
+	const leadingSlot = startSlot ?? icon;
+
 	return (
 		<div
 			data-slot="empty"
@@ -11,106 +26,43 @@ function Empty({ className, ...props }: EmptyProps) {
 				"flex w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-xl p-6 text-center text-balance",
 				className,
 			)}
-			{...props}
-		/>
+		>
+			<div
+				data-slot="empty-header"
+				className="flex max-w-sm flex-col items-center gap-1"
+			>
+				{leadingSlot ? (
+					<div
+						data-slot="empty-icon"
+						data-variant="icon"
+						className="mb-2 flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0"
+					>
+						{leadingSlot}
+					</div>
+				) : null}
+				<h3
+					data-slot="empty-title"
+					className="font-heading text-sm font-medium tracking-tight"
+				>
+					{title}
+				</h3>
+				{description ? (
+					<p
+						data-slot="empty-description"
+						className="text-xs/relaxed text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary"
+					>
+						{description}
+					</p>
+				) : null}
+			</div>
+			{action ? (
+				<div
+					data-slot="empty-content"
+					className="flex w-full max-w-sm min-w-0 flex-col items-center gap-2 text-xs/relaxed text-balance"
+				>
+					{action}
+				</div>
+			) : null}
+		</div>
 	);
 }
-
-export type EmptyHeaderProps = React.ComponentProps<"div">;
-
-function EmptyHeader({ className, ...props }: EmptyHeaderProps) {
-	return (
-		<div
-			data-slot="empty-header"
-			className={cn("flex max-w-sm flex-col items-center gap-1", className)}
-			{...props}
-		/>
-	);
-}
-
-const emptyMediaVariants = cva(
-	"mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
-	{
-		variants: {
-			variant: {
-				default: "bg-transparent",
-				icon: "flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-foreground [&_svg:not([class*='size-'])]:size-4",
-			},
-		},
-		defaultVariants: {
-			variant: "default",
-		},
-	},
-);
-
-export type EmptyMediaProps = React.ComponentProps<"div"> &
-	VariantProps<typeof emptyMediaVariants>;
-
-function EmptyMedia({
-	className,
-	variant = "default",
-	...props
-}: EmptyMediaProps) {
-	return (
-		<div
-			data-slot="empty-icon"
-			data-variant={variant}
-			className={cn(emptyMediaVariants({ variant, className }))}
-			{...props}
-		/>
-	);
-}
-
-export type EmptyTitleProps = React.ComponentProps<"h3">;
-
-function EmptyTitle({ className, ...props }: EmptyTitleProps) {
-	return (
-		<h3
-			data-slot="empty-title"
-			className={cn(
-				"font-heading text-sm font-medium tracking-tight",
-				className,
-			)}
-			{...props}
-		/>
-	);
-}
-
-export type EmptyDescriptionProps = React.ComponentProps<"p">;
-
-function EmptyDescription({ className, ...props }: EmptyDescriptionProps) {
-	return (
-		<p
-			data-slot="empty-description"
-			className={cn(
-				"text-xs/relaxed text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
-				className,
-			)}
-			{...props}
-		/>
-	);
-}
-
-export type EmptyContentProps = React.ComponentProps<"div">;
-
-function EmptyContent({ className, ...props }: EmptyContentProps) {
-	return (
-		<div
-			data-slot="empty-content"
-			className={cn(
-				"flex w-full max-w-sm min-w-0 flex-col items-center gap-2 text-xs/relaxed text-balance",
-				className,
-			)}
-			{...props}
-		/>
-	);
-}
-
-export {
-	Empty,
-	EmptyHeader,
-	EmptyTitle,
-	EmptyDescription,
-	EmptyContent,
-	EmptyMedia,
-};

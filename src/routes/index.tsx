@@ -1,19 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { PlaylistPanel } from "@/features/playlist/panel";
 import { HotkeysCheatsheetDialog } from "@/features/workspace/hotkeys-cheatsheet-dialog";
 import { WorkspaceLayout } from "@/features/workspace/layout";
 import { WorkspaceMenubar } from "@/features/workspace/menubar";
 import { useWorkspaceStore } from "@/features/workspace/store";
 
 export const Route = createFileRoute("/")({ component: Home });
-
-function PlaylistPanel() {
-	return (
-		<div className="flex h-full items-center justify-center">
-			<span className="text-2xl font-semibold text-muted-foreground">Left</span>
-		</div>
-	);
-}
 
 function SlidesPanel() {
 	return (

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HotkeysCheatsheetDialog } from "./hotkeys-cheatsheet-dialog";
 import { useWorkspaceStore } from "./store";
@@ -10,6 +10,7 @@ describe("HotkeysCheatsheetDialog", () => {
 	});
 
 	afterEach(() => {
+		cleanup();
 		useWorkspaceStore.setState({ isCheatsheetOpen: false });
 	});
 

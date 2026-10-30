@@ -1,18 +1,18 @@
 "use client";
 
-import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import { Menubar as MenubarPrimitive } from "@base-ui/react/menubar";
-import { IconCheck } from "@tabler/icons-react";
 import { cn } from "cn";
 import type * as React from "react";
 import {
 	DropdownMenu,
+	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuPortal,
 	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
 	DropdownMenuSeparator,
 	DropdownMenuShortcut,
 	DropdownMenuSub,
@@ -62,7 +62,7 @@ function MenubarTrigger({ className, ...props }: MenubarTriggerProps) {
 		<DropdownMenuTrigger
 			data-slot="menubar-trigger"
 			className={cn(
-				"flex items-center rounded-[calc(var(--radius-md)-2px)] px-2 py-[calc(--spacing(0.85))] text-xs/relaxed font-medium outline-hidden select-none hover:bg-muted aria-expanded:bg-muted",
+				"focus-ring flex items-center rounded-[calc(var(--radius-md)-2px)] px-2 py-[calc(--spacing(0.85))] text-xs/relaxed font-medium select-none hover:bg-muted aria-expanded:bg-muted",
 				className,
 			)}
 			{...props}
@@ -109,6 +109,7 @@ function MenubarItem({
 			data-slot="menubar-item"
 			data-inset={inset}
 			data-variant={variant}
+			variant={variant}
 			className={cn(
 				"group/menubar-item min-h-7 gap-2 rounded-md px-2 py-1 text-xs/relaxed focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-7.5 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-3.5 data-[variant=destructive]:*:[svg]:text-destructive!",
 				className,
@@ -118,35 +119,20 @@ function MenubarItem({
 	);
 }
 
-export type MenubarCheckboxItemProps = MenuPrimitive.CheckboxItem.Props & {
-	inset?: boolean;
-};
+export type MenubarCheckboxItemProps = React.ComponentProps<
+	typeof DropdownMenuCheckboxItem
+>;
 
 function MenubarCheckboxItem({
 	className,
-	children,
-	checked,
-	inset,
 	...props
 }: MenubarCheckboxItemProps) {
 	return (
-		<MenuPrimitive.CheckboxItem
+		<DropdownMenuCheckboxItem
 			data-slot="menubar-checkbox-item"
-			data-inset={inset}
-			className={cn(
-				"relative flex min-h-7 cursor-default items-center gap-2 rounded-md py-1.5 pr-2 pl-7.5 text-xs outline-hidden select-none focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground data-inset:pl-7.5 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-				className,
-			)}
-			checked={checked}
+			className={cn(className)}
 			{...props}
-		>
-			<span className="pointer-events-none absolute left-2 flex size-4 items-center justify-center [&_svg:not([class*='size-'])]:size-4">
-				<MenuPrimitive.CheckboxItemIndicator>
-					<IconCheck />
-				</MenuPrimitive.CheckboxItemIndicator>
-			</span>
-			{children}
-		</MenuPrimitive.CheckboxItem>
+		/>
 	);
 }
 
@@ -158,33 +144,17 @@ function MenubarRadioGroup({ ...props }: MenubarRadioGroupProps) {
 	return <DropdownMenuRadioGroup data-slot="menubar-radio-group" {...props} />;
 }
 
-export type MenubarRadioItemProps = MenuPrimitive.RadioItem.Props & {
-	inset?: boolean;
-};
+export type MenubarRadioItemProps = React.ComponentProps<
+	typeof DropdownMenuRadioItem
+>;
 
-function MenubarRadioItem({
-	className,
-	children,
-	inset,
-	...props
-}: MenubarRadioItemProps) {
+function MenubarRadioItem({ className, ...props }: MenubarRadioItemProps) {
 	return (
-		<MenuPrimitive.RadioItem
+		<DropdownMenuRadioItem
 			data-slot="menubar-radio-item"
-			data-inset={inset}
-			className={cn(
-				"relative flex min-h-7 cursor-default items-center gap-2 rounded-md py-1.5 pr-2 pl-7.5 text-xs outline-hidden select-none focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground data-inset:pl-7.5 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
-				className,
-			)}
+			className={cn(className)}
 			{...props}
-		>
-			<span className="pointer-events-none absolute left-2 flex size-4 items-center justify-center [&_svg:not([class*='size-'])]:size-4">
-				<MenuPrimitive.RadioItemIndicator>
-					<IconCheck />
-				</MenuPrimitive.RadioItemIndicator>
-			</span>
-			{children}
-		</MenuPrimitive.RadioItem>
+		/>
 	);
 }
 

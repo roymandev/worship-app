@@ -1,5 +1,6 @@
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { appHotkeys } from "@/features/workspace/hotkeys";
 
 export const Route = createRootRoute({
@@ -30,10 +31,7 @@ function NotFoundComponent() {
 				Sorry, we couldn&apos;t find the page you&apos;re looking for.
 			</p>
 			<div className="mt-6">
-				<Link
-					to="/"
-					className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-				>
+				<Link to="/" className={buttonVariants({ variant: "default" })}>
 					Go back home
 				</Link>
 			</div>
@@ -60,13 +58,9 @@ function RootErrorComponent({
 			</h1>
 			<p className="mt-4 max-w-md text-sm text-gray-600">{errorMessage}</p>
 			<div className="mt-6">
-				<button
-					type="button"
-					onClick={reset}
-					className="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
-				>
+				<Button type="button" variant="destructive" onClick={reset}>
 					Retry
-				</button>
+				</Button>
 			</div>
 		</div>
 	);

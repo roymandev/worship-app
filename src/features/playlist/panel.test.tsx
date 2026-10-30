@@ -278,23 +278,29 @@ describe("PlaylistPanel", () => {
 		await user.keyboard("{ArrowRight}");
 		const moveDownBtn = screen.getAllByRole("button", { name: "Move down" })[0];
 		expect(document.activeElement).toBe(moveDownBtn);
+		expect(moveDownBtn).toHaveFocus();
+		expect(rows[0]).not.toHaveFocus();
 
 		// ArrowDown moves to next row and synchronizes focus to that row
 		await user.keyboard("{ArrowDown}");
 		expect(usePlaylistStore.getState().selectedItemId).toBe("item-2");
 		expect(rows[1]).toHaveFocus();
 		expect(rows[1]).toHaveAttribute("aria-selected", "true");
+		expect(moveDownBtn).not.toHaveFocus();
 
 		// Now move into row 1's action buttons (Move up is enabled)
 		await user.keyboard("{ArrowRight}");
 		const moveUpBtnRow1 = screen.getAllByRole("button", { name: "Move up" })[1];
 		expect(document.activeElement).toBe(moveUpBtnRow1);
+		expect(moveUpBtnRow1).toHaveFocus();
+		expect(rows[1]).not.toHaveFocus();
 
 		// ArrowUp moves to previous row and synchronizes focus to row 0
 		await user.keyboard("{ArrowUp}");
 		expect(usePlaylistStore.getState().selectedItemId).toBe("item-1");
 		expect(rows[0]).toHaveFocus();
 		expect(rows[0]).toHaveAttribute("aria-selected", "true");
+		expect(moveUpBtnRow1).not.toHaveFocus();
 	});
 
 	it("all action buttons have tabIndex -1 so sequential tab order does not step through them", () => {

@@ -81,7 +81,7 @@ body {
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.5 0.134 242.749);
   --chart-1: oklch(0.828 0.111 230.318);
   --chart-2: oklch(0.685 0.169 237.323);
   --chart-3: oklch(0.588 0.158 241.966);
@@ -95,7 +95,7 @@ body {
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-ring: oklch(0.5 0.134 242.749);
 }
 
 .dark {
@@ -116,7 +116,7 @@ body {
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ring: oklch(0.685 0.169 237.323);
   --chart-1: oklch(0.828 0.111 230.318);
   --chart-2: oklch(0.685 0.169 237.323);
   --chart-3: oklch(0.588 0.158 241.966);
@@ -129,7 +129,7 @@ body {
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: oklch(0.685 0.169 237.323);
 }
 
 @layer base {
@@ -162,5 +162,23 @@ body {
   &:focus-visible {
     outline: none;
     box-shadow: inset 0 0 0 2px var(--ring);
+  }
+}
+
+@utility focus-ring-destructive {
+  outline: none;
+  &:focus-visible {
+    outline: none;
+    --tw-ring-offset-shadow: var(--tw-ring-inset,) 0 0 0 1px var(--background);
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + 1px) var(--destructive);
+    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+  }
+}
+
+@utility focus-ring-inset-destructive {
+  outline: none;
+  &:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--destructive);
   }
 }

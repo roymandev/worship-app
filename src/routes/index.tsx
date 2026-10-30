@@ -1,3 +1,4 @@
+import { useAppHotkeys, useHotkey } from "@tanstack/react-hotkeys";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import {
@@ -11,6 +12,7 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { HotkeysKbd } from "@/components/ui/kbd";
 import {
 	Menubar,
 	MenubarContent,
@@ -25,6 +27,7 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { HotkeysCheatsheetDialog } from "@/features/workspace/hotkeys-cheatsheet-dialog";
 import { useWorkspaceStore } from "@/features/workspace/store";
 
 export const Route = createFileRoute("/")({ component: Home });
@@ -32,7 +35,27 @@ export const Route = createFileRoute("/")({ component: Home });
 function Home() {
 	const groupRef = useRef<GroupImperativeHandle | null>(null);
 	const [resetDialogOpen, setResetDialogOpen] = useState(false);
+	const [cheatsheetOpen, setCheatsheetOpen] = useState(false);
 	const mode = useWorkspaceStore((s) => s.mode);
+	const appHotkeys = useAppHotkeys();
+
+	useHotkey(
+		appHotkeys["workspace.toggleLayoutMode"],
+		() => useWorkspaceStore.getState().toggleMode(),
+		{ ignoreInputs: "auto" },
+	);
+
+	useHotkey(
+		appHotkeys["workspace.resetLayout"],
+		() => setResetDialogOpen(true),
+		{ ignoreInputs: "auto" },
+	);
+
+	useHotkey(
+		appHotkeys["help.shortcuts"],
+		() => setCheatsheetOpen((prev) => !prev),
+		{ ignoreInputs: "auto" },
+	);
 
 	const handleReset = () => {
 		groupRef.current?.setLayout({
@@ -53,14 +76,37 @@ function Home() {
 						<MenubarTrigger>View</MenubarTrigger>
 						<MenubarContent>
 							<MenubarItem
-								disabled={isEditMode}
-								onClick={() => useWorkspaceStore.getState().setMode("edit")}
+								onClick={() => useWorkspaceStore.getState().toggleMode()}
+								className="flex items-center justify-between gap-4"
 							>
-								Edit Layout
+								<span className="whitespace-nowrap">
+									{isEditMode ? "Done Editing" : "Edit Layout"}
+								</span>
+								<HotkeysKbd
+									chord={appHotkeys["workspace.toggleLayoutMode"].hotkey ?? ""}
+								/>
 							</MenubarItem>
 							<MenubarSeparator />
-							<MenubarItem onClick={() => setResetDialogOpen(true)}>
-								Reset Layout...
+							<MenubarItem
+								onClick={() => setResetDialogOpen(true)}
+								className="flex items-center justify-between gap-4"
+							>
+								<span className="whitespace-nowrap">Reset Layout...</span>
+								<HotkeysKbd
+									chord={appHotkeys["workspace.resetLayout"].hotkey ?? ""}
+								/>
+							</MenubarItem>
+						</MenubarContent>
+					</MenubarMenu>
+					<MenubarMenu>
+						<MenubarTrigger>Help</MenubarTrigger>
+						<MenubarContent>
+							<MenubarItem
+								onClick={() => setCheatsheetOpen(true)}
+								className="flex items-center justify-between gap-4"
+							>
+								<span className="whitespace-nowrap">Keyboard Shortcuts</span>
+								<HotkeysKbd chord={appHotkeys["help.shortcuts"].hotkey ?? ""} />
 							</MenubarItem>
 						</MenubarContent>
 					</MenubarMenu>
@@ -93,6 +139,10 @@ function Home() {
 						</AlertDialogFooter>
 					</AlertDialogContent>
 				</AlertDialog>
+				<HotkeysCheatsheetDialog
+					open={cheatsheetOpen}
+					onOpenChange={setCheatsheetOpen}
+				/>
 			</header>
 			<div className="flex-1 min-h-0 w-full">
 				<ResizablePanelGroup

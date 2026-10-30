@@ -1,4 +1,6 @@
+import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { appHotkeys } from "@/features/workspace/hotkeys";
 
 export const Route = createRootRoute({
 	component: RootComponent,
@@ -8,7 +10,14 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-	return <Outlet />;
+	return (
+		<HotkeysProvider
+			appHotkeys={appHotkeys}
+			defaultOptions={{ hotkey: { ignoreInputs: "auto" } }}
+		>
+			<Outlet />
+		</HotkeysProvider>
+	);
 }
 
 function NotFoundComponent() {

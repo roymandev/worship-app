@@ -27,6 +27,7 @@
     "@base-ui/react": "^1.9.0",
     "@fontsource-variable/figtree": "^5.3.0",
     "@tabler/icons-react": "^3.49.0",
+    "@tanstack/react-hotkeys": "^0.17.0",
     "@tanstack/react-router": "1.170.46",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.0",

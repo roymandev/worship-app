@@ -1,99 +1,70 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render, screen } from "@testing-library/react";
-import {
-	Empty,
-	EmptyContent,
-	EmptyDescription,
-	EmptyHeader,
-	EmptyMedia,
-	EmptyTitle,
-} from "./empty";
+import { EmptyState } from "./empty";
 
-describe("Empty primitive components", () => {
+describe("EmptyState component", () => {
 	afterEach(() => {
 		cleanup();
 	});
 
-	it("renders Empty container with children and custom class", () => {
+	it("renders title, description, icon, and action", () => {
 		render(
-			<Empty data-testid="empty-root" className="custom-root">
-				<span>Child</span>
-			</Empty>,
+			<EmptyState
+				className="custom-empty"
+				icon={<span data-testid="test-icon">Icon</span>}
+				title="No items found"
+				description="Try adjusting your search criteria."
+				action={<button type="button">Create item</button>}
+			/>,
 		);
 
-		const el = screen.getByTestId("empty-root");
-		expect(el).toBeInTheDocument();
-		expect(el).toHaveAttribute("data-slot", "empty");
-		expect(el).toHaveClass("custom-root");
-		expect(el).toHaveTextContent("Child");
-	});
+		const root = screen
+			.getByText("No items found")
+			.closest('[data-slot="empty"]');
+		expect(root).toBeInTheDocument();
+		expect(root).toHaveClass("custom-empty");
 
-	it("renders EmptyHeader with children and custom class", () => {
-		render(
-			<EmptyHeader data-testid="empty-header" className="custom-header">
-				<span>Header Content</span>
-			</EmptyHeader>,
-		);
-
-		const el = screen.getByTestId("empty-header");
-		expect(el).toBeInTheDocument();
-		expect(el).toHaveAttribute("data-slot", "empty-header");
-		expect(el).toHaveClass("custom-header");
-		expect(el).toHaveTextContent("Header Content");
-	});
-
-	it("renders EmptyMedia with default and icon variants", () => {
-		const { rerender } = render(
-			<EmptyMedia data-testid="empty-media">
-				<span>Media</span>
-			</EmptyMedia>,
-		);
-
-		let el = screen.getByTestId("empty-media");
-		expect(el).toHaveAttribute("data-slot", "empty-icon");
-		expect(el).toHaveAttribute("data-variant", "default");
-
-		rerender(
-			<EmptyMedia data-testid="empty-media" variant="icon">
-				<span>Media</span>
-			</EmptyMedia>,
-		);
-
-		el = screen.getByTestId("empty-media");
-		expect(el).toHaveAttribute("data-variant", "icon");
-	});
-
-	it("renders EmptyTitle as an accessible heading tag h3", () => {
-		render(<EmptyTitle>Test Title</EmptyTitle>);
+		const icon = screen.getByTestId("test-icon");
+		expect(icon).toBeInTheDocument();
 
 		const heading = screen.getByRole("heading", {
 			level: 3,
-			name: "Test Title",
+			name: "No items found",
 		});
 		expect(heading).toBeInTheDocument();
-		expect(heading.tagName).toBe("H3");
 		expect(heading).toHaveAttribute("data-slot", "empty-title");
+
+		const description = screen.getByText("Try adjusting your search criteria.");
+		expect(description).toBeInTheDocument();
+		expect(description.tagName).toBe("P");
+		expect(description).toHaveAttribute("data-slot", "empty-description");
+
+		const actionBtn = screen.getByRole("button", { name: "Create item" });
+		expect(actionBtn).toBeInTheDocument();
 	});
 
-	it("renders EmptyDescription as paragraph", () => {
-		render(<EmptyDescription>Test Description</EmptyDescription>);
+	it("renders minimally with only title", () => {
+		render(<EmptyState title="Simple Title" />);
 
-		const desc = screen.getByText("Test Description");
-		expect(desc).toBeInTheDocument();
-		expect(desc.tagName).toBe("P");
-		expect(desc).toHaveAttribute("data-slot", "empty-description");
+		const heading = screen.getByRole("heading", {
+			level: 3,
+			name: "Simple Title",
+		});
+		expect(heading).toBeInTheDocument();
+		expect(screen.queryByRole("button")).toBeNull();
 	});
 
-	it("renders EmptyContent with children", () => {
+	it("supports ReactNode for title, description, and startSlot", () => {
 		render(
-			<EmptyContent data-testid="empty-content">
-				<button type="button">Action</button>
-			</EmptyContent>,
+			<EmptyState
+				startSlot={<span data-testid="start-slot-icon">Start</span>}
+				title={<span>Rich Title</span>}
+				description={<span>Rich Description</span>}
+			/>,
 		);
 
-		const content = screen.getByTestId("empty-content");
-		expect(content).toBeInTheDocument();
-		expect(content).toHaveAttribute("data-slot", "empty-content");
-		expect(screen.getByRole("button", { name: "Action" })).toBeInTheDocument();
+		expect(screen.getByTestId("start-slot-icon")).toBeInTheDocument();
+		expect(screen.getByText("Rich Title")).toBeInTheDocument();
+		expect(screen.getByText("Rich Description")).toBeInTheDocument();
 	});
 });

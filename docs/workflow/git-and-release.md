@@ -47,13 +47,13 @@ bun run build      # Vite production build
 ### Step 3: Pull Request Creation via `/mr`
 When work on your branch is complete and pushed, create or update the Pull Request using the OpenCode `/mr` command.
 
-The command automatically generates a Conventional Commit title and structured PR description:
+The command automatically generates a Conventional Commit title and structured PR description. PR titles strictly follow Conventional Commits (`type(scope): subject` or `type: subject`), while ticket IDs belong in the branch name (e.g. `feat/01-...`) and PR body:
 ```
-[optional-ticket-id] <type>(<scope>): <summary>
+<type>(<scope>): <summary>
 ```
 *Example titles:*
 - `feat(playlist): add inline keyboard reorder controls`
-- `[WOR-102] fix(workspace): prevent focus leakage on panel resize`
+- `fix(workspace): prevent focus leakage on panel resize`
 
 ---
 
@@ -61,7 +61,7 @@ The command automatically generates a Conventional Commit title and structured P
 
 ### GitHub Actions CI (`ci.yml`)
 Every PR automatically runs:
-1. **PR Title Linter** (`action-semantic-pull-request`): Enforces Conventional Commit format (allowing optional `[TICKET]` prefix).
+1. **PR Title Linter** (`action-semantic-pull-request`): Enforces standard Conventional Commit format (`type(scope): subject` or `type: subject`). WIP drafts (`wip: ...`) are supported.
 2. **Quality Verification**:
    - `bun run check`
    - `bun run typecheck`

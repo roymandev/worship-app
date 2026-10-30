@@ -305,8 +305,29 @@ describe("PlaylistPanel", () => {
 		expect(screen.queryByText("Psalm 23")).not.toBeInTheDocument();
 		expect(rows[0]).toHaveTextContent("Amazing Grace");
 		expect(rows[1]).toHaveTextContent("10,000 Reasons");
-		// In test 1, item-1 was selected when deleting item-2, so selection stayed on item-1
-		expect(rows[0]).toHaveFocus();
+		// Deleting item at index 1 restores focus to the subsequent item (now at index 1: "10,000 Reasons")
+		expect(rows[1]).toHaveFocus();
+	});
+
+	it("deleting the last item in edit mode restores focus to the preceding item", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-1" });
+
+		render(<PlaylistPanel />);
+
+		const deleteBtns = screen.getAllByRole("button", { name: "Delete item" });
+		// Click delete on the last item (item 3: 10,000 Reasons)
+		await user.click(deleteBtns[2]);
+
+		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
+		await user.click(confirmDeleteBtn);
+
+		const rows = screen.getAllByRole("row");
+		expect(rows).toHaveLength(2);
+		expect(screen.queryByText("10,000 Reasons")).not.toBeInTheDocument();
+		// Deleting last item restores focus to previous item (index 1: Psalm 23)
+		expect(rows[1]).toHaveTextContent("Psalm 23");
+		expect(rows[1]).toHaveFocus();
 	});
 
 	it("deleting an item in view mode via Backspace triggers popover and focuses neighbor upon delete", async () => {
@@ -526,10 +547,142 @@ describe("PlaylistPanel", () => {
 		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
 		expect(confirmDeleteBtn).toHaveFocus();
 
-		// Background rows must not have focus
-		const rows = screen.getAllByRole("row");
+		// Background rows must not have focus (querying DOM container since background is inert/aria-hidden while popover is open)
+		const rows = document.querySelectorAll('[role="row"]');
 		for (const row of rows) {
 			expect(row).not.toHaveFocus();
 		}
+	});
+
+	it("cycles Tab and Arrow navigation inside delete confirmation popover with boundary clamping", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-1" });
+
+		render(<PlaylistPanel />);
+
+		const deleteBtns = screen.getAllByRole("button", { name: "Delete item" });
+		await user.click(deleteBtns[0]);
+
+		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
+		const deleteBtn = screen.getByRole("button", { name: "Delete" });
+		const dialog = screen.getByRole("alertdialog");
+
+		await waitFor(() => expect(cancelBtn).toHaveFocus());
+
+		// Shift+Tab from Cancel moves backward to Delete
+		await user.keyboard("{Shift>}{Tab}{/Shift}");
+		expect(deleteBtn).toHaveFocus();
+
+		// Shift+Tab from Delete moves backward to Cancel
+		await user.keyboard("{Shift>}{Tab}{/Shift}");
+		expect(cancelBtn).toHaveFocus();
+
+		// Tab from Cancel moves forward to Delete
+		await user.keyboard("{Tab}");
+		expect(deleteBtn).toHaveFocus();
+
+		// Tab from Delete moves forward back to Cancel
+		await user.keyboard("{Tab}");
+		expect(cancelBtn).toHaveFocus();
+
+		// If focus is somehow on dialog container, Tab moves safely to Cancel
+		dialog.focus();
+		expect(dialog).toHaveFocus();
+		await user.keyboard("{Tab}");
+		expect(cancelBtn).toHaveFocus();
+
+		// ArrowLeft on Cancel stays clamped
+		await user.keyboard("{ArrowLeft}");
+		expect(cancelBtn).toHaveFocus();
+
+		// ArrowRight from Cancel moves to Delete
+		await user.keyboard("{ArrowRight}");
+		expect(deleteBtn).toHaveFocus();
+
+		// ArrowRight on Delete stays clamped
+		await user.keyboard("{ArrowRight}");
+		expect(deleteBtn).toHaveFocus();
+
+		// ArrowLeft from Delete moves to Cancel
+		await user.keyboard("{ArrowLeft}");
+		expect(cancelBtn).toHaveFocus();
+	});
+
+	it("confirms deletion via Space key on Delete button", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-2" });
+
+		render(<PlaylistPanel />);
+
+		const deleteBtns = screen.getAllByRole("button", { name: "Delete item" });
+		await user.click(deleteBtns[1]);
+
+		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
+		await waitFor(() => expect(cancelBtn).toHaveFocus());
+
+		await user.keyboard("{Tab}");
+		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
+		expect(confirmDeleteBtn).toHaveFocus();
+
+		await user.keyboard(" ");
+
+		const remainingRows = screen.getAllByRole("row");
+		expect(remainingRows).toHaveLength(2);
+		expect(screen.queryByText("Psalm 23")).not.toBeInTheDocument();
+	});
+
+	it("keyboard horizontal navigation across action cell buttons and back to row", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-2" });
+
+		render(<PlaylistPanel />);
+
+		const rows = screen.getAllByRole("row");
+		rows[1].focus();
+		expect(rows[1]).toHaveFocus();
+
+		// Move into actions: item 1 (index 1) has Move up enabled
+		await user.keyboard("{ArrowRight}");
+		const moveUpBtn = screen.getAllByRole("button", { name: "Move up" })[1];
+		expect(moveUpBtn).toHaveFocus();
+
+		// ArrowRight moves to Move down
+		await user.keyboard("{ArrowRight}");
+		const moveDownBtn = screen.getAllByRole("button", { name: "Move down" })[1];
+		expect(moveDownBtn).toHaveFocus();
+
+		// ArrowRight moves to Edit item
+		await user.keyboard("{ArrowRight}");
+		const editBtn = screen.getAllByRole("button", { name: "Edit item" })[1];
+		expect(editBtn).toHaveFocus();
+
+		// ArrowRight moves to Delete item
+		await user.keyboard("{ArrowRight}");
+		const deleteBtn = screen.getAllByRole("button", { name: "Delete item" })[1];
+		expect(deleteBtn).toHaveFocus();
+
+		// Clamped at end
+		await user.keyboard("{ArrowRight}");
+		expect(deleteBtn).toHaveFocus();
+
+		// ArrowLeft moves back through items
+		await user.keyboard("{ArrowLeft}");
+		expect(editBtn).toHaveFocus();
+
+		await user.keyboard("{ArrowLeft}");
+		expect(moveDownBtn).toHaveFocus();
+
+		await user.keyboard("{ArrowLeft}");
+		expect(moveUpBtn).toHaveFocus();
+
+		// ArrowLeft from first action returns focus to the row
+		await user.keyboard("{ArrowLeft}");
+		expect(rows[1]).toHaveFocus();
+
+		// Escape from action button returns focus to the row
+		await user.keyboard("{ArrowRight}");
+		expect(moveUpBtn).toHaveFocus();
+		await user.keyboard("{Escape}");
+		expect(rows[1]).toHaveFocus();
 	});
 });

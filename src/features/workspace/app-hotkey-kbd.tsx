@@ -1,62 +1,12 @@
 import { cn } from "cn";
 import type * as React from "react";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
-import { type AppHotkeyId, appHotkeys } from "@/features/workspace/hotkeys";
-
-function isMacPlatform(): boolean {
-	if (typeof navigator === "undefined") {
-		return false;
-	}
-	// Support newer User-Agent Client Hints if available, fallback to navigator.platform/userAgent
-	const nav = navigator as unknown as {
-		userAgentData?: { platform?: string };
-		platform?: string;
-	};
-	const platformString =
-		nav.userAgentData?.platform || nav.platform || navigator.userAgent;
-	return /(Mac|iPhone|iPod|iPad)/i.test(platformString);
-}
-
-const MAC_KEY_SYMBOLS: Record<string, string> = {
-	mod: "⌘",
-	meta: "⌘",
-	cmd: "⌘",
-	command: "⌘",
-	alt: "⌥",
-	opt: "⌥",
-	option: "⌥",
-	shift: "⇧",
-	ctrl: "⌃",
-	control: "⌃",
-	enter: "↵",
-	return: "↵",
-	backspace: "⌫",
-	escape: "Esc",
-	esc: "Esc",
-};
-
-const STANDARD_KEY_SYMBOLS: Record<string, string> = {
-	mod: "Ctrl",
-	ctrl: "Ctrl",
-	control: "Ctrl",
-	alt: "Alt",
-	opt: "Alt",
-	option: "Alt",
-	shift: "Shift",
-	enter: "Enter",
-	return: "Enter",
-	backspace: "Backspace",
-	escape: "Esc",
-	esc: "Esc",
-};
-
-function formatKeySymbol(key: string, isMac: boolean): string {
-	const normalized = key.trim();
-	const lower = normalized.toLowerCase();
-	const symbolMap = isMac ? MAC_KEY_SYMBOLS : STANDARD_KEY_SYMBOLS;
-
-	return symbolMap[lower] ?? normalized;
-}
+import {
+	type AppHotkeyId,
+	appHotkeys,
+	formatKeySymbol,
+	isMacPlatform,
+} from "@/features/workspace/hotkeys";
 
 export type HotkeyChordKbdProps = React.ComponentProps<"kbd"> & {
 	chord: string;

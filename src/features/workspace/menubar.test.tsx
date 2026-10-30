@@ -8,8 +8,6 @@ describe("WorkspaceMenubar", () => {
 	beforeEach(() => {
 		useWorkspaceStore.setState({
 			mode: "view",
-			isResetDialogOpen: false,
-			isCheatsheetOpen: false,
 		});
 	});
 
@@ -97,8 +95,14 @@ describe("WorkspaceMenubar", () => {
 		expect(useWorkspaceStore.getState().mode).toBe("view");
 	});
 
-	it("opens reset confirmation dialog when clicking reset layout item", async () => {
+	it("triggers reset layout callback or dispatches event when clicking reset layout item", async () => {
 		const user = userEvent.setup();
+		let eventFired = false;
+		const handleEvent = () => {
+			eventFired = true;
+		};
+		window.addEventListener("workspace:reset-layout", handleEvent);
+
 		render(<WorkspaceMenubar />);
 
 		const viewTrigger = screen.getByRole("menuitem", { name: "View" });
@@ -110,11 +114,42 @@ describe("WorkspaceMenubar", () => {
 		expect(resetLayoutItem).toHaveAttribute("data-variant", "destructive");
 
 		await user.click(resetLayoutItem);
-		expect(useWorkspaceStore.getState().isResetDialogOpen).toBe(true);
+		expect(eventFired).toBe(true);
+
+		window.removeEventListener("workspace:reset-layout", handleEvent);
 	});
 
-	it("opens cheatsheet when clicking help menu item", async () => {
+	it("triggers onResetLayout prop when provided", async () => {
 		const user = userEvent.setup();
+		let propCalled = false;
+
+		render(
+			<WorkspaceMenubar
+				onResetLayout={() => {
+					propCalled = true;
+				}}
+			/>,
+		);
+
+		const viewTrigger = screen.getByRole("menuitem", { name: "View" });
+		await user.click(viewTrigger);
+
+		const resetLayoutItem = screen.getByRole("menuitem", {
+			name: /Reset layout to defaults\.\.\./i,
+		});
+
+		await user.click(resetLayoutItem);
+		expect(propCalled).toBe(true);
+	});
+
+	it("dispatches cheatsheet event when clicking help menu item", async () => {
+		const user = userEvent.setup();
+		let eventFired = false;
+		const handleEvent = () => {
+			eventFired = true;
+		};
+		window.addEventListener("workspace:open-cheatsheet", handleEvent);
+
 		render(<WorkspaceMenubar />);
 
 		const helpTrigger = screen.getByRole("menuitem", { name: "Help" });
@@ -126,6 +161,31 @@ describe("WorkspaceMenubar", () => {
 		expect(shortcutsItem).toBeInTheDocument();
 
 		await user.click(shortcutsItem);
-		expect(useWorkspaceStore.getState().isCheatsheetOpen).toBe(true);
+		expect(eventFired).toBe(true);
+
+		window.removeEventListener("workspace:open-cheatsheet", handleEvent);
+	});
+
+	it("triggers onOpenCheatsheet prop when provided", async () => {
+		const user = userEvent.setup();
+		let propCalled = false;
+
+		render(
+			<WorkspaceMenubar
+				onOpenCheatsheet={() => {
+					propCalled = true;
+				}}
+			/>,
+		);
+
+		const helpTrigger = screen.getByRole("menuitem", { name: "Help" });
+		await user.click(helpTrigger);
+
+		const shortcutsItem = screen.getByRole("menuitem", {
+			name: /Keyboard shortcuts/i,
+		});
+
+		await user.click(shortcutsItem);
+		expect(propCalled).toBe(true);
 	});
 });

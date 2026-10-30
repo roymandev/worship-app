@@ -1,6 +1,6 @@
 import { HotkeysProvider, useHotkey } from "@tanstack/react-hotkeys";
 import { cn } from "cn";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -41,9 +41,7 @@ export function WorkspaceLayout({
 }: WorkspaceLayoutProps) {
 	const groupRef = useRef<GroupImperativeHandle | null>(null);
 	const mode = useWorkspaceStore((state) => state.mode);
-	const isResetDialogOpen = useWorkspaceStore(
-		(state) => state.isResetDialogOpen,
-	);
+	const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
 	useHotkey(
 		appHotkeys["workspace.toggleLayoutMode"],
@@ -53,21 +51,26 @@ export function WorkspaceLayout({
 
 	useHotkey(
 		appHotkeys["workspace.resetLayout"],
-		() => useWorkspaceStore.getState().openResetConfirmation(),
+		() => setIsResetDialogOpen(true),
 		{ ignoreInputs: "auto" },
 	);
+
+	useEffect(() => {
+		const handleResetRequest = () => {
+			setIsResetDialogOpen(true);
+		};
+
+		window.addEventListener("workspace:reset-layout", handleResetRequest);
+		return () => {
+			window.removeEventListener("workspace:reset-layout", handleResetRequest);
+		};
+	}, []);
 
 	const isEditMode = mode === "edit";
 
 	const handleReset = () => {
 		groupRef.current?.setLayout(DEFAULT_LAYOUT);
-		useWorkspaceStore.getState().closeResetConfirmation();
-	};
-
-	const handleOpenChange = (open: boolean) => {
-		if (!open) {
-			useWorkspaceStore.getState().closeResetConfirmation();
-		}
+		setIsResetDialogOpen(false);
 	};
 
 	return (
@@ -91,7 +94,7 @@ export function WorkspaceLayout({
 				</ResizablePanel>
 			</ResizablePanelGroup>
 
-			<AlertDialog open={isResetDialogOpen} onOpenChange={handleOpenChange}>
+			<AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
 				<AlertDialogContent>
 					<HotkeysProvider
 						scope="workspace:reset-dialog"

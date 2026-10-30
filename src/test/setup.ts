@@ -1,6 +1,10 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import packageJson from "../../package.json" with { type: "json" };
 
 GlobalRegistrator.register();
+
+// biome-ignore lint/suspicious/noExplicitAny: Global compile-time version injected into test runtime
+(globalThis as any).__APP_VERSION__ = packageJson.version;
 
 // biome-ignore lint/suspicious/noExplicitAny: React act testing environment flag on globalThis
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;

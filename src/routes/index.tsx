@@ -5,6 +5,7 @@ import { HotkeysCheatsheetDialog } from "@/features/workspace/hotkeys-cheatsheet
 import { WorkspaceLayout } from "@/features/workspace/layout";
 import { WorkspaceMenubar } from "@/features/workspace/menubar";
 import { useWorkspaceStore } from "@/features/workspace/store";
+import { APP_VERSION } from "@/utils/version";
 
 export const Route = createFileRoute("/")({ component: Home });
 
@@ -36,7 +37,15 @@ function Home() {
 	return (
 		<main className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">
 			<header className="flex h-12 shrink-0 items-center gap-4 border-b px-4">
-				<h1 className="text-sm font-semibold tracking-tight">Worship App</h1>
+				<div className="flex items-center gap-2">
+					<h1 className="text-sm font-semibold tracking-tight">Worship App</h1>
+					<span
+						title={`Version ${APP_VERSION}`}
+						className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+					>
+						v{APP_VERSION}
+					</span>
+				</div>
 				<WorkspaceMenubar />
 				{isEditMode && (
 					<div className="ml-auto">

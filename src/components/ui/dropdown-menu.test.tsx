@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
 	DropdownMenu,
@@ -74,10 +74,14 @@ describe("DropdownMenu component", () => {
 		expect(destructiveItem).toHaveAttribute("data-variant", "destructive");
 
 		// Keyboard focus
-		defaultItem.focus();
+		act(() => {
+			defaultItem.focus();
+		});
 		expect(defaultItem).toHaveFocus();
 
-		destructiveItem.focus();
+		act(() => {
+			destructiveItem.focus();
+		});
 		expect(destructiveItem).toHaveFocus();
 	});
 

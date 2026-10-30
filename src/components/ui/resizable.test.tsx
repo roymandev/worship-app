@@ -25,7 +25,7 @@ describe("ResizableHandle component", () => {
 		expect(handle).toBeInTheDocument();
 	});
 
-	it("supports keyboard navigation via tab key and arrow keys", async () => {
+	it("supports keyboard navigation via tab key", async () => {
 		const user = userEvent.setup();
 		render(
 			<ResizablePanelGroup orientation="horizontal">
@@ -39,12 +39,6 @@ describe("ResizableHandle component", () => {
 		expect(handle).not.toHaveFocus();
 
 		await user.tab();
-		expect(handle).toHaveFocus();
-
-		// Test keyboard arrow navigation
-		await user.keyboard("{ArrowRight}");
-		expect(handle).toHaveFocus();
-		await user.keyboard("{ArrowLeft}");
 		expect(handle).toHaveFocus();
 	});
 

@@ -344,7 +344,7 @@ describe("PlaylistPanel", () => {
 		}
 	});
 
-	it("dismissing delete confirmation popover restores focus to trigger or originating row", async () => {
+	it("dismissing delete confirmation popover in edit mode restores focus to trigger button", async () => {
 		const user = userEvent.setup();
 		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-2" });
 
@@ -366,9 +366,14 @@ describe("PlaylistPanel", () => {
 		// Popover should close and focus should be restored to trigger button
 		expect(screen.queryByText("Delete this item?")).not.toBeInTheDocument();
 		expect(triggerBtn).toHaveFocus();
+	});
 
-		// Now test dismissal via Escape in view mode
+	it("dismissing delete confirmation popover in view mode restores focus to originating row", async () => {
+		const user = userEvent.setup();
 		usePlaylistStore.setState({ mode: "view", selectedItemId: "item-1" });
+
+		render(<PlaylistPanel />);
+
 		const rows = screen.getAllByRole("row");
 		rows[0].focus();
 		expect(rows[0]).toHaveFocus();

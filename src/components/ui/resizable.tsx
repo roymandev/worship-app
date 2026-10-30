@@ -1,0 +1,105 @@
+import { cn } from "cn";
+import * as ResizablePrimitive from "react-resizable-panels";
+
+export type { GroupImperativeHandle } from "react-resizable-panels";
+
+export type ResizablePanelGroupProps = ResizablePrimitive.GroupProps & {
+	autoSaveId?: string;
+};
+
+function ResizablePanelGroupWithAutoSave({
+	autoSaveId,
+	defaultLayout: callerDefaultLayout,
+	onLayoutChanged: callerOnLayoutChanged,
+	groupRef,
+	...props
+}: ResizablePanelGroupProps & { autoSaveId: string }) {
+	const { defaultLayout, onLayoutChanged } =
+		ResizablePrimitive.useDefaultLayout({
+			id: autoSaveId,
+		});
+
+	return (
+		<ResizablePrimitive.Group
+			data-slot="resizable-panel-group"
+			groupRef={groupRef}
+			defaultLayout={callerDefaultLayout ?? defaultLayout}
+			onLayoutChanged={(layout, meta) => {
+				onLayoutChanged(layout, meta);
+				callerOnLayoutChanged?.(layout, meta);
+			}}
+			{...props}
+		/>
+	);
+}
+
+function ResizablePanelGroup({
+	autoSaveId,
+	className,
+	groupRef,
+	...props
+}: ResizablePanelGroupProps) {
+	const groupClassName = cn(
+		"flex h-full w-full aria-[orientation=vertical]:flex-col",
+		className,
+	);
+
+	if (autoSaveId) {
+		return (
+			<ResizablePanelGroupWithAutoSave
+				autoSaveId={autoSaveId}
+				className={groupClassName}
+				groupRef={groupRef}
+				{...props}
+			/>
+		);
+	}
+
+	return (
+		<ResizablePrimitive.Group
+			data-slot="resizable-panel-group"
+			className={groupClassName}
+			groupRef={groupRef}
+			{...props}
+		/>
+	);
+}
+
+function ResizablePanel({ ...props }: ResizablePrimitive.PanelProps) {
+	return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />;
+}
+
+export type ResizableHandleProps = ResizablePrimitive.SeparatorProps & {
+	withHandle?: boolean;
+};
+
+function ResizableHandle({
+	withHandle,
+	className,
+	disabled,
+	style,
+	...props
+}: ResizableHandleProps) {
+	return (
+		<ResizablePrimitive.Separator
+			data-slot="resizable-handle"
+			disabled={disabled}
+			style={{
+				...style,
+				...(disabled ? { cursor: "default" } : {}),
+			}}
+			className={cn(
+				"relative flex w-px items-center justify-center bg-border ring-offset-background after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-hidden aria-[orientation=horizontal]:h-px aria-[orientation=horizontal]:w-full aria-[orientation=horizontal]:after:left-0 aria-[orientation=horizontal]:after:h-1 aria-[orientation=horizontal]:after:w-full aria-[orientation=horizontal]:after:translate-x-0 aria-[orientation=horizontal]:after:-translate-y-1/2 [&[aria-orientation=horizontal]>div]:rotate-90",
+				disabled && "cursor-default",
+				className,
+			)}
+			{...props}
+		>
+			{!disabled && withHandle && (
+				<div className="z-10 flex h-6 w-1 shrink-0 rounded-lg bg-border" />
+			)}
+		</ResizablePrimitive.Separator>
+	);
+}
+
+export { ResizableHandle, ResizablePanel, ResizablePanelGroup };

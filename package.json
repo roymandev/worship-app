@@ -12,7 +12,10 @@
     "lint": "biome lint",
     "check": "biome check",
     "test": "bun test",
-    "typecheck": "tsc --noEmit",
+    "test:coverage": "bun test --coverage",
+    "audit": "bun audit --audit-level=moderate",
+    "dedupe:check": "bun dedupe --check",
+    "typecheck": "bun check --no-script",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -63,10 +66,8 @@
     "typescript": "^6.0.2",
     "vite": "^8.0.0"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "lightningcss"
-    ]
-  }
+  "trustedDependencies": [
+    "esbuild",
+    "lightningcss"
+  ]
 }

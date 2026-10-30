@@ -207,6 +207,20 @@ describe("usePlaylistStore", () => {
 			expect(state.selectedItemId).toBeNull();
 		});
 
+		it("resets mode to view when deleting the last item in edit mode", () => {
+			usePlaylistStore.setState({
+				items: [{ id: "solo", title: "Solo", content: "" }],
+				selectedItemId: "solo",
+				mode: "edit",
+			});
+
+			usePlaylistStore.getState().deleteItem("solo");
+
+			const state = usePlaylistStore.getState();
+			expect(state.items).toHaveLength(0);
+			expect(state.mode).toBe("view");
+		});
+
 		it("preserves selection if deleted item was not selected", () => {
 			usePlaylistStore.getState().selectItem("item-1");
 			usePlaylistStore.getState().deleteItem("item-2");

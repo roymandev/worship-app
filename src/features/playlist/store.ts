@@ -144,6 +144,7 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 			return {
 				items: newItems,
 				selectedItemId: nextSelectedId,
+				mode: newItems.length === 0 ? "view" : state.mode,
 				activeConfirmDeleteId:
 					state.activeConfirmDeleteId === id
 						? null

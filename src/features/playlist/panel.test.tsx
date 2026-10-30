@@ -135,14 +135,20 @@ describe("PlaylistPanel", () => {
 		expect(usePlaylistStore.getState().mode).toBe("view");
 	});
 
-	it("renders empty state when all items deleted, and '+ Add Item' restores an item", async () => {
+	it("renders empty state when all items deleted, and '+ Add Item' restores an item and focuses row", async () => {
 		const user = userEvent.setup();
 		usePlaylistStore.setState({ items: [], selectedItemId: null });
 
 		render(<PlaylistPanel />);
 
-		expect(screen.getByText("No items in playlist")).toBeInTheDocument();
+		expect(screen.getByText("Playlist is empty")).toBeInTheDocument();
+		expect(
+			screen.getByText("Add items to build your worship service order."),
+		).toBeInTheDocument();
 		expect(screen.queryByRole("grid")).not.toBeInTheDocument();
+
+		const organizeBtn = screen.getByRole("button", { name: "Organize" });
+		expect(organizeBtn).toBeDisabled();
 
 		const addFallbackBtn = screen.getByRole("button", { name: "Add Item" });
 		await user.click(addFallbackBtn);
@@ -152,6 +158,86 @@ describe("PlaylistPanel", () => {
 			screen.getByRole("grid", { name: "Playlist items" }),
 		).toBeInTheDocument();
 		expect(screen.getByText("(Untitled)")).toBeInTheDocument();
+
+		await waitFor(() => {
+			const activeRow = screen.getByRole("row", { selected: true });
+			expect(activeRow).toHaveFocus();
+		});
+	});
+
+	it("activates empty state Add Item button via Enter key and restores playlist item", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ items: [], selectedItemId: null });
+
+		render(<PlaylistPanel />);
+
+		const addFallbackBtn = screen.getByRole("button", { name: "Add Item" });
+		addFallbackBtn.focus();
+		expect(addFallbackBtn).toHaveFocus();
+
+		await user.keyboard("{Enter}");
+
+		expect(usePlaylistStore.getState().items).toHaveLength(1);
+		expect(
+			screen.getByRole("grid", { name: "Playlist items" }),
+		).toBeInTheDocument();
+
+		await waitFor(() => {
+			const activeRow = screen.getByRole("row", { selected: true });
+			expect(activeRow).toHaveFocus();
+		});
+	});
+
+	it("activates empty state Add Item button via Space key and restores playlist item", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ items: [], selectedItemId: null });
+
+		render(<PlaylistPanel />);
+
+		const addFallbackBtn = screen.getByRole("button", { name: "Add Item" });
+		addFallbackBtn.focus();
+		expect(addFallbackBtn).toHaveFocus();
+
+		await user.keyboard(" ");
+
+		expect(usePlaylistStore.getState().items).toHaveLength(1);
+		expect(
+			screen.getByRole("grid", { name: "Playlist items" }),
+		).toBeInTheDocument();
+
+		await waitFor(() => {
+			const activeRow = screen.getByRole("row", { selected: true });
+			expect(activeRow).toHaveFocus();
+		});
+	});
+
+	it("shifts focus to empty state Add Item button and resets mode to view when deleting the last item", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({
+			items: [
+				{
+					id: "item-only",
+					title: "Single Item",
+					content: "Solo",
+				},
+			],
+			selectedItemId: "item-only",
+			mode: "edit",
+		});
+
+		render(<PlaylistPanel />);
+
+		const deleteBtn = screen.getByRole("button", { name: "Delete item" });
+		await user.click(deleteBtn);
+
+		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
+		await user.click(confirmDeleteBtn);
+
+		expect(usePlaylistStore.getState().mode).toBe("view");
+		await waitFor(() => {
+			const emptyAddBtn = screen.getByRole("button", { name: "Add Item" });
+			expect(emptyAddBtn).toHaveFocus();
+		});
 	});
 
 	it("reordering items via Move Up / Move Down buttons", async () => {

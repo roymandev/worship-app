@@ -26,12 +26,19 @@ describe("Release Please config and manifest integrity", () => {
 		expect(releasePleaseManifest["."]).toBe(packageJson.version);
 	});
 
-	it('parses release-please-config.json and contains "prerelease": true', () => {
+	it("parses release-please-config.json and contains valid pre-release, bootstrap, and tag settings", () => {
 		expect(releasePleaseConfig).toBeDefined();
 		expect(typeof releasePleaseConfig).toBe("object");
+		expect(releasePleaseConfig["include-component-in-tag"]).toBe(false);
+		expect(releasePleaseConfig["bootstrap-sha"]).toBe(
+			"c8d9d5d8cdaf7499a3b8042626e2806aa5fdf830",
+		);
 		expect(releasePleaseConfig.packages?.["."]?.prerelease).toBe(true);
 		expect(releasePleaseConfig.packages?.["."]?.["prerelease-type"]).toBe(
 			"alpha",
+		);
+		expect(releasePleaseConfig.packages?.["."]?.["release-as"]).toBe(
+			"2.0.0-alpha.0",
 		);
 	});
 });

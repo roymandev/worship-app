@@ -6,8 +6,7 @@
     ".": {
       "release-type": "node",
       "prerelease": true,
-      "prerelease-type": "alpha",
-      "release-as": "2.0.0-alpha.0"
+      "prerelease-type": "alpha"
     }
   }
 }

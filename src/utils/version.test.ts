@@ -33,12 +33,10 @@ describe("Release Please config and manifest integrity", () => {
 		expect(releasePleaseConfig["bootstrap-sha"]).toBe(
 			"c8d9d5d8cdaf7499a3b8042626e2806aa5fdf830",
 		);
-		expect(releasePleaseConfig.packages?.["."]?.prerelease).toBe(true);
-		expect(releasePleaseConfig.packages?.["."]?.["prerelease-type"]).toBe(
-			"alpha",
-		);
-		expect(releasePleaseConfig.packages?.["."]?.["release-as"]).toBe(
-			"2.0.0-alpha.0",
-		);
+		const rootPackage = releasePleaseConfig.packages?.["."];
+		expect(rootPackage).toBeDefined();
+		expect(rootPackage?.prerelease).toBe(true);
+		expect(rootPackage?.["prerelease-type"]).toBe("alpha");
+		expect(rootPackage && "release-as" in rootPackage).toBe(false);
 	});
 });

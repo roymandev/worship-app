@@ -12,6 +12,14 @@ import type * as React from "react";
 import { useEffect, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuSeparator,
+	ContextMenuShortcut,
+	ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { EmptyState } from "@/components/ui/empty";
 import {
 	Popover,
@@ -215,6 +223,23 @@ export function PlaylistPanel() {
 		id: string,
 		index: number,
 	) => {
+		// Shift+F10: Open context menu for this item
+		if (e.shiftKey && e.key === "F10") {
+			e.preventDefault();
+			e.stopPropagation();
+			usePlaylistStore.getState().selectItem(id);
+			usePlaylistStore.getState().closeDeleteConfirm();
+			const rect = e.currentTarget.getBoundingClientRect();
+			const contextMenuEvent = new MouseEvent("contextmenu", {
+				bubbles: true,
+				cancelable: true,
+				clientX: rect.left + rect.width / 2,
+				clientY: rect.top + rect.height / 2,
+			});
+			e.currentTarget.dispatchEvent(contextMenuEvent);
+			return;
+		}
+
 		// Alt+ArrowUp: Move Up
 		if (e.altKey && e.key === "ArrowUp") {
 			e.preventDefault();
@@ -427,188 +452,305 @@ export function PlaylistPanel() {
 				</div>
 			</header>
 
-			<div className="min-h-0 flex-1 overflow-y-auto p-2">
-				{items.length === 0 ? (
-					<EmptyState
-						className="border-none"
-						icon={<IconList className="size-4" />}
-						title="Playlist is empty"
-						description="Add items to build your worship service order."
-						action={
-							<Button
-								ref={emptyAddButtonRef}
-								variant="default"
-								size="sm"
-								onClick={handleAdd}
-							>
-								<IconPlus className="mr-1 size-3.5" />
-								Add Item
-							</Button>
-						}
-					/>
-				) : (
-					// biome-ignore lint/a11y/useSemanticElements: APG Composite Grid
-					<div
-						ref={gridRef}
-						role="grid"
-						aria-label="Playlist items"
-						tabIndex={-1}
-						onKeyDown={handleGridKeyDown}
-						className="flex flex-col gap-1"
-					>
-						{items.map((item, index) => {
-							const isSelected = item.id === selectedItemId;
-							return (
-								// biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Row
-								<div
-									key={item.id}
-									ref={(node) => {
-										if (node) {
-											rowRefs.current.set(item.id, node);
-										} else {
-											rowRefs.current.delete(item.id);
-										}
-									}}
-									role="row"
-									data-item-id={item.id}
-									tabIndex={isSelected ? 0 : -1}
-									aria-selected={isSelected}
-									onClick={() =>
-										usePlaylistStore.getState().selectItem(item.id)
-									}
-									onKeyDown={(e) => handleRowKeyDown(e, item.id, index)}
-									className={cn(
-										"group flex items-center justify-between gap-2 rounded-md px-3 py-2 text-xs transition-colors",
-										"focus-ring-inset select-none",
-										isSelected
-											? "bg-accent text-accent-foreground font-medium"
-											: "hover:bg-muted/50 text-foreground",
-									)}
+			<ContextMenu
+				onOpenChange={(open) => {
+					if (open) {
+						usePlaylistStore.getState().closeDeleteConfirm();
+					}
+				}}
+			>
+				<ContextMenuTrigger
+					data-testid="playlist-viewport"
+					className="min-h-0 flex-1 overflow-y-auto p-2"
+				>
+					{items.length === 0 ? (
+						<EmptyState
+							className="border-none"
+							icon={<IconList className="size-4" />}
+							title="Playlist is empty"
+							description="Add items to build your worship service order."
+							action={
+								<Button
+									ref={emptyAddButtonRef}
+									variant="default"
+									size="sm"
+									onClick={handleAdd}
 								>
-									{/* biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Cell */}
-									{/* biome-ignore lint/a11y/useFocusableInteractive: Row manages roving focus */}
-									<div role="gridcell" className="min-w-0 flex-1 truncate">
-										<span className="truncate">{item.title}</span>
-									</div>
-
-									{/* biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Cell */}
-									{/* biome-ignore lint/a11y/useFocusableInteractive: Child buttons receive roving focus */}
-									<div
-										ref={(node) => {
-											if (node) {
-												actionCellRefs.current.set(item.id, node);
+									<IconPlus className="mr-1 size-3.5" />
+									Add Item
+								</Button>
+							}
+						/>
+					) : (
+						// biome-ignore lint/a11y/useSemanticElements: APG Composite Grid
+						<div
+							ref={gridRef}
+							role="grid"
+							aria-label="Playlist items"
+							tabIndex={-1}
+							onKeyDown={handleGridKeyDown}
+							className="flex flex-col gap-1"
+						>
+							{items.map((item, index) => {
+								const isSelected = item.id === selectedItemId;
+								return (
+									<ContextMenu
+										key={item.id}
+										onOpenChange={(open) => {
+											if (open) {
+												usePlaylistStore.getState().selectItem(item.id);
+												usePlaylistStore.getState().closeDeleteConfirm();
 											} else {
-												actionCellRefs.current.delete(item.id);
+												rowRefs.current.get(item.id)?.focus();
 											}
 										}}
-										role="gridcell"
-										className="flex shrink-0 items-center gap-1"
-										onKeyDown={(e) => handleActionCellKeyDown(e, item.id)}
-										onClick={(e) => {
-											// Stop click inside actions from bubbling to row select
-											e.stopPropagation();
-										}}
 									>
-										{mode === "view" ? (
-											<Button
-												variant="ghost"
-												size="icon-xs"
-												tabIndex={-1}
-												title="Go Live"
-												aria-label="Go Live"
-												className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground"
+										<ContextMenuTrigger
+											render={
+												// biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Row
+												<div
+													ref={(node) => {
+														if (node) {
+															rowRefs.current.set(item.id, node);
+														} else {
+															rowRefs.current.delete(item.id);
+														}
+													}}
+													role="row"
+													data-item-id={item.id}
+													tabIndex={isSelected ? 0 : -1}
+													aria-selected={isSelected}
+													onClick={() =>
+														usePlaylistStore.getState().selectItem(item.id)
+													}
+													onKeyDown={(e) => handleRowKeyDown(e, item.id, index)}
+													className={cn(
+														"group flex items-center justify-between gap-2 rounded-md px-3 py-2 text-xs transition-colors",
+														"focus-ring-inset select-none",
+														isSelected
+															? "bg-accent text-accent-foreground font-medium"
+															: "hover:bg-muted/50 text-foreground",
+													)}
+												/>
+											}
+										>
+											{/* biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Cell */}
+											{/* biome-ignore lint/a11y/useFocusableInteractive: Row manages roving focus */}
+											<div role="gridcell" className="min-w-0 flex-1 truncate">
+												<span className="truncate">{item.title}</span>
+											</div>
+
+											{/* biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Cell */}
+											{/* biome-ignore lint/a11y/useFocusableInteractive: Child buttons receive roving focus */}
+											<div
+												ref={(node) => {
+													if (node) {
+														actionCellRefs.current.set(item.id, node);
+													} else {
+														actionCellRefs.current.delete(item.id);
+													}
+												}}
+												role="gridcell"
+												className="flex shrink-0 items-center gap-1"
+												onKeyDown={(e) => handleActionCellKeyDown(e, item.id)}
+												onClick={(e) => {
+													// Stop click inside actions from bubbling to row select
+													e.stopPropagation();
+												}}
 											>
-												<IconPlayerPlay className="size-3" />
-											</Button>
-										) : (
-											<>
-												<Button
-													ref={(node) => {
-														if (node) {
-															moveUpRefs.current.set(item.id, node);
-														} else {
-															moveUpRefs.current.delete(item.id);
-														}
-													}}
-													variant="ghost"
-													size="icon-xs"
-													tabIndex={-1}
-													disabled={index === 0}
-													title="Move up"
-													aria-label="Move up"
-													onClick={(e) => {
-														e.stopPropagation();
-														handleMoveUp(item.id, index);
-													}}
-												>
-													<IconArrowUp className="size-3" />
-												</Button>
-												<Button
-													ref={(node) => {
-														if (node) {
-															moveDownRefs.current.set(item.id, node);
-														} else {
-															moveDownRefs.current.delete(item.id);
-														}
-													}}
-													variant="ghost"
-													size="icon-xs"
-													tabIndex={-1}
-													disabled={index === items.length - 1}
-													title="Move down"
-													aria-label="Move down"
-													onClick={(e) => {
-														e.stopPropagation();
-														handleMoveDown(item.id, index);
-													}}
-												>
-													<IconArrowDown className="size-3" />
-												</Button>
-												<Button
-													variant="ghost"
-													size="icon-xs"
-													tabIndex={-1}
-													title="Edit item"
-													aria-label="Edit item"
-													onClick={(e) => {
-														e.stopPropagation();
-														usePlaylistStore
-															.getState()
-															.startEditingItem(item.id);
-													}}
-												>
-													<IconPencil className="size-3" />
-												</Button>
-												<Button
-													ref={(node) => {
-														if (node) {
-															deleteTriggerRefs.current.set(item.id, node);
-														} else {
-															deleteTriggerRefs.current.delete(item.id);
-														}
-													}}
-													variant="ghost"
-													size="icon-xs"
-													tabIndex={-1}
-													title="Delete item"
-													aria-label="Delete item"
-													className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-													onClick={(e) => {
-														e.stopPropagation();
-														handleOpenDelete(item.id, e.currentTarget);
-													}}
-												>
-													<IconTrash className="size-3" />
-												</Button>
-											</>
-										)}
-									</div>
-								</div>
-							);
-						})}
-					</div>
-				)}
-			</div>
+												{mode === "view" ? (
+													<Button
+														variant="ghost"
+														size="icon-xs"
+														tabIndex={-1}
+														title="Go Live"
+														aria-label="Go Live"
+														className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground"
+													>
+														<IconPlayerPlay className="size-3" />
+													</Button>
+												) : (
+													<>
+														<Button
+															ref={(node) => {
+																if (node) {
+																	moveUpRefs.current.set(item.id, node);
+																} else {
+																	moveUpRefs.current.delete(item.id);
+																}
+															}}
+															variant="ghost"
+															size="icon-xs"
+															tabIndex={-1}
+															disabled={index === 0}
+															title="Move up"
+															aria-label="Move up"
+															onClick={(e) => {
+																e.stopPropagation();
+																handleMoveUp(item.id, index);
+															}}
+														>
+															<IconArrowUp className="size-3" />
+														</Button>
+														<Button
+															ref={(node) => {
+																if (node) {
+																	moveDownRefs.current.set(item.id, node);
+																} else {
+																	moveDownRefs.current.delete(item.id);
+																}
+															}}
+															variant="ghost"
+															size="icon-xs"
+															tabIndex={-1}
+															disabled={index === items.length - 1}
+															title="Move down"
+															aria-label="Move down"
+															onClick={(e) => {
+																e.stopPropagation();
+																handleMoveDown(item.id, index);
+															}}
+														>
+															<IconArrowDown className="size-3" />
+														</Button>
+														<Button
+															variant="ghost"
+															size="icon-xs"
+															tabIndex={-1}
+															title="Edit item"
+															aria-label="Edit item"
+															onClick={(e) => {
+																e.stopPropagation();
+																usePlaylistStore
+																	.getState()
+																	.startEditingItem(item.id);
+															}}
+														>
+															<IconPencil className="size-3" />
+														</Button>
+														<Button
+															ref={(node) => {
+																if (node) {
+																	deleteTriggerRefs.current.set(item.id, node);
+																} else {
+																	deleteTriggerRefs.current.delete(item.id);
+																}
+															}}
+															variant="ghost"
+															size="icon-xs"
+															tabIndex={-1}
+															title="Delete item"
+															aria-label="Delete item"
+															className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+															onClick={(e) => {
+																e.stopPropagation();
+																handleOpenDelete(item.id, e.currentTarget);
+															}}
+														>
+															<IconTrash className="size-3" />
+														</Button>
+													</>
+												)}
+											</div>
+										</ContextMenuTrigger>
+
+										<ContextMenuContent>
+											<ContextMenuItem
+												onClick={() => {
+													// Go live handler
+												}}
+											>
+												<IconPlayerPlay />
+												<span>Go Live</span>
+											</ContextMenuItem>
+											<ContextMenuItem
+												onClick={() => {
+													usePlaylistStore.getState().startEditingItem(item.id);
+												}}
+											>
+												<IconPencil />
+												<span>Edit Item</span>
+												<ContextMenuShortcut>E</ContextMenuShortcut>
+											</ContextMenuItem>
+											<ContextMenuItem
+												disabled={index === 0}
+												onClick={() => {
+													handleMoveUp(item.id, index);
+												}}
+											>
+												<IconArrowUp />
+												<span>Move Up</span>
+												<ContextMenuShortcut>Alt+↑</ContextMenuShortcut>
+											</ContextMenuItem>
+											<ContextMenuItem
+												disabled={index === items.length - 1}
+												onClick={() => {
+													handleMoveDown(item.id, index);
+												}}
+											>
+												<IconArrowDown />
+												<span>Move Down</span>
+												<ContextMenuShortcut>Alt+↓</ContextMenuShortcut>
+											</ContextMenuItem>
+											<ContextMenuItem
+												variant="destructive"
+												onClick={() => {
+													handleOpenDelete(
+														item.id,
+														rowRefs.current.get(item.id) ?? null,
+													);
+												}}
+											>
+												<IconTrash />
+												<span>Delete Item</span>
+												<ContextMenuShortcut>Del</ContextMenuShortcut>
+											</ContextMenuItem>
+											<ContextMenuSeparator />
+											<ContextMenuItem
+												onClick={() => {
+													usePlaylistStore.getState().insertItemAfter(item.id);
+												}}
+											>
+												<IconPlus />
+												<span>Add Item</span>
+											</ContextMenuItem>
+											<ContextMenuItem
+												onClick={() => {
+													handleToggleMode();
+												}}
+											>
+												<IconList />
+												<span>
+													{isEditMode ? "Done Organizing" : "Organize Playlist"}
+												</span>
+											</ContextMenuItem>
+										</ContextMenuContent>
+									</ContextMenu>
+								);
+							})}
+						</div>
+					)}
+				</ContextMenuTrigger>
+				<ContextMenuContent>
+					<ContextMenuItem
+						onClick={() => {
+							handleAdd();
+						}}
+					>
+						<IconPlus />
+						<span>Add Item</span>
+					</ContextMenuItem>
+					<ContextMenuItem
+						disabled={items.length === 0}
+						onClick={() => {
+							handleToggleMode();
+						}}
+					>
+						<IconList />
+						<span>{isEditMode ? "Done Organizing" : "Organize Playlist"}</span>
+					</ContextMenuItem>
+				</ContextMenuContent>
+			</ContextMenu>
 
 			{/* Singleton Delete Confirm Popover */}
 			<Popover

@@ -719,4 +719,332 @@ describe("PlaylistPanel", () => {
 		await user.keyboard("E");
 		expect(usePlaylistStore.getState().editingItemId).toBe("item-3");
 	});
+
+	describe("Playlist Item Context Menu", () => {
+		it("right-clicking a playlist item row selects it and opens the context menu", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+			expect(rows[1]).toHaveAttribute("aria-selected", "false");
+
+			// Right-click on row 1 (Psalm 23)
+			await user.pointer({ keys: "[MouseRight]", target: rows[1] });
+
+			// Item should now be selected
+			expect(usePlaylistStore.getState().selectedItemId).toBe("item-2");
+			expect(rows[1]).toHaveAttribute("aria-selected", "true");
+
+			// Context menu should be open
+			const menu = await screen.findByRole("menu");
+			expect(menu).toBeInTheDocument();
+		});
+
+		it("opening item context menu dismisses active inline delete confirmation popover", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({
+				mode: "edit",
+				selectedItemId: "item-1",
+				activeConfirmDeleteId: "item-1",
+			});
+
+			render(<PlaylistPanel />);
+			expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+
+			// Popover marks background aria-hidden/inert. Query rows from DOM:
+			const rows = document.querySelectorAll<HTMLElement>('[role="row"]');
+			expect(rows.length).toBeGreaterThan(1);
+
+			// Right-click row 2
+			await user.pointer({ keys: "[MouseRight]", target: rows[1] });
+
+			// Popover should be dismissed
+			expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+			expect(usePlaylistStore.getState().activeConfirmDeleteId).toBeNull();
+			expect(usePlaylistStore.getState().selectedItemId).toBe("item-2");
+		});
+
+		it("keyboard Shift+F10 on focused row opens context menu and selects it", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+			rows[1].focus();
+
+			await user.keyboard("{Shift>}{F10}{/Shift}");
+
+			const menu = await screen.findByRole("menu");
+			expect(menu).toBeInTheDocument();
+			expect(usePlaylistStore.getState().selectedItemId).toBe("item-2");
+		});
+
+		it("renders all context menu items in correct order with shortcut cues and disabled states", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+
+			// Open context menu on first row
+			await user.pointer({ keys: "[MouseRight]", target: rows[0] });
+
+			const menu = await screen.findByRole("menu");
+			expect(menu).toBeInTheDocument();
+
+			const menuItems = within(menu).getAllByRole("menuitem");
+			expect(menuItems).toHaveLength(7);
+
+			// 1. Go Live
+			expect(menuItems[0]).toHaveTextContent("Go Live");
+			// 2. Edit Item (E)
+			expect(menuItems[1]).toHaveTextContent("Edit Item");
+			expect(menuItems[1]).toHaveTextContent("E");
+			// 3. Move Up (Alt+↑, disabled when first item)
+			expect(menuItems[2]).toHaveTextContent("Move Up");
+			expect(menuItems[2]).toHaveTextContent("Alt+↑");
+			expect(menuItems[2]).toHaveAttribute("aria-disabled", "true");
+			// 4. Move Down (Alt+↓, enabled on first item)
+			expect(menuItems[3]).toHaveTextContent("Move Down");
+			expect(menuItems[3]).toHaveTextContent("Alt+↓");
+			expect(menuItems[3]).not.toHaveAttribute("aria-disabled", "true");
+			// 5. Delete Item (Del / Backspace)
+			expect(menuItems[4]).toHaveTextContent("Delete Item");
+			expect(menuItems[4]).toHaveTextContent("Del");
+			expect(menuItems[4]).toHaveAttribute("data-variant", "destructive");
+			// 6. Add Item
+			expect(menuItems[5]).toHaveTextContent("Add Item");
+			// 7. Organize Playlist / Done Organizing
+			expect(menuItems[6]).toHaveTextContent("Organize Playlist");
+
+			// Close menu
+			await user.keyboard("{Escape}");
+
+			// Open context menu on last row (index 2)
+			await user.pointer({ keys: "[MouseRight]", target: rows[2] });
+			const lastMenu = await screen.findByRole("menu");
+			const lastMenuItems = within(lastMenu).getAllByRole("menuitem");
+
+			// Move Up enabled on last item
+			expect(lastMenuItems[2]).not.toHaveAttribute("aria-disabled", "true");
+			// Move Down disabled on last item
+			expect(lastMenuItems[3]).toHaveAttribute("aria-disabled", "true");
+		});
+
+		it("shows 'Done Organizing' in context menu when in edit mode", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({ mode: "edit" });
+
+			render(<PlaylistPanel />);
+			const rows = screen.getAllByRole("row");
+			await user.pointer({ keys: "[MouseRight]", target: rows[0] });
+
+			const menu = await screen.findByRole("menu");
+			expect(within(menu).getByText("Done Organizing")).toBeInTheDocument();
+
+			// Clicking it toggles to view mode
+			await user.click(within(menu).getByText("Done Organizing"));
+			expect(usePlaylistStore.getState().mode).toBe("view");
+		});
+
+		it("clicking 'Add Item' in context menu calls insertItemAfter and inserts item directly below", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+			// Right click row 0 (Amazing Grace, id: item-1)
+			await user.pointer({ keys: "[MouseRight]", target: rows[0] });
+
+			const menu = await screen.findByRole("menu");
+			const addItemBtn = within(menu).getByRole("menuitem", {
+				name: /add item/i,
+			});
+			await user.click(addItemBtn);
+
+			const currentItems = usePlaylistStore.getState().items;
+			expect(currentItems).toHaveLength(4);
+			expect(currentItems[0].id).toBe("item-1");
+			expect(currentItems[1].title).toBe("(Untitled)");
+			expect(currentItems[2].id).toBe("item-2");
+			expect(usePlaylistStore.getState().selectedItemId).toBe(
+				currentItems[1].id,
+			);
+			expect(usePlaylistStore.getState().editingItemId).toBe(
+				currentItems[1].id,
+			);
+		});
+
+		it("clicking 'Delete Item' opens the inline confirmation popover anchored to that row", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+			await user.pointer({ keys: "[MouseRight]", target: rows[1] });
+
+			const menu = await screen.findByRole("menu");
+			const deleteBtn = within(menu).getByRole("menuitem", {
+				name: /delete item/i,
+			});
+			await user.click(deleteBtn);
+
+			// Context menu closed, inline confirmation popover open
+			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+			expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+			expect(usePlaylistStore.getState().activeConfirmDeleteId).toBe("item-2");
+		});
+
+		it("clicking 'Edit Item' opens item editor", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+			await user.pointer({ keys: "[MouseRight]", target: rows[1] });
+
+			const menu = await screen.findByRole("menu");
+			const editBtn = within(menu).getByRole("menuitem", {
+				name: /edit item/i,
+			});
+			await user.click(editBtn);
+
+			expect(usePlaylistStore.getState().editingItemId).toBe("item-2");
+		});
+
+		it("closing menu restores focus to active row", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+			rows[1].focus();
+			expect(rows[1]).toHaveFocus();
+
+			await user.keyboard("{Shift>}{F10}{/Shift}");
+			const menu = await screen.findByRole("menu");
+			expect(menu).toBeInTheDocument();
+
+			await user.keyboard("{Escape}");
+			await waitFor(() => {
+				expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+				expect(rows[1]).toHaveFocus();
+			});
+		});
+	});
+
+	describe("Playlist Panel Context Menu", () => {
+		it("right-clicking empty space in the panel opens the panel context menu", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			const panel = screen.getByTestId("playlist-viewport");
+			await user.pointer({ keys: "[MouseRight]", target: panel });
+
+			const menu = await screen.findByRole("menu");
+			expect(menu).toBeInTheDocument();
+
+			const menuItems = within(menu).getAllByRole("menuitem");
+			expect(menuItems).toHaveLength(2);
+			expect(menuItems[0]).toHaveTextContent("Add Item");
+			expect(menuItems[1]).toHaveTextContent("Organize Playlist");
+		});
+
+		it("right-clicking empty state placeholder opens the panel context menu", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({ items: [], selectedItemId: null });
+
+			render(<PlaylistPanel />);
+
+			const emptyStateText = screen.getByText("Playlist is empty");
+			await user.pointer({ keys: "[MouseRight]", target: emptyStateText });
+
+			const menu = await screen.findByRole("menu");
+			expect(menu).toBeInTheDocument();
+
+			const menuItems = within(menu).getAllByRole("menuitem");
+			expect(menuItems).toHaveLength(2);
+			expect(menuItems[0]).toHaveTextContent("Add Item");
+			expect(menuItems[1]).toHaveTextContent("Organize Playlist");
+			expect(menuItems[1]).toHaveAttribute("aria-disabled", "true");
+		});
+
+		it("right-clicking an item row opens the item context menu, not the panel context menu", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+			await user.pointer({ keys: "[MouseRight]", target: rows[0] });
+
+			const menu = await screen.findByRole("menu");
+			expect(menu).toBeInTheDocument();
+
+			// Item context menu has 7 items, panel menu has 2
+			const menuItems = within(menu).getAllByRole("menuitem");
+			expect(menuItems).toHaveLength(7);
+			expect(menuItems[0]).toHaveTextContent("Go Live");
+		});
+
+		it("clicking 'Add Item' in the panel context menu appends an item to the end of the playlist", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			const panel = screen.getByTestId("playlist-viewport");
+			await user.pointer({ keys: "[MouseRight]", target: panel });
+
+			const menu = await screen.findByRole("menu");
+			const addItemBtn = within(menu).getByRole("menuitem", {
+				name: /add item/i,
+			});
+			await user.click(addItemBtn);
+
+			const items = usePlaylistStore.getState().items;
+			expect(items).toHaveLength(4);
+			expect(items[3].title).toBe("(Untitled)");
+			expect(usePlaylistStore.getState().selectedItemId).toBe(items[3].id);
+		});
+
+		it("clicking 'Organize Playlist' in the panel context menu toggles organize mode and is disabled when empty", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			const panel = screen.getByTestId("playlist-viewport");
+			await user.pointer({ keys: "[MouseRight]", target: panel });
+
+			const menu = await screen.findByRole("menu");
+			const organizeBtn = within(menu).getByRole("menuitem", {
+				name: /organize playlist/i,
+			});
+			expect(organizeBtn).not.toHaveAttribute("aria-disabled", "true");
+
+			await user.click(organizeBtn);
+			expect(usePlaylistStore.getState().mode).toBe("edit");
+
+			// Now right-click again in edit mode
+			await user.pointer({ keys: "[MouseRight]", target: panel });
+			const editMenu = await screen.findByRole("menu");
+			const doneBtn = within(editMenu).getByRole("menuitem", {
+				name: /done organizing/i,
+			});
+			await user.click(doneBtn);
+			expect(usePlaylistStore.getState().mode).toBe("view");
+		});
+
+		it("opening panel context menu dismisses active inline delete confirmation popover", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({
+				mode: "edit",
+				selectedItemId: "item-1",
+				activeConfirmDeleteId: "item-1",
+			});
+
+			render(<PlaylistPanel />);
+			expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+
+			const panel = document.querySelector<HTMLElement>(
+				'[data-testid="playlist-viewport"]',
+			);
+			expect(panel).not.toBeNull();
+			if (panel) {
+				await user.pointer({ keys: "[MouseRight]", target: panel });
+			}
+
+			expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+			expect(usePlaylistStore.getState().activeConfirmDeleteId).toBeNull();
+		});
+	});
 });

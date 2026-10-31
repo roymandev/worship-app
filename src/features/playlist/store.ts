@@ -40,6 +40,11 @@ export type PlaylistState = {
 	selectPrevious: () => void;
 	selectNext: () => void;
 	addItem: (title?: string, content?: string) => PlaylistItem;
+	insertItemAfter: (
+		targetId: string,
+		title?: string,
+		content?: string,
+	) => PlaylistItem;
 	moveItemUp: (id: string) => void;
 	moveItemDown: (id: string) => void;
 	deleteItem: (id: string) => void;
@@ -96,6 +101,33 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 			selectedItemId: newItem.id,
 			editingItemId: newItem.id,
 		}));
+		return newItem;
+	},
+
+	insertItemAfter: (targetId, title = "(Untitled)", content = "") => {
+		const newItem: PlaylistItem = {
+			id: nanoid(),
+			title,
+			content,
+		};
+		set((state) => {
+			const targetIndex = state.items.findIndex((item) => item.id === targetId);
+			let nextItems: PlaylistItem[];
+			if (targetIndex !== -1) {
+				nextItems = [
+					...state.items.slice(0, targetIndex + 1),
+					newItem,
+					...state.items.slice(targetIndex + 1),
+				];
+			} else {
+				nextItems = [...state.items, newItem];
+			}
+			return {
+				items: nextItems,
+				selectedItemId: newItem.id,
+				editingItemId: newItem.id,
+			};
+		});
 		return newItem;
 	},
 

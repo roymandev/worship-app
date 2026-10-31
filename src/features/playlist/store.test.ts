@@ -129,6 +129,77 @@ describe("usePlaylistStore", () => {
 		});
 	});
 
+	describe("insertItemAfter", () => {
+		it("inserts item directly after first item and updates selectedItemId and editingItemId", () => {
+			const newItem = usePlaylistStore
+				.getState()
+				.insertItemAfter("item-1", "Inserted Song", "Verse 1");
+			const state = usePlaylistStore.getState();
+
+			expect(state.items).toHaveLength(4);
+			expect(state.items.map((i) => i.id)).toEqual([
+				"item-1",
+				newItem.id,
+				"item-2",
+				"item-3",
+			]);
+			expect(newItem.title).toBe("Inserted Song");
+			expect(newItem.content).toBe("Verse 1");
+			expect(state.selectedItemId).toBe(newItem.id);
+			expect(state.editingItemId).toBe(newItem.id);
+		});
+
+		it("inserts item in the middle of the playlist", () => {
+			const newItem = usePlaylistStore
+				.getState()
+				.insertItemAfter("item-2", "Middle Song", "Middle lyrics");
+			const state = usePlaylistStore.getState();
+
+			expect(state.items).toHaveLength(4);
+			expect(state.items.map((i) => i.id)).toEqual([
+				"item-1",
+				"item-2",
+				newItem.id,
+				"item-3",
+			]);
+			expect(state.selectedItemId).toBe(newItem.id);
+			expect(state.editingItemId).toBe(newItem.id);
+		});
+
+		it("inserts item after the last item", () => {
+			const newItem = usePlaylistStore
+				.getState()
+				.insertItemAfter("item-3", "Last Song");
+			const state = usePlaylistStore.getState();
+
+			expect(state.items).toHaveLength(4);
+			expect(state.items.map((i) => i.id)).toEqual([
+				"item-1",
+				"item-2",
+				"item-3",
+				newItem.id,
+			]);
+			expect(newItem.title).toBe("Last Song");
+			expect(newItem.content).toBe("");
+			expect(state.selectedItemId).toBe(newItem.id);
+			expect(state.editingItemId).toBe(newItem.id);
+		});
+
+		it("falls back to appending when targetId is not found", () => {
+			const newItem = usePlaylistStore
+				.getState()
+				.insertItemAfter("non-existent-id");
+			const state = usePlaylistStore.getState();
+
+			expect(state.items).toHaveLength(4);
+			expect(state.items[3]).toEqual(newItem);
+			expect(newItem.title).toBe("(Untitled)");
+			expect(newItem.content).toBe("");
+			expect(state.selectedItemId).toBe(newItem.id);
+			expect(state.editingItemId).toBe(newItem.id);
+		});
+	});
+
 	describe("editor actions", () => {
 		it("defaults editingItemId to null", () => {
 			expect(usePlaylistStore.getState().editingItemId).toBeNull();

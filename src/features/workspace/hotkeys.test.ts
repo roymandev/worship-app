@@ -45,9 +45,9 @@ describe("searchHotkeys", () => {
 	});
 
 	it("filters by hotkey chord notation", () => {
-		const results = searchHotkeys("Mod+Enter");
+		const results = searchHotkeys("Mod+Shift+C");
 		expect(results).toHaveLength(1);
-		expect(results[0].id).toBe("presentation.goLive");
+		expect(results[0].id).toBe("presentation.toggleClear");
 	});
 
 	it("returns empty array when query does not match any hotkey", () => {

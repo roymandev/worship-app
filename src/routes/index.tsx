@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { PlaylistItemEditor } from "@/features/playlist/item-editor";
 import { PlaylistPanel } from "@/features/playlist/panel";
+import { usePlaylistStore } from "@/features/playlist/store";
 import { HotkeysCheatsheetDialog } from "@/features/workspace/hotkeys-cheatsheet-dialog";
 import { WorkspaceLayout } from "@/features/workspace/layout";
 import { WorkspaceMenubar } from "@/features/workspace/menubar";
 import { useWorkspaceStore } from "@/features/workspace/store";
 import { APP_VERSION } from "@/utils/version";
 
-export const Route = createFileRoute("/")({ component: Home });
+export const Route = createFileRoute("/")({ component: WorkspaceRoute });
 
 function SlidesPanel() {
 	return (
@@ -29,10 +31,15 @@ function LiveScreenPanel() {
 	);
 }
 
-function Home() {
+function WorkspaceRoute() {
 	const mode = useWorkspaceStore((state) => state.mode);
 	const isEditMode = mode === "edit";
 	const toggleMode = useWorkspaceStore((s) => s.toggleMode);
+	const editingItemId = usePlaylistStore((state) => state.editingItemId);
+	const playlistItems = usePlaylistStore((state) => state.items);
+	const isEditingItemResolved =
+		editingItemId !== null &&
+		playlistItems.some((item) => item.id === editingItemId);
 
 	return (
 		<main className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">
@@ -57,7 +64,13 @@ function Home() {
 			</header>
 			<WorkspaceLayout
 				left={<PlaylistPanel />}
-				center={<SlidesPanel />}
+				center={
+					isEditingItemResolved ? (
+						<PlaylistItemEditor itemId={editingItemId} />
+					) : (
+						<SlidesPanel />
+					)
+				}
 				right={<LiveScreenPanel />}
 			/>
 			<HotkeysCheatsheetDialog />

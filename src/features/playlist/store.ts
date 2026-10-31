@@ -7,6 +7,8 @@ export type PlaylistItem = {
 	content: string;
 };
 
+export type PlaylistItemDraft = Pick<PlaylistItem, "title" | "content">;
+
 export type PlaylistMode = "view" | "edit";
 
 export const INITIAL_PLAYLIST_ITEMS: PlaylistItem[] = [
@@ -31,6 +33,7 @@ export const INITIAL_PLAYLIST_ITEMS: PlaylistItem[] = [
 export type PlaylistState = {
 	items: PlaylistItem[];
 	selectedItemId: string | null;
+	editingItemId: string | null;
 	mode: PlaylistMode;
 	activeConfirmDeleteId: string | null;
 	selectItem: (id: string | null) => void;
@@ -40,6 +43,9 @@ export type PlaylistState = {
 	moveItemUp: (id: string) => void;
 	moveItemDown: (id: string) => void;
 	deleteItem: (id: string) => void;
+	startEditingItem: (id: string) => void;
+	stopEditingItem: () => void;
+	updateItem: (id: string, updates: PlaylistItemDraft) => void;
 	setMode: (mode: PlaylistMode) => void;
 	toggleMode: () => void;
 	openDeleteConfirm: (id: string) => void;
@@ -49,6 +55,7 @@ export type PlaylistState = {
 export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 	items: INITIAL_PLAYLIST_ITEMS,
 	selectedItemId: "item-1",
+	editingItemId: null,
 	mode: "view",
 	activeConfirmDeleteId: null,
 
@@ -87,6 +94,7 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 		set((state) => ({
 			items: [...state.items, newItem],
 			selectedItemId: newItem.id,
+			editingItemId: newItem.id,
 		}));
 		return newItem;
 	},
@@ -144,12 +152,32 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 			return {
 				items: newItems,
 				selectedItemId: nextSelectedId,
+				editingItemId: state.editingItemId === id ? null : state.editingItemId,
 				mode: newItems.length === 0 ? "view" : state.mode,
 				activeConfirmDeleteId:
 					state.activeConfirmDeleteId === id
 						? null
 						: state.activeConfirmDeleteId,
 			};
+		});
+	},
+
+	startEditingItem: (id) => set({ editingItemId: id }),
+
+	stopEditingItem: () => set({ editingItemId: null }),
+
+	updateItem: (id, updates) => {
+		set((state) => {
+			const index = state.items.findIndex((item) => item.id === id);
+			if (index === -1) return state;
+
+			const newItems = [...state.items];
+			newItems[index] = {
+				...newItems[index],
+				...updates,
+			};
+
+			return { items: newItems };
 		});
 	},
 

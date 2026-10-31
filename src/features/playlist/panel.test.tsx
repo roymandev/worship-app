@@ -685,4 +685,38 @@ describe("PlaylistPanel", () => {
 		await user.keyboard("{Escape}");
 		expect(rows[1]).toHaveFocus();
 	});
+
+	it("clicking the Edit item (pencil) button triggers startEditingItem with item id", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ mode: "edit", editingItemId: null });
+
+		render(<PlaylistPanel />);
+
+		const editBtns = screen.getAllByRole("button", { name: "Edit item" });
+		expect(editBtns).toHaveLength(3);
+
+		await user.click(editBtns[1]);
+		expect(usePlaylistStore.getState().editingItemId).toBe("item-2");
+	});
+
+	it("pressing 'e' or 'E' key on a focused playlist row triggers startEditingItem with row id", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ editingItemId: null });
+
+		render(<PlaylistPanel />);
+
+		const rows = screen.getAllByRole("row");
+		rows[0].focus();
+		expect(rows[0]).toHaveFocus();
+
+		await user.keyboard("e");
+		expect(usePlaylistStore.getState().editingItemId).toBe("item-1");
+
+		// Test row 2 with uppercase E
+		rows[2].focus();
+		expect(rows[2]).toHaveFocus();
+
+		await user.keyboard("E");
+		expect(usePlaylistStore.getState().editingItemId).toBe("item-3");
+	});
 });

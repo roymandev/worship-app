@@ -6,6 +6,7 @@ describe("usePlaylistStore", () => {
 		usePlaylistStore.setState({
 			items: [...INITIAL_PLAYLIST_ITEMS],
 			selectedItemId: "item-1",
+			editingItemId: null,
 			mode: "view",
 			activeConfirmDeleteId: null,
 		});
@@ -31,6 +32,7 @@ describe("usePlaylistStore", () => {
 			content: "Bless the Lord, O my soul, O my soul\nWorship His holy name...",
 		});
 		expect(state.selectedItemId).toBe("item-1");
+		expect(state.editingItemId).toBeNull();
 		expect(state.mode).toBe("view");
 		expect(state.activeConfirmDeleteId).toBeNull();
 	});
@@ -96,7 +98,7 @@ describe("usePlaylistStore", () => {
 	});
 
 	describe("addItem", () => {
-		it("appends item with default title and content, selects it, and returns it", () => {
+		it("appends item with default title and content, selects it, sets editingItemId, and returns it", () => {
 			const newItem = usePlaylistStore.getState().addItem();
 			const state = usePlaylistStore.getState();
 
@@ -107,9 +109,10 @@ describe("usePlaylistStore", () => {
 			expect(newItem.id).toBeString();
 			expect(newItem.id.length).toBeGreaterThan(0);
 			expect(state.selectedItemId).toBe(newItem.id);
+			expect(state.editingItemId).toBe(newItem.id);
 		});
 
-		it("appends item with custom title and content", () => {
+		it("appends item with custom title and content and sets editingItemId", () => {
 			const newItem = usePlaylistStore
 				.getState()
 				.addItem(
@@ -122,6 +125,55 @@ describe("usePlaylistStore", () => {
 			expect(newItem.title).toBe("How Great Thou Art");
 			expect(newItem.content).toBe("O Lord, my God, when I in awesome wonder");
 			expect(state.selectedItemId).toBe(newItem.id);
+			expect(state.editingItemId).toBe(newItem.id);
+		});
+	});
+
+	describe("editor actions", () => {
+		it("defaults editingItemId to null", () => {
+			expect(usePlaylistStore.getState().editingItemId).toBeNull();
+		});
+
+		it("startEditingItem sets editingItemId", () => {
+			usePlaylistStore.getState().startEditingItem("item-2");
+			expect(usePlaylistStore.getState().editingItemId).toBe("item-2");
+		});
+
+		it("stopEditingItem sets editingItemId to null", () => {
+			usePlaylistStore.getState().startEditingItem("item-2");
+			expect(usePlaylistStore.getState().editingItemId).toBe("item-2");
+
+			usePlaylistStore.getState().stopEditingItem();
+			expect(usePlaylistStore.getState().editingItemId).toBeNull();
+		});
+
+		it("updateItem updates title and content for the specified item without modifying other items or order", () => {
+			usePlaylistStore.getState().updateItem("item-2", {
+				title: "Psalm 23 (Updated)",
+				content: "The Lord is my shepherd; I lack nothing.",
+			});
+
+			const { items } = usePlaylistStore.getState();
+			expect(items).toHaveLength(3);
+			expect(items.map((i) => i.id)).toEqual(["item-1", "item-2", "item-3"]);
+
+			expect(items[0]).toEqual(INITIAL_PLAYLIST_ITEMS[0]);
+			expect(items[1]).toEqual({
+				id: "item-2",
+				title: "Psalm 23 (Updated)",
+				content: "The Lord is my shepherd; I lack nothing.",
+			});
+			expect(items[2]).toEqual(INITIAL_PLAYLIST_ITEMS[2]);
+		});
+
+		it("updateItem does nothing when id is not found", () => {
+			usePlaylistStore.getState().updateItem("non-existent", {
+				title: "Ghost",
+				content: "Ghost Content",
+			});
+
+			const { items } = usePlaylistStore.getState();
+			expect(items).toEqual(INITIAL_PLAYLIST_ITEMS);
 		});
 	});
 
@@ -236,6 +288,22 @@ describe("usePlaylistStore", () => {
 
 			usePlaylistStore.getState().deleteItem("item-2");
 			expect(usePlaylistStore.getState().activeConfirmDeleteId).toBeNull();
+		});
+
+		it("resets editingItemId to null if the deleted item was currently being edited", () => {
+			usePlaylistStore.getState().startEditingItem("item-2");
+			expect(usePlaylistStore.getState().editingItemId).toBe("item-2");
+
+			usePlaylistStore.getState().deleteItem("item-2");
+			expect(usePlaylistStore.getState().editingItemId).toBeNull();
+		});
+
+		it("leaves editingItemId unchanged if a different item is deleted", () => {
+			usePlaylistStore.getState().startEditingItem("item-3");
+			expect(usePlaylistStore.getState().editingItemId).toBe("item-3");
+
+			usePlaylistStore.getState().deleteItem("item-1");
+			expect(usePlaylistStore.getState().editingItemId).toBe("item-3");
 		});
 
 		it("retains activeConfirmDeleteId if a different item is deleted", () => {

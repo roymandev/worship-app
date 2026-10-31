@@ -243,6 +243,18 @@ export function PlaylistPanel() {
 			return;
 		}
 
+		if (
+			!e.altKey &&
+			!e.ctrlKey &&
+			!e.metaKey &&
+			(e.key === "e" || e.key === "E")
+		) {
+			e.preventDefault();
+			e.stopPropagation();
+			usePlaylistStore.getState().startEditingItem(id);
+			return;
+		}
+
 		// ArrowRight: focus the first interactive button in the action cell
 		if (e.key === "ArrowRight") {
 			const actionCell = actionCellRefs.current.get(id);
@@ -458,6 +470,7 @@ export function PlaylistPanel() {
 										}
 									}}
 									role="row"
+									data-item-id={item.id}
 									tabIndex={isSelected ? 0 : -1}
 									aria-selected={isSelected}
 									onClick={() =>
@@ -559,6 +572,9 @@ export function PlaylistPanel() {
 													aria-label="Edit item"
 													onClick={(e) => {
 														e.stopPropagation();
+														usePlaylistStore
+															.getState()
+															.startEditingItem(item.id);
 													}}
 												>
 													<IconPencil className="size-3" />

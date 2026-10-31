@@ -31,30 +31,65 @@ describe("Workspace Center Panel Integration", () => {
 		cleanup();
 	});
 
-	it("renders SlidesPanel ('Center') when editingItemId is null", () => {
+	it("renders CueListPanel when editingItemId is null and selectedItemId is resolved", () => {
 		render(<WorkspaceCenterPanel />);
 
-		expect(screen.getByText("Center")).toBeInTheDocument();
+		expect(
+			screen.getByRole("region", { name: "Cue list panel" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", { name: "Amazing Grace" }),
+		).toBeInTheDocument();
 		expect(
 			screen.queryByRole("form", { name: "Edit playlist item" }),
 		).not.toBeInTheDocument();
 	});
 
-	it("renders SlidesPanel ('Center') when editingItemId cannot be resolved in playlistItems", () => {
+	it("renders CueListPanel when editingItemId cannot be resolved in playlistItems", () => {
 		usePlaylistStore.setState({ editingItemId: "non-existent-id" });
 		render(<WorkspaceCenterPanel />);
 
-		expect(screen.getByText("Center")).toBeInTheDocument();
+		expect(
+			screen.getByRole("region", { name: "Cue list panel" }),
+		).toBeInTheDocument();
 		expect(
 			screen.queryByRole("form", { name: "Edit playlist item" }),
 		).not.toBeInTheDocument();
+	});
+
+	it("renders EmptyState when selectedItemId is null", () => {
+		usePlaylistStore.setState({ selectedItemId: null });
+		render(<WorkspaceCenterPanel />);
+
+		expect(screen.getByText("No playlist item selected")).toBeInTheDocument();
+		expect(
+			screen.getByText("Select an item from the playlist to view its cues."),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("region", { name: "Cue list panel" }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("form", { name: "Edit playlist item" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders EmptyState when selectedItemId cannot be resolved in playlistItems", () => {
+		usePlaylistStore.setState({ selectedItemId: "non-existent-id" });
+		render(<WorkspaceCenterPanel />);
+
+		expect(screen.getByText("No playlist item selected")).toBeInTheDocument();
+		expect(
+			screen.getByText("Select an item from the playlist to view its cues."),
+		).toBeInTheDocument();
 	});
 
 	it("renders PlaylistItemEditor when editingItemId is set and resolved", () => {
 		usePlaylistStore.setState({ editingItemId: "item-1" });
 		render(<WorkspaceCenterPanel />);
 
-		expect(screen.queryByText("Center")).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("region", { name: "Cue list panel" }),
+		).not.toBeInTheDocument();
 		expect(
 			screen.getByRole("form", { name: "Edit playlist item" }),
 		).toBeInTheDocument();
@@ -65,12 +100,16 @@ describe("Workspace Center Panel Integration", () => {
 		const user = userEvent.setup();
 		render(<WorkspaceView />);
 
-		expect(screen.getByText("Center")).toBeInTheDocument();
+		expect(
+			screen.getByRole("region", { name: "Cue list panel" }),
+		).toBeInTheDocument();
 
 		const addBtn = screen.getByRole("button", { name: "Add item" });
 		await user.click(addBtn);
 
-		expect(screen.queryByText("Center")).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("region", { name: "Cue list panel" }),
+		).not.toBeInTheDocument();
 		expect(
 			screen.getByRole("form", { name: "Edit playlist item" }),
 		).toBeInTheDocument();
@@ -81,7 +120,9 @@ describe("Workspace Center Panel Integration", () => {
 		const user = userEvent.setup();
 		render(<WorkspaceView />);
 
-		expect(screen.getByText("Center")).toBeInTheDocument();
+		expect(
+			screen.getByRole("region", { name: "Cue list panel" }),
+		).toBeInTheDocument();
 
 		const rows = screen.getAllByRole("row");
 		await user.pointer({ keys: "[MouseRight]", target: rows[1] }); // item-2: Psalm 23
@@ -90,7 +131,9 @@ describe("Workspace Center Panel Integration", () => {
 		const editBtn = within(menu).getByRole("menuitem", { name: /edit item/i });
 		await user.click(editBtn);
 
-		expect(screen.queryByText("Center")).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("region", { name: "Cue list panel" }),
+		).not.toBeInTheDocument();
 		expect(
 			screen.getByRole("form", { name: "Edit playlist item" }),
 		).toBeInTheDocument();
@@ -101,20 +144,24 @@ describe("Workspace Center Panel Integration", () => {
 		const user = userEvent.setup();
 		render(<WorkspaceView />);
 
-		expect(screen.getByText("Center")).toBeInTheDocument();
+		expect(
+			screen.getByRole("region", { name: "Cue list panel" }),
+		).toBeInTheDocument();
 
 		const rows = screen.getAllByRole("row");
 		rows[0].focus();
 		await user.keyboard("{F2}");
 
-		expect(screen.queryByText("Center")).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("region", { name: "Cue list panel" }),
+		).not.toBeInTheDocument();
 		expect(
 			screen.getByRole("form", { name: "Edit playlist item" }),
 		).toBeInTheDocument();
 		expect(screen.getByLabelText("Title")).toHaveValue("Amazing Grace");
 	});
 
-	it("deleting the active item being edited resets editingItemId and returns center panel to SlidesPanel", async () => {
+	it("deleting the active item being edited resets editingItemId and returns center panel to CueListPanel", async () => {
 		const user = userEvent.setup();
 		usePlaylistStore.setState({ editingItemId: "item-2" });
 		render(<WorkspaceView />);
@@ -134,9 +181,11 @@ describe("Workspace Center Panel Integration", () => {
 		const confirmDeleteBtn = screen.getByRole("button", { name: "Delete" });
 		await user.click(confirmDeleteBtn);
 
-		// Center panel should return to SlidesPanel
+		// Center panel should return to CueListPanel
 		await waitFor(() => {
-			expect(screen.getByText("Center")).toBeInTheDocument();
+			expect(
+				screen.getByRole("region", { name: "Cue list panel" }),
+			).toBeInTheDocument();
 		});
 		expect(
 			screen.queryByRole("form", { name: "Edit playlist item" }),

@@ -2,11 +2,27 @@ import { defineAppHotkeys } from "@tanstack/react-hotkeys";
 
 export type AppHotkeyMeta = {
 	name: string;
-	group: "Workspace" | "Presentation" | "Help";
+	group: "Workspace" | "Presentation" | "Playlist" | "Help";
 	description: string;
 };
 
 export const appHotkeys = defineAppHotkeys({
+	"playlist.saveItem": {
+		hotkey: "Mod+Enter",
+		meta: {
+			name: "Save playlist item",
+			group: "Playlist",
+			description: "Save changes to playlist item",
+		},
+	},
+	"playlist.cancelEdit": {
+		hotkey: "Escape",
+		meta: {
+			name: "Cancel item editing",
+			group: "Playlist",
+			description: "Discard changes or exit editor",
+		},
+	},
 	"workspace.toggleLayoutMode": {
 		hotkey: "Mod+E",
 		meta: {

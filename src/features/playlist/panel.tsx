@@ -15,13 +15,15 @@ import { PlaylistItemRow } from "@/features/playlist/item-row";
 import { usePlaylistStore } from "@/features/playlist/store";
 
 export function PlaylistPanel() {
-	const { items, selectedItemId, activeConfirmDeleteId } = usePlaylistStore(
-		useShallow((s) => ({
-			items: s.items,
-			selectedItemId: s.selectedItemId,
-			activeConfirmDeleteId: s.activeConfirmDeleteId,
-		})),
-	);
+	const { items, selectedItemId, editingItemId, activeConfirmDeleteId } =
+		usePlaylistStore(
+			useShallow((s) => ({
+				items: s.items,
+				selectedItemId: s.selectedItemId,
+				editingItemId: s.editingItemId,
+				activeConfirmDeleteId: s.activeConfirmDeleteId,
+			})),
+		);
 
 	const gridRef = useRef<HTMLDivElement | null>(null);
 	const addButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -188,6 +190,7 @@ export function PlaylistPanel() {
 						>
 							{items.map((item, index) => {
 								const isSelected = item.id === selectedItemId;
+								const isEditing = item.id === editingItemId;
 								return (
 									<PlaylistItemRow
 										key={item.id}
@@ -195,6 +198,7 @@ export function PlaylistPanel() {
 										index={index}
 										totalItems={items.length}
 										isSelected={isSelected}
+										isEditing={isEditing}
 									/>
 								);
 							})}

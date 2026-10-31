@@ -25,6 +25,7 @@ type Props = {
 	index: number;
 	totalItems: number;
 	isSelected: boolean;
+	isEditing?: boolean;
 };
 
 export function PlaylistItemRow({
@@ -32,6 +33,7 @@ export function PlaylistItemRow({
 	index,
 	totalItems,
 	isSelected,
+	isEditing = false,
 }: Props) {
 	const localRowRef = useRef<HTMLDivElement | null>(null);
 	const actionCellRef = useRef<HTMLDivElement | null>(null);
@@ -194,6 +196,7 @@ export function PlaylistItemRow({
 						ref={localRowRef}
 						role="row"
 						data-item-id={item.id}
+						data-editing={isEditing ? "true" : undefined}
 						tabIndex={isSelected ? 0 : -1}
 						aria-selected={isSelected}
 						onClick={() => {
@@ -213,8 +216,19 @@ export function PlaylistItemRow({
 			>
 				{/* biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Cell */}
 				{/* biome-ignore lint/a11y/useFocusableInteractive: Row manages roving focus */}
-				<div role="gridcell" className="min-w-0 flex-1 truncate">
+				<div
+					role="gridcell"
+					className="flex min-w-0 flex-1 items-center gap-1.5 truncate"
+				>
+					{isEditing && (
+						<IconPencil
+							className="size-3.5 text-primary shrink-0"
+							title="In item editor"
+							aria-hidden="true"
+						/>
+					)}
 					<span className="truncate">{item.title}</span>
+					{isEditing && <span className="sr-only">(editing)</span>}
 				</div>
 
 				{/* biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Cell */}

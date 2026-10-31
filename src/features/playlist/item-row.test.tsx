@@ -49,6 +49,103 @@ describe("PlaylistItemRow", () => {
 		expect(gridcells[1]).toHaveAttribute("data-action-cell", "item-1");
 	});
 
+	it("renders editing indicator and attributes when isEditing is true", () => {
+		render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalItems={3}
+				isSelected={false}
+				isEditing={true}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		expect(row).toHaveAttribute("data-editing", "true");
+
+		const titleEl = screen.getByTitle("In item editor");
+		expect(titleEl).toBeInTheDocument();
+		expect(titleEl.parentElement).toHaveAttribute("aria-hidden", "true");
+
+		expect(screen.getByText("(editing)")).toBeInTheDocument();
+	});
+
+	it("omits editing indicator and attributes when isEditing is false or undefined", () => {
+		const { rerender } = render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalItems={3}
+				isSelected={false}
+				isEditing={false}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		expect(row).not.toHaveAttribute("data-editing");
+		expect(screen.queryByTitle("In item editor")).toBeNull();
+		expect(screen.queryByText("(editing)")).toBeNull();
+
+		rerender(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalItems={3}
+				isSelected={false}
+			/>,
+		);
+		expect(row).not.toHaveAttribute("data-editing");
+		expect(screen.queryByTitle("In item editor")).toBeNull();
+		expect(screen.queryByText("(editing)")).toBeNull();
+	});
+
+	it("renders editing indicator correctly under isSelected=true", () => {
+		render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalItems={3}
+				isSelected={true}
+				isEditing={true}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		expect(row).toHaveAttribute("data-editing", "true");
+		expect(row).toHaveAttribute("aria-selected", "true");
+
+		const titleEl = screen.getByTitle("In item editor");
+		expect(titleEl).toBeInTheDocument();
+		expect(titleEl.parentElement).toHaveAttribute("aria-hidden", "true");
+		expect(screen.getByText("(editing)")).toBeInTheDocument();
+	});
+
+	it("preserves keyboard roving and action cell behavior when isEditing is true", async () => {
+		const user = userEvent.setup();
+		render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalItems={3}
+				isSelected={true}
+				isEditing={true}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		row.focus();
+		expect(document.activeElement).toBe(row);
+
+		// ArrowRight should focus Go Live button in action cell
+		await user.keyboard("{ArrowRight}");
+		const goLiveBtn = screen.getByRole("button", { name: "Go Live" });
+		expect(document.activeElement).toBe(goLiveBtn);
+
+		// ArrowLeft should return focus to the row
+		await user.keyboard("{ArrowLeft}");
+		expect(document.activeElement).toBe(row);
+	});
+
 	it("reflects unselected tabIndex and aria-selected state", () => {
 		render(
 			<PlaylistItemRow

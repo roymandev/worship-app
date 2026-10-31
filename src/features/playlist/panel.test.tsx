@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import {
+	act,
 	cleanup,
 	render,
 	screen,
@@ -446,6 +447,94 @@ describe("PlaylistPanel", () => {
 			const menu = await screen.findByRole("menu");
 			expect(menu).toBeInTheDocument();
 			expect(within(menu).getByText("Go Live")).toBeInTheDocument();
+		});
+	});
+
+	describe("Active Editor Row Indicator", () => {
+		it("setting editingItemId dynamically displays the editing indicator and data-editing attribute on the corresponding row", () => {
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+			expect(rows[0]).not.toHaveAttribute("data-editing");
+			expect(within(rows[0]).queryByText("(editing)")).not.toBeInTheDocument();
+
+			act(() => {
+				usePlaylistStore.getState().startEditingItem("item-1");
+			});
+
+			const updatedRows = screen.getAllByRole("row");
+			expect(updatedRows[0]).toHaveAttribute("data-editing", "true");
+			expect(within(updatedRows[0]).getByText("(editing)")).toBeInTheDocument();
+			expect(updatedRows[1]).not.toHaveAttribute("data-editing");
+			expect(updatedRows[2]).not.toHaveAttribute("data-editing");
+		});
+
+		it("changing editingItemId transfers the indicator to the new row", () => {
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+			expect(rows[0]).toHaveAttribute("data-editing", "true");
+			expect(within(rows[0]).getByText("(editing)")).toBeInTheDocument();
+			expect(rows[1]).not.toHaveAttribute("data-editing");
+
+			act(() => {
+				usePlaylistStore.getState().startEditingItem("item-2");
+			});
+
+			const updatedRows = screen.getAllByRole("row");
+			expect(updatedRows[0]).not.toHaveAttribute("data-editing");
+			expect(
+				within(updatedRows[0]).queryByText("(editing)"),
+			).not.toBeInTheDocument();
+			expect(updatedRows[1]).toHaveAttribute("data-editing", "true");
+			expect(within(updatedRows[1]).getByText("(editing)")).toBeInTheDocument();
+		});
+
+		it("setting editingItemId to null removes the indicator from all rows", () => {
+			usePlaylistStore.setState({ editingItemId: "item-2" });
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+			expect(rows[1]).toHaveAttribute("data-editing", "true");
+			expect(within(rows[1]).getByText("(editing)")).toBeInTheDocument();
+
+			act(() => {
+				usePlaylistStore.getState().stopEditingItem();
+			});
+
+			for (const row of screen.getAllByRole("row")) {
+				expect(row).not.toHaveAttribute("data-editing");
+				expect(within(row).queryByText("(editing)")).not.toBeInTheDocument();
+			}
+		});
+
+		it("selected item can differ from the editing item without indicator disappearing from the editing item", () => {
+			usePlaylistStore.setState({
+				selectedItemId: "item-1",
+				editingItemId: "item-2",
+			});
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+			expect(rows[0]).toHaveAttribute("aria-selected", "true");
+			expect(rows[0]).not.toHaveAttribute("data-editing");
+			expect(within(rows[0]).queryByText("(editing)")).not.toBeInTheDocument();
+
+			expect(rows[1]).toHaveAttribute("aria-selected", "false");
+			expect(rows[1]).toHaveAttribute("data-editing", "true");
+			expect(within(rows[1]).getByText("(editing)")).toBeInTheDocument();
+
+			// Change selection to item-3
+			act(() => {
+				usePlaylistStore.getState().selectItem("item-3");
+			});
+
+			const updatedRows = screen.getAllByRole("row");
+			expect(updatedRows[2]).toHaveAttribute("aria-selected", "true");
+			expect(updatedRows[2]).not.toHaveAttribute("data-editing");
+			expect(updatedRows[1]).toHaveAttribute("data-editing", "true");
+			expect(within(updatedRows[1]).getByText("(editing)")).toBeInTheDocument();
 		});
 	});
 });

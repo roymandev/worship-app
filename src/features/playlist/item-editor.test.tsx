@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
 import {
 	PlaylistItemEditor,
 	playlistItemFormDefaultValues,
@@ -15,7 +14,6 @@ describe("PlaylistItemEditor", () => {
 			items: [...INITIAL_PLAYLIST_ITEMS],
 			selectedItemId: "item-1",
 			editingItemId: "item-1",
-			mode: "view",
 			activeConfirmDeleteId: null,
 		});
 	});
@@ -48,7 +46,8 @@ describe("PlaylistItemEditor", () => {
 	});
 
 	it("renders item title and content fields populated with store item values", () => {
-		render(<PlaylistItemEditor itemId="item-1" />);
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<PlaylistItemEditor />);
 
 		const titleInput = screen.getByLabelText("Title");
 		const contentInput = screen.getByLabelText("Content");
@@ -60,7 +59,8 @@ describe("PlaylistItemEditor", () => {
 	});
 
 	it("autofocuses title input on mount", () => {
-		render(<PlaylistItemEditor itemId="item-1" />);
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<PlaylistItemEditor />);
 
 		const titleInput = screen.getByLabelText("Title");
 		expect(document.activeElement).toBe(titleInput);
@@ -68,7 +68,8 @@ describe("PlaylistItemEditor", () => {
 
 	it("validates title: shows validation error when title is empty or whitespace-only and prevents saving", async () => {
 		const user = userEvent.setup();
-		render(<PlaylistItemEditor itemId="item-1" />);
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<PlaylistItemEditor />);
 
 		const titleInput = screen.getByLabelText("Title");
 		await user.clear(titleInput);
@@ -91,7 +92,8 @@ describe("PlaylistItemEditor", () => {
 
 	it("saves on clicking Save button, updating store and calling stopEditingItem", async () => {
 		const user = userEvent.setup();
-		render(<PlaylistItemEditor itemId="item-1" />);
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<PlaylistItemEditor />);
 
 		const titleInput = screen.getByLabelText("Title");
 		const contentInput = screen.getByLabelText("Content");
@@ -116,7 +118,8 @@ describe("PlaylistItemEditor", () => {
 
 	it("saves on pressing Mod+Enter (Ctrl/Cmd+Enter), updating store and calling stopEditingItem", async () => {
 		const user = userEvent.setup();
-		render(<PlaylistItemEditor itemId="item-1" />);
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<PlaylistItemEditor />);
 
 		const titleInput = screen.getByLabelText("Title");
 		await user.type(titleInput, " (Special)");
@@ -135,7 +138,8 @@ describe("PlaylistItemEditor", () => {
 
 	it("cancels cleanly without prompt when draft is unmodified (isDirty === false) on clicking Cancel", async () => {
 		const user = userEvent.setup();
-		render(<PlaylistItemEditor itemId="item-1" />);
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<PlaylistItemEditor />);
 
 		const cancelButton = screen.getByRole("button", { name: "Cancel" });
 		await user.click(cancelButton);
@@ -146,7 +150,8 @@ describe("PlaylistItemEditor", () => {
 
 	it("cancels cleanly without prompt when draft is unmodified on pressing Escape", async () => {
 		const user = userEvent.setup();
-		render(<PlaylistItemEditor itemId="item-1" />);
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<PlaylistItemEditor />);
 
 		await user.keyboard("{Escape}");
 
@@ -156,7 +161,8 @@ describe("PlaylistItemEditor", () => {
 
 	it("displays AlertDialog confirmation when draft is dirty on clicking Cancel", async () => {
 		const user = userEvent.setup();
-		render(<PlaylistItemEditor itemId="item-1" />);
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<PlaylistItemEditor />);
 
 		const titleInput = screen.getByLabelText("Title");
 		await user.type(titleInput, " modified");
@@ -177,7 +183,8 @@ describe("PlaylistItemEditor", () => {
 
 	it("displays AlertDialog confirmation when draft is dirty on pressing Escape", async () => {
 		const user = userEvent.setup();
-		render(<PlaylistItemEditor itemId="item-1" />);
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<PlaylistItemEditor />);
 
 		const contentInput = screen.getByLabelText("Content");
 		await user.type(contentInput, " modified content");
@@ -191,7 +198,8 @@ describe("PlaylistItemEditor", () => {
 
 	it("canceling the alert dialog keeps the editor open with dirty draft intact", async () => {
 		const user = userEvent.setup();
-		render(<PlaylistItemEditor itemId="item-1" />);
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<PlaylistItemEditor />);
 
 		const titleInput = screen.getByLabelText("Title");
 		await user.type(titleInput, " modified");
@@ -216,7 +224,8 @@ describe("PlaylistItemEditor", () => {
 
 	it("pressing Escape while the discard confirmation dialog is open closes the dialog and keeps the draft", async () => {
 		const user = userEvent.setup();
-		render(<PlaylistItemEditor itemId="item-1" />);
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<PlaylistItemEditor />);
 
 		const titleInput = screen.getByLabelText("Title");
 		await user.type(titleInput, " modified draft");
@@ -240,7 +249,8 @@ describe("PlaylistItemEditor", () => {
 
 	it("confirming discard closes the dialog, discards changes, and stops editing", async () => {
 		const user = userEvent.setup();
-		render(<PlaylistItemEditor itemId="item-1" />);
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<PlaylistItemEditor />);
 
 		const titleInput = screen.getByLabelText("Title");
 		await user.type(titleInput, " modified");
@@ -266,13 +276,14 @@ describe("PlaylistItemEditor", () => {
 	});
 
 	it("restores focus to playlist row when itemId matches in playlist grid on unmount", async () => {
+		usePlaylistStore.setState({ editingItemId: "item-1" });
 		const row = document.createElement("div");
 		row.setAttribute("role", "row");
 		row.setAttribute("data-item-id", "item-1");
 		row.setAttribute("tabindex", "0");
 		document.body.appendChild(row);
 
-		const { unmount } = render(<PlaylistItemEditor itemId="item-1" />);
+		const { unmount } = render(<PlaylistItemEditor />);
 
 		expect(document.activeElement).toBe(screen.getByLabelText("Title"));
 
@@ -283,13 +294,14 @@ describe("PlaylistItemEditor", () => {
 	});
 
 	it("restores focus to the caller element on unmount as fallback", async () => {
+		usePlaylistStore.setState({ editingItemId: "item-1" });
 		const triggerButton = document.createElement("button");
 		triggerButton.textContent = "Trigger Edit";
 		document.body.appendChild(triggerButton);
 		triggerButton.focus();
 		expect(document.activeElement).toBe(triggerButton);
 
-		const { unmount } = render(<PlaylistItemEditor itemId="item-1" />);
+		const { unmount } = render(<PlaylistItemEditor />);
 
 		// Active element should be title input
 		expect(document.activeElement).toBe(screen.getByLabelText("Title"));
@@ -300,16 +312,21 @@ describe("PlaylistItemEditor", () => {
 		document.body.removeChild(triggerButton);
 	});
 
-	it("synchronously snapshots / resets form when itemId prop changes", async () => {
+	it("synchronously snapshots / resets form when itemId changes in store", async () => {
 		const user = userEvent.setup();
+		usePlaylistStore.setState({ editingItemId: "item-1" });
 		function Wrapper() {
-			const [id, setId] = useState("item-1");
 			return (
 				<div>
-					<button type="button" onClick={() => setId("item-2")}>
+					<button
+						type="button"
+						onClick={() =>
+							usePlaylistStore.setState({ editingItemId: "item-2" })
+						}
+					>
 						Switch to item 2
 					</button>
-					<PlaylistItemEditor itemId={id} />
+					<PlaylistItemEditor />
 				</div>
 			);
 		}
@@ -327,7 +344,8 @@ describe("PlaylistItemEditor", () => {
 	});
 
 	it("handles missing item gracefully by calling stopEditingItem", () => {
-		render(<PlaylistItemEditor itemId="non-existent" />);
+		usePlaylistStore.setState({ editingItemId: "non-existent" });
+		render(<PlaylistItemEditor />);
 
 		expect(usePlaylistStore.getState().editingItemId).toBeNull();
 	});

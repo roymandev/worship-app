@@ -7,7 +7,6 @@ describe("usePlaylistStore", () => {
 			items: [...INITIAL_PLAYLIST_ITEMS],
 			selectedItemId: "item-1",
 			editingItemId: null,
-			mode: "view",
 			activeConfirmDeleteId: null,
 		});
 	});
@@ -33,7 +32,6 @@ describe("usePlaylistStore", () => {
 		});
 		expect(state.selectedItemId).toBe("item-1");
 		expect(state.editingItemId).toBeNull();
-		expect(state.mode).toBe("view");
 		expect(state.activeConfirmDeleteId).toBeNull();
 	});
 
@@ -330,20 +328,6 @@ describe("usePlaylistStore", () => {
 			expect(state.selectedItemId).toBeNull();
 		});
 
-		it("resets mode to view when deleting the last item in edit mode", () => {
-			usePlaylistStore.setState({
-				items: [{ id: "solo", title: "Solo", content: "" }],
-				selectedItemId: "solo",
-				mode: "edit",
-			});
-
-			usePlaylistStore.getState().deleteItem("solo");
-
-			const state = usePlaylistStore.getState();
-			expect(state.items).toHaveLength(0);
-			expect(state.mode).toBe("view");
-		});
-
 		it("preserves selection if deleted item was not selected", () => {
 			usePlaylistStore.getState().selectItem("item-1");
 			usePlaylistStore.getState().deleteItem("item-2");
@@ -389,23 +373,7 @@ describe("usePlaylistStore", () => {
 		});
 	});
 
-	describe("mode and delete confirm controls", () => {
-		it("setMode sets mode explicitly", () => {
-			usePlaylistStore.getState().setMode("edit");
-			expect(usePlaylistStore.getState().mode).toBe("edit");
-
-			usePlaylistStore.getState().setMode("view");
-			expect(usePlaylistStore.getState().mode).toBe("view");
-		});
-
-		it("toggleMode toggles between view and edit", () => {
-			usePlaylistStore.getState().toggleMode();
-			expect(usePlaylistStore.getState().mode).toBe("edit");
-
-			usePlaylistStore.getState().toggleMode();
-			expect(usePlaylistStore.getState().mode).toBe("view");
-		});
-
+	describe("delete confirm controls", () => {
 		it("openDeleteConfirm and closeDeleteConfirm manage confirm id", () => {
 			usePlaylistStore.getState().openDeleteConfirm("item-2");
 			expect(usePlaylistStore.getState().activeConfirmDeleteId).toBe("item-2");

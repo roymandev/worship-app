@@ -32,10 +32,6 @@ export const playlistItemFormDefaultValues: PlaylistItemFormInput = {
 	content: "",
 };
 
-export type PlaylistItemEditorProps = {
-	itemId: string;
-};
-
 type EditorFormInnerProps = {
 	itemId: string;
 };
@@ -223,7 +219,9 @@ function EditorFormInner({ itemId }: EditorFormInnerProps) {
 	);
 }
 
-export function PlaylistItemEditor({ itemId }: PlaylistItemEditorProps) {
+export function PlaylistItemEditor() {
+	const resolvedItemId = usePlaylistStore((state) => state.editingItemId);
+
 	const callerElementRef = useRef<HTMLElement | null>(
 		typeof document !== "undefined" &&
 			document.activeElement instanceof HTMLElement
@@ -233,9 +231,10 @@ export function PlaylistItemEditor({ itemId }: PlaylistItemEditorProps) {
 
 	useEffect(() => {
 		return () => {
+			if (!resolvedItemId) return;
 			const rowElement =
 				document.querySelector<HTMLElement>(
-					`[role="row"][data-item-id="${itemId}"]`,
+					`[role="row"][data-item-id="${resolvedItemId}"]`,
 				) ??
 				document.querySelector<HTMLElement>(
 					'[role="row"][aria-selected="true"]',
@@ -247,11 +246,15 @@ export function PlaylistItemEditor({ itemId }: PlaylistItemEditorProps) {
 				callerElementRef.current.focus();
 			}
 		};
-	}, [itemId]);
+	}, [resolvedItemId]);
+
+	if (!resolvedItemId) {
+		return null;
+	}
 
 	return (
 		<HotkeysProvider scope="playlist:item-editor" exclusive>
-			<EditorFormInner itemId={itemId} />
+			<EditorFormInner itemId={resolvedItemId} />
 		</HotkeysProvider>
 	);
 }

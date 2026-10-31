@@ -9,8 +9,6 @@ export type PlaylistItem = {
 
 export type PlaylistItemDraft = Pick<PlaylistItem, "title" | "content">;
 
-export type PlaylistMode = "view" | "edit";
-
 export const INITIAL_PLAYLIST_ITEMS: PlaylistItem[] = [
 	{
 		id: "item-1",
@@ -34,7 +32,6 @@ export type PlaylistState = {
 	items: PlaylistItem[];
 	selectedItemId: string | null;
 	editingItemId: string | null;
-	mode: PlaylistMode;
 	activeConfirmDeleteId: string | null;
 	selectItem: (id: string | null) => void;
 	selectPrevious: () => void;
@@ -51,8 +48,6 @@ export type PlaylistState = {
 	startEditingItem: (id: string) => void;
 	stopEditingItem: () => void;
 	updateItem: (id: string, updates: PlaylistItemDraft) => void;
-	setMode: (mode: PlaylistMode) => void;
-	toggleMode: () => void;
 	openDeleteConfirm: (id: string) => void;
 	closeDeleteConfirm: () => void;
 };
@@ -61,7 +56,6 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 	items: INITIAL_PLAYLIST_ITEMS,
 	selectedItemId: "item-1",
 	editingItemId: null,
-	mode: "view",
 	activeConfirmDeleteId: null,
 
 	selectItem: (id) => set({ selectedItemId: id }),
@@ -185,7 +179,6 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 				items: newItems,
 				selectedItemId: nextSelectedId,
 				editingItemId: state.editingItemId === id ? null : state.editingItemId,
-				mode: newItems.length === 0 ? "view" : state.mode,
 				activeConfirmDeleteId:
 					state.activeConfirmDeleteId === id
 						? null
@@ -212,13 +205,6 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 			return { items: newItems };
 		});
 	},
-
-	setMode: (mode) => set({ mode }),
-
-	toggleMode: () =>
-		set((state) => ({
-			mode: state.mode === "view" ? "edit" : "view",
-		})),
 
 	openDeleteConfirm: (id) => set({ activeConfirmDeleteId: id }),
 

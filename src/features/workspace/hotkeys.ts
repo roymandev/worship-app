@@ -86,7 +86,7 @@ export type HotkeySearchResult = {
 	group: string;
 	name: string;
 	description: string;
-	formattedChord: string;
+	hotkey: (typeof appHotkeys)[AppHotkeyId]["hotkey"];
 };
 
 export function isMacPlatform(): boolean {
@@ -118,6 +118,16 @@ const MAC_KEY_SYMBOLS: Record<string, string> = {
 	backspace: "⌫",
 	escape: "Esc",
 	esc: "Esc",
+	arrowup: "↑",
+	arrowdown: "↓",
+	arrowleft: "←",
+	arrowright: "→",
+	up: "↑",
+	down: "↓",
+	left: "←",
+	right: "→",
+	del: "⌫",
+	delete: "⌦",
 };
 
 const STANDARD_KEY_SYMBOLS: Record<string, string> = {
@@ -133,6 +143,16 @@ const STANDARD_KEY_SYMBOLS: Record<string, string> = {
 	backspace: "Backspace",
 	escape: "Esc",
 	esc: "Esc",
+	arrowup: "↑",
+	arrowdown: "↓",
+	arrowleft: "←",
+	arrowright: "→",
+	up: "↑",
+	down: "↓",
+	left: "←",
+	right: "→",
+	del: "Del",
+	delete: "Delete",
 };
 
 export function formatKeySymbol(key: string, isMac = isMacPlatform()): string {
@@ -189,10 +209,7 @@ function getHotkeySearchString(
 	return "";
 }
 
-export function searchHotkeys(
-	query: string,
-	isMac = isMacPlatform(),
-): HotkeySearchResult[] {
+export function searchHotkeys(query: string): HotkeySearchResult[] {
 	const rawQuery = query.trim().toLowerCase();
 	const normalizedQuery = normalizeSearchTerm(rawQuery);
 
@@ -208,7 +225,6 @@ export function searchHotkeys(
 		const description = item.meta?.description ?? "";
 		const group = item.meta?.group ?? "General";
 		const chord = item.hotkey;
-		const formattedChord = formatHotkeyChord(chord, isMac);
 
 		if (rawQuery) {
 			const nameLower = name.toLowerCase();
@@ -216,15 +232,13 @@ export function searchHotkeys(
 			const groupLower = group.toLowerCase();
 			const hotkeyStr = getHotkeySearchString(chord).toLowerCase();
 			const normalizedHotkeyStr = normalizeSearchTerm(hotkeyStr);
-			const formattedChordLower = formattedChord.toLowerCase();
 
 			const matches =
 				nameLower.includes(rawQuery) ||
 				descLower.includes(rawQuery) ||
 				groupLower.includes(rawQuery) ||
 				hotkeyStr.includes(rawQuery) ||
-				normalizedHotkeyStr.includes(normalizedQuery) ||
-				formattedChordLower.includes(rawQuery);
+				normalizedHotkeyStr.includes(normalizedQuery);
 
 			if (!matches) {
 				continue;
@@ -236,7 +250,7 @@ export function searchHotkeys(
 			group,
 			name,
 			description,
-			formattedChord,
+			hotkey: chord,
 		});
 	}
 

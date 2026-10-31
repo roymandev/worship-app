@@ -143,4 +143,68 @@ describe("Workspace Center Panel Integration", () => {
 		).not.toBeInTheDocument();
 		expect(usePlaylistStore.getState().editingItemId).toBeNull();
 	});
+
+	it("prompts discard dialog when switching items in workspace with a dirty draft, aborting switch on cancel and transitioning on discard", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({ editingItemId: "item-1" });
+		render(<WorkspaceView />);
+
+		// Verify item-1 editor is open
+		const titleInput = screen.getByLabelText("Title");
+		expect(titleInput).toHaveValue("Amazing Grace");
+
+		// Modify title to make draft dirty
+		await user.type(titleInput, " modified lyrics");
+
+		// Try to switch by triggering edit on Psalm 23 (rows[1]) via context menu
+		const rows = screen.getAllByRole("row");
+		await user.pointer({ keys: "[MouseRight]", target: rows[1] });
+		const menu = await screen.findByRole("menu");
+		const editBtn = within(menu).getByRole("menuitem", { name: /edit item/i });
+		await user.click(editBtn);
+
+		// Discard confirmation dialog should appear
+		const dialog = await screen.findByRole("alertdialog");
+		expect(dialog).toBeInTheDocument();
+		expect(screen.getByText("Discard unsaved changes?")).toBeInTheDocument();
+
+		// Click Cancel in discard dialog
+		const cancelDialogBtn = screen.getByRole("button", { name: "Cancel" });
+		await user.click(cancelDialogBtn);
+
+		// Dialog closes and editor stays on item-1 with modified draft intact
+		await waitFor(() => {
+			expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+		});
+		expect(
+			screen.getByRole("form", { name: "Edit playlist item" }),
+		).toBeInTheDocument();
+		expect(screen.getByLabelText("Title")).toHaveValue(
+			"Amazing Grace modified lyrics",
+		);
+		expect(usePlaylistStore.getState().editingItemId).toBe("item-1");
+
+		// Try switching again to Psalm 23 (rows[1]) via context menu
+		await user.pointer({ keys: "[MouseRight]", target: rows[1] });
+		const menu2 = await screen.findByRole("menu");
+		const editBtn2 = within(menu2).getByRole("menuitem", {
+			name: /edit item/i,
+		});
+		await user.click(editBtn2);
+
+		// Discard dialog appears again
+		const dialog2 = await screen.findByRole("alertdialog");
+		expect(dialog2).toBeInTheDocument();
+
+		// Click Discard
+		const discardBtn = screen.getByRole("button", { name: "Discard" });
+		await user.click(discardBtn);
+
+		// Transition completes to Psalm 23
+		await waitFor(() => {
+			expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+			expect(screen.getByLabelText("Title")).toHaveValue("Psalm 23");
+			expect(usePlaylistStore.getState().editingItemId).toBe("item-2");
+		});
+	});
 });

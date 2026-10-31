@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
 	PlaylistItemEditor,
@@ -196,13 +196,14 @@ describe("PlaylistItemEditor", () => {
 		expect(screen.getByText("Discard unsaved changes?")).toBeInTheDocument();
 	});
 
-	it("canceling the alert dialog keeps the editor open with dirty draft intact", async () => {
+	it("canceling the alert dialog keeps the editor open with dirty draft intact and restores focus", async () => {
 		const user = userEvent.setup();
 		usePlaylistStore.setState({ editingItemId: "item-1" });
 		render(<PlaylistItemEditor />);
 
-		const titleInput = screen.getByLabelText("Title");
-		await user.type(titleInput, " modified");
+		const contentInput = screen.getByLabelText("Content");
+		await user.click(contentInput);
+		await user.type(contentInput, " modified");
 
 		const cancelButton = screen.getByRole("button", { name: "Cancel" });
 		await user.click(cancelButton);
@@ -218,7 +219,9 @@ describe("PlaylistItemEditor", () => {
 			expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 		});
 
-		expect(titleInput).toHaveValue("Amazing Grace modified");
+		await waitFor(() => {
+			expect(document.activeElement).toBe(contentInput);
+		});
 		expect(usePlaylistStore.getState().editingItemId).toBe("item-1");
 	});
 
@@ -348,5 +351,214 @@ describe("PlaylistItemEditor", () => {
 		render(<PlaylistItemEditor />);
 
 		expect(usePlaylistStore.getState().editingItemId).toBeNull();
+	});
+
+	describe("beforeunload guard", () => {
+		it("registers beforeunload listener when form is dirty and unregisters when cleaned", async () => {
+			const addSpy = vi.spyOn(window, "addEventListener");
+			const removeSpy = vi.spyOn(window, "removeEventListener");
+
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistItemEditor />);
+
+			const user = userEvent.setup();
+			const titleInput = screen.getByLabelText("Title");
+
+			// Initial state: not dirty, no beforeunload listener
+			const beforeunloadAddCalls = addSpy.mock.calls.filter(
+				([event]) => event === "beforeunload",
+			);
+			expect(beforeunloadAddCalls.length).toBe(0);
+
+			// Type to make dirty
+			await user.type(titleInput, " modified");
+
+			// Now beforeunload listener should be registered
+			const dirtyAddCalls = addSpy.mock.calls.filter(
+				([event]) => event === "beforeunload",
+			);
+			expect(dirtyAddCalls.length).toBeGreaterThan(0);
+
+			// Test the event handler itself prevents default and sets returnValue
+			const handler = dirtyAddCalls[dirtyAddCalls.length - 1][1] as (
+				e: BeforeUnloadEvent,
+			) => void;
+			const mockEvent = {
+				preventDefault: vi.fn(),
+				returnValue: "not empty",
+			} as unknown as BeforeUnloadEvent;
+
+			handler(mockEvent);
+			expect(mockEvent.preventDefault).toHaveBeenCalled();
+			expect(mockEvent.returnValue).toBe("");
+
+			// Clear text back to initial value to clean the form
+			await user.clear(titleInput);
+			await user.type(titleInput, "Amazing Grace");
+
+			await waitFor(() => {
+				const removeCalls = removeSpy.mock.calls.filter(
+					([event]) => event === "beforeunload",
+				);
+				expect(removeCalls.length).toBeGreaterThan(0);
+			});
+
+			addSpy.mockRestore();
+			removeSpy.mockRestore();
+		});
+
+		it("unregisters beforeunload listener when saved via Save button", async () => {
+			const addSpy = vi.spyOn(window, "addEventListener");
+			const removeSpy = vi.spyOn(window, "removeEventListener");
+
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistItemEditor />);
+
+			const user = userEvent.setup();
+			const titleInput = screen.getByLabelText("Title");
+			await user.type(titleInput, " updated");
+
+			expect(
+				addSpy.mock.calls.some(([event]) => event === "beforeunload"),
+			).toBe(true);
+
+			const saveButton = screen.getByRole("button", { name: "Save" });
+			await user.click(saveButton);
+
+			await waitFor(() => {
+				expect(
+					removeSpy.mock.calls.some(([event]) => event === "beforeunload"),
+				).toBe(true);
+			});
+
+			addSpy.mockRestore();
+			removeSpy.mockRestore();
+		});
+
+		it("unregisters beforeunload listener when unmounted while dirty", async () => {
+			const removeSpy = vi.spyOn(window, "removeEventListener");
+
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			const { unmount } = render(<PlaylistItemEditor />);
+
+			const user = userEvent.setup();
+			const titleInput = screen.getByLabelText("Title");
+			await user.type(titleInput, " dirty change");
+
+			unmount();
+
+			const removeCalls = removeSpy.mock.calls.filter(
+				([event]) => event === "beforeunload",
+			);
+			expect(removeCalls.length).toBeGreaterThan(0);
+
+			removeSpy.mockRestore();
+		});
+	});
+
+	describe("in-app item switch guard", () => {
+		it("intercepts store editingItemId switch when dirty and opens discard dialog", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistItemEditor />);
+
+			const titleInput = screen.getByLabelText("Title");
+			await user.type(titleInput, " modified draft");
+
+			// External switch attempted: switch to item-2
+			act(() => {
+				usePlaylistStore.getState().startEditingItem("item-2");
+			});
+
+			// Confirmation dialog should appear
+			const dialog = await screen.findByRole("alertdialog");
+			expect(dialog).toBeInTheDocument();
+			expect(screen.getByText("Discard unsaved changes?")).toBeInTheDocument();
+
+			// Input should still show current dirty draft
+			expect(titleInput).toHaveValue("Amazing Grace modified draft");
+		});
+
+		it("canceling discard dialog on item switch reverts store editingItemId and preserves draft", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistItemEditor />);
+
+			const titleInput = screen.getByLabelText("Title");
+			await user.type(titleInput, " modified draft");
+
+			// External switch to item-2
+			act(() => {
+				usePlaylistStore.getState().startEditingItem("item-2");
+			});
+
+			const dialog = await screen.findByRole("alertdialog");
+			expect(dialog).toBeInTheDocument();
+
+			// Click Cancel in dialog
+			const dialogCancelButton = screen.getByRole("button", { name: "Cancel" });
+			await user.click(dialogCancelButton);
+
+			await waitFor(() => {
+				expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+			});
+
+			// Reverted back to item-1 in store and draft preserved
+			expect(usePlaylistStore.getState().editingItemId).toBe("item-1");
+			expect(titleInput).toHaveValue("Amazing Grace modified draft");
+		});
+
+		it("confirming discard on item switch advances to the new item", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistItemEditor />);
+
+			const titleInput = screen.getByLabelText("Title");
+			await user.type(titleInput, " modified draft");
+
+			// External switch to item-2
+			act(() => {
+				usePlaylistStore.getState().startEditingItem("item-2");
+			});
+
+			const dialog = await screen.findByRole("alertdialog");
+			expect(dialog).toBeInTheDocument();
+
+			// Click Discard
+			const discardButton = screen.getByRole("button", { name: "Discard" });
+			await user.click(discardButton);
+
+			await waitFor(() => {
+				expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+				expect(usePlaylistStore.getState().editingItemId).toBe("item-2");
+				expect(screen.getByLabelText("Title")).toHaveValue("Psalm 23");
+			});
+		});
+
+		it("confirming discard on stopping edit (external set to null) stops editing", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistItemEditor />);
+
+			const titleInput = screen.getByLabelText("Title");
+			await user.type(titleInput, " modified draft");
+
+			// External deselect/stop editing
+			act(() => {
+				usePlaylistStore.getState().stopEditingItem();
+			});
+
+			const dialog = await screen.findByRole("alertdialog");
+			expect(dialog).toBeInTheDocument();
+
+			// Click Discard
+			const discardButton = screen.getByRole("button", { name: "Discard" });
+			await user.click(discardButton);
+
+			await waitFor(() => {
+				expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+				expect(usePlaylistStore.getState().editingItemId).toBeNull();
+			});
+		});
 	});
 });

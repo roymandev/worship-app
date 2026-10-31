@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0-alpha.0](https://github.com/roymandev/worship-app/compare/v2.0.0-alpha.0...v2.1.0-alpha.0) (2026-10-31)
+
+
+### Features
+
+* **playlist:** add playlist item editor and UI primitives ([#14](https://github.com/roymandev/worship-app/issues/14)) ([297fbba](https://github.com/roymandev/worship-app/commit/297fbba50dac9a8fbc0df69d75543af4ea5d4688))
+
 ## [2.0.0-alpha.0](https://github.com/roymandev/worship-app/compare/v2.0.0-alpha.0...v2.0.0-alpha.0) (2026-10-30)
 
 

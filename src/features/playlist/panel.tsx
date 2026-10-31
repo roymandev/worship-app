@@ -1,33 +1,17 @@
-import {
-	IconArrowDown,
-	IconArrowUp,
-	IconList,
-	IconPencil,
-	IconPlayerPlay,
-	IconPlus,
-	IconTrash,
-} from "@tabler/icons-react";
-import { cn } from "cn";
+import { IconList, IconPlus } from "@tabler/icons-react";
 import type * as React from "react";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import {
 	ContextMenu,
 	ContextMenuContent,
 	ContextMenuItem,
-	ContextMenuSeparator,
-	ContextMenuShortcut,
 	ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { EmptyState } from "@/components/ui/empty";
-import {
-	Popover,
-	PopoverClose,
-	PopoverContent,
-	PopoverDescription,
-	PopoverTitle,
-} from "@/components/ui/popover";
+import { PlaylistDeleteConfirmPopover } from "@/features/playlist/delete-confirm-popover";
+import { PlaylistItemRow } from "@/features/playlist/item-row";
 import { usePlaylistStore } from "@/features/playlist/store";
 
 export function PlaylistPanel() {
@@ -52,12 +36,48 @@ export function PlaylistPanel() {
 	const moveDownRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 	const deleteTriggerRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
-	// References inside singleton delete confirm popover
-	const popoverCancelRef = useRef<HTMLButtonElement | null>(null);
-	const popoverConfirmRef = useRef<HTMLButtonElement | null>(null);
-
 	// Track the element that triggered the delete popover to restore focus upon cancel/dismiss
 	const deleteTriggerOriginRef = useRef<HTMLElement | null>(null);
+
+	const handleRegisterRow = useCallback(
+		(id: string, el: HTMLDivElement | null) => {
+			if (el) rowRefs.current.set(id, el);
+			else rowRefs.current.delete(id);
+		},
+		[],
+	);
+
+	const handleRegisterActionCell = useCallback(
+		(id: string, el: HTMLDivElement | null) => {
+			if (el) actionCellRefs.current.set(id, el);
+			else actionCellRefs.current.delete(id);
+		},
+		[],
+	);
+
+	const handleRegisterMoveUp = useCallback(
+		(id: string, el: HTMLButtonElement | null) => {
+			if (el) moveUpRefs.current.set(id, el);
+			else moveUpRefs.current.delete(id);
+		},
+		[],
+	);
+
+	const handleRegisterMoveDown = useCallback(
+		(id: string, el: HTMLButtonElement | null) => {
+			if (el) moveDownRefs.current.set(id, el);
+			else moveDownRefs.current.delete(id);
+		},
+		[],
+	);
+
+	const handleRegisterDeleteTrigger = useCallback(
+		(id: string, el: HTMLButtonElement | null) => {
+			if (el) deleteTriggerRefs.current.set(id, el);
+			else deleteTriggerRefs.current.delete(id);
+		},
+		[],
+	);
 
 	const isEditMode = mode === "edit";
 
@@ -361,54 +381,6 @@ export function PlaylistPanel() {
 		}
 	};
 
-	const handlePopoverKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-		if (e.key === "Escape") {
-			e.stopPropagation();
-			handleCloseDelete();
-			return;
-		}
-
-		if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-			e.preventDefault();
-			e.stopPropagation();
-			return;
-		}
-
-		if (e.key === "ArrowRight") {
-			e.preventDefault();
-			e.stopPropagation();
-			if (document.activeElement === popoverCancelRef.current) {
-				popoverConfirmRef.current?.focus();
-			}
-			return;
-		}
-
-		if (e.key === "ArrowLeft") {
-			e.preventDefault();
-			e.stopPropagation();
-			if (document.activeElement === popoverConfirmRef.current) {
-				popoverCancelRef.current?.focus();
-			}
-			return;
-		}
-
-		if (e.key === "Tab") {
-			e.stopPropagation();
-			if (e.shiftKey) {
-				if (document.activeElement !== popoverConfirmRef.current) {
-					e.preventDefault();
-					popoverConfirmRef.current?.focus();
-				}
-			} else {
-				if (document.activeElement !== popoverCancelRef.current) {
-					e.preventDefault();
-					popoverCancelRef.current?.focus();
-				}
-			}
-			return;
-		}
-	};
-
 	// Determine dynamic popover anchor element
 	const activeAnchorElement = activeConfirmDeleteId
 		? (deleteTriggerRefs.current.get(activeConfirmDeleteId) ??
@@ -494,238 +466,24 @@ export function PlaylistPanel() {
 							{items.map((item, index) => {
 								const isSelected = item.id === selectedItemId;
 								return (
-									<ContextMenu
+									<PlaylistItemRow
 										key={item.id}
-										onOpenChange={(open) => {
-											if (open) {
-												usePlaylistStore.getState().selectItem(item.id);
-												usePlaylistStore.getState().closeDeleteConfirm();
-											} else {
-												rowRefs.current.get(item.id)?.focus();
-											}
-										}}
-									>
-										<ContextMenuTrigger
-											render={
-												// biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Row
-												<div
-													ref={(node) => {
-														if (node) {
-															rowRefs.current.set(item.id, node);
-														} else {
-															rowRefs.current.delete(item.id);
-														}
-													}}
-													role="row"
-													data-item-id={item.id}
-													tabIndex={isSelected ? 0 : -1}
-													aria-selected={isSelected}
-													onClick={() =>
-														usePlaylistStore.getState().selectItem(item.id)
-													}
-													onKeyDown={(e) => handleRowKeyDown(e, item.id, index)}
-													className={cn(
-														"group flex items-center justify-between gap-2 rounded-md px-3 py-2 text-xs transition-colors",
-														"focus-ring-inset select-none",
-														isSelected
-															? "bg-accent text-accent-foreground font-medium"
-															: "hover:bg-muted/50 text-foreground",
-													)}
-												/>
-											}
-										>
-											{/* biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Cell */}
-											{/* biome-ignore lint/a11y/useFocusableInteractive: Row manages roving focus */}
-											<div role="gridcell" className="min-w-0 flex-1 truncate">
-												<span className="truncate">{item.title}</span>
-											</div>
-
-											{/* biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Cell */}
-											{/* biome-ignore lint/a11y/useFocusableInteractive: Child buttons receive roving focus */}
-											<div
-												ref={(node) => {
-													if (node) {
-														actionCellRefs.current.set(item.id, node);
-													} else {
-														actionCellRefs.current.delete(item.id);
-													}
-												}}
-												role="gridcell"
-												className="flex shrink-0 items-center gap-1"
-												onKeyDown={(e) => handleActionCellKeyDown(e, item.id)}
-												onClick={(e) => {
-													// Stop click inside actions from bubbling to row select
-													e.stopPropagation();
-												}}
-											>
-												{mode === "view" ? (
-													<Button
-														variant="ghost"
-														size="icon-xs"
-														tabIndex={-1}
-														title="Go Live"
-														aria-label="Go Live"
-														className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground"
-													>
-														<IconPlayerPlay className="size-3" />
-													</Button>
-												) : (
-													<>
-														<Button
-															ref={(node) => {
-																if (node) {
-																	moveUpRefs.current.set(item.id, node);
-																} else {
-																	moveUpRefs.current.delete(item.id);
-																}
-															}}
-															variant="ghost"
-															size="icon-xs"
-															tabIndex={-1}
-															disabled={index === 0}
-															title="Move up"
-															aria-label="Move up"
-															onClick={(e) => {
-																e.stopPropagation();
-																handleMoveUp(item.id, index);
-															}}
-														>
-															<IconArrowUp className="size-3" />
-														</Button>
-														<Button
-															ref={(node) => {
-																if (node) {
-																	moveDownRefs.current.set(item.id, node);
-																} else {
-																	moveDownRefs.current.delete(item.id);
-																}
-															}}
-															variant="ghost"
-															size="icon-xs"
-															tabIndex={-1}
-															disabled={index === items.length - 1}
-															title="Move down"
-															aria-label="Move down"
-															onClick={(e) => {
-																e.stopPropagation();
-																handleMoveDown(item.id, index);
-															}}
-														>
-															<IconArrowDown className="size-3" />
-														</Button>
-														<Button
-															variant="ghost"
-															size="icon-xs"
-															tabIndex={-1}
-															title="Edit item"
-															aria-label="Edit item"
-															onClick={(e) => {
-																e.stopPropagation();
-																usePlaylistStore
-																	.getState()
-																	.startEditingItem(item.id);
-															}}
-														>
-															<IconPencil className="size-3" />
-														</Button>
-														<Button
-															ref={(node) => {
-																if (node) {
-																	deleteTriggerRefs.current.set(item.id, node);
-																} else {
-																	deleteTriggerRefs.current.delete(item.id);
-																}
-															}}
-															variant="ghost"
-															size="icon-xs"
-															tabIndex={-1}
-															title="Delete item"
-															aria-label="Delete item"
-															className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-															onClick={(e) => {
-																e.stopPropagation();
-																handleOpenDelete(item.id, e.currentTarget);
-															}}
-														>
-															<IconTrash className="size-3" />
-														</Button>
-													</>
-												)}
-											</div>
-										</ContextMenuTrigger>
-
-										<ContextMenuContent>
-											<ContextMenuItem
-												onClick={() => {
-													// Go live handler
-												}}
-											>
-												<IconPlayerPlay />
-												<span>Go Live</span>
-											</ContextMenuItem>
-											<ContextMenuItem
-												onClick={() => {
-													usePlaylistStore.getState().startEditingItem(item.id);
-												}}
-											>
-												<IconPencil />
-												<span>Edit Item</span>
-												<ContextMenuShortcut>E</ContextMenuShortcut>
-											</ContextMenuItem>
-											<ContextMenuItem
-												disabled={index === 0}
-												onClick={() => {
-													handleMoveUp(item.id, index);
-												}}
-											>
-												<IconArrowUp />
-												<span>Move Up</span>
-												<ContextMenuShortcut>Alt+↑</ContextMenuShortcut>
-											</ContextMenuItem>
-											<ContextMenuItem
-												disabled={index === items.length - 1}
-												onClick={() => {
-													handleMoveDown(item.id, index);
-												}}
-											>
-												<IconArrowDown />
-												<span>Move Down</span>
-												<ContextMenuShortcut>Alt+↓</ContextMenuShortcut>
-											</ContextMenuItem>
-											<ContextMenuItem
-												variant="destructive"
-												onClick={() => {
-													handleOpenDelete(
-														item.id,
-														rowRefs.current.get(item.id) ?? null,
-													);
-												}}
-											>
-												<IconTrash />
-												<span>Delete Item</span>
-												<ContextMenuShortcut>Del</ContextMenuShortcut>
-											</ContextMenuItem>
-											<ContextMenuSeparator />
-											<ContextMenuItem
-												onClick={() => {
-													usePlaylistStore.getState().insertItemAfter(item.id);
-												}}
-											>
-												<IconPlus />
-												<span>Add Item</span>
-											</ContextMenuItem>
-											<ContextMenuItem
-												onClick={() => {
-													handleToggleMode();
-												}}
-											>
-												<IconList />
-												<span>
-													{isEditMode ? "Done Organizing" : "Organize Playlist"}
-												</span>
-											</ContextMenuItem>
-										</ContextMenuContent>
-									</ContextMenu>
+										item={item}
+										index={index}
+										totalItems={items.length}
+										isSelected={isSelected}
+										mode={mode}
+										onRegisterRow={handleRegisterRow}
+										onRegisterActionCell={handleRegisterActionCell}
+										onRegisterMoveUp={handleRegisterMoveUp}
+										onRegisterMoveDown={handleRegisterMoveDown}
+										onRegisterDeleteTrigger={handleRegisterDeleteTrigger}
+										onMoveUp={handleMoveUp}
+										onMoveDown={handleMoveDown}
+										onRequestDelete={handleOpenDelete}
+										onKeyDown={handleRowKeyDown}
+										onActionCellKeyDown={handleActionCellKeyDown}
+									/>
 								);
 							})}
 						</div>
@@ -752,61 +510,13 @@ export function PlaylistPanel() {
 				</ContextMenuContent>
 			</ContextMenu>
 
-			{/* Singleton Delete Confirm Popover */}
-			<Popover
+			<PlaylistDeleteConfirmPopover
 				open={activeConfirmDeleteId !== null}
-				onOpenChange={(nextOpen) => {
-					if (!nextOpen) {
-						handleCloseDelete();
-					}
-				}}
-				modal="trap-focus"
-			>
-				<PopoverContent
-					role="alertdialog"
-					initialFocus={popoverCancelRef}
-					data-item-id={activeConfirmDeleteId ?? undefined}
-					anchor={activeAnchorElement}
-					side="bottom"
-					align="end"
-					sideOffset={6}
-					className="w-64 gap-3 p-3"
-					onKeyDown={handlePopoverKeyDown}
-				>
-					<div className="flex flex-col gap-1">
-						<PopoverTitle className="font-semibold text-foreground text-xs">
-							Delete this item?
-						</PopoverTitle>
-						<PopoverDescription className="text-muted-foreground text-xs">
-							Are you sure you want to delete this item?
-						</PopoverDescription>
-					</div>
-					<div className="flex items-center justify-end gap-2 pt-2">
-						<PopoverClose
-							render={
-								<Button
-									ref={popoverCancelRef}
-									type="button"
-									variant="outline"
-									size="sm"
-									onClick={handleCloseDelete}
-								>
-									Cancel
-								</Button>
-							}
-						/>
-						<Button
-							ref={popoverConfirmRef}
-							type="button"
-							variant="destructive"
-							size="sm"
-							onClick={handleConfirmDelete}
-						>
-							Delete
-						</Button>
-					</div>
-				</PopoverContent>
-			</Popover>
+				anchor={activeAnchorElement}
+				itemId={activeConfirmDeleteId}
+				onConfirm={handleConfirmDelete}
+				onClose={handleCloseDelete}
+			/>
 		</section>
 	);
 }

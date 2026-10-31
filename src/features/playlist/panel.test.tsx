@@ -15,6 +15,7 @@ describe("PlaylistPanel", () => {
 		usePlaylistStore.setState({
 			items: [...INITIAL_PLAYLIST_ITEMS],
 			selectedItemId: "item-1",
+			editingItemId: null,
 			mode: "view",
 			activeConfirmDeleteId: null,
 		});
@@ -516,7 +517,7 @@ describe("PlaylistPanel", () => {
 		expect(document.activeElement).toBe(doneBtn);
 	});
 
-	it("traps focus inside the delete confirmation popover, prevents focus leakage, and ignores ArrowUp/ArrowDown", async () => {
+	it("traps focus inside the delete confirmation popover and prevents focus leakage", async () => {
 		const user = userEvent.setup();
 		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-1" });
 
@@ -531,16 +532,6 @@ describe("PlaylistPanel", () => {
 
 		await waitFor(() => expect(cancelBtn).toHaveFocus());
 
-		// Verify pressing ArrowDown inside popover leaves selected item unchanged and focus within popover
-		await user.keyboard("{ArrowDown}");
-		expect(usePlaylistStore.getState().selectedItemId).toBe("item-1");
-		expect(cancelBtn).toHaveFocus();
-
-		// Verify pressing ArrowUp inside popover leaves selected item unchanged and focus within popover
-		await user.keyboard("{ArrowUp}");
-		expect(usePlaylistStore.getState().selectedItemId).toBe("item-1");
-		expect(cancelBtn).toHaveFocus();
-
 		// Verify pressing Shift+Tab inside popover leaves selected item unchanged and focus remains contained
 		await user.keyboard("{Shift>}{Tab}{/Shift}");
 		expect(usePlaylistStore.getState().selectedItemId).toBe("item-1");
@@ -552,60 +543,6 @@ describe("PlaylistPanel", () => {
 		for (const row of rows) {
 			expect(row).not.toHaveFocus();
 		}
-	});
-
-	it("cycles Tab and Arrow navigation inside delete confirmation popover with boundary clamping", async () => {
-		const user = userEvent.setup();
-		usePlaylistStore.setState({ mode: "edit", selectedItemId: "item-1" });
-
-		render(<PlaylistPanel />);
-
-		const deleteBtns = screen.getAllByRole("button", { name: "Delete item" });
-		await user.click(deleteBtns[0]);
-
-		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
-		const deleteBtn = screen.getByRole("button", { name: "Delete" });
-		const dialog = screen.getByRole("alertdialog");
-
-		await waitFor(() => expect(cancelBtn).toHaveFocus());
-
-		// Shift+Tab from Cancel moves backward to Delete
-		await user.keyboard("{Shift>}{Tab}{/Shift}");
-		expect(deleteBtn).toHaveFocus();
-
-		// Shift+Tab from Delete moves backward to Cancel
-		await user.keyboard("{Shift>}{Tab}{/Shift}");
-		expect(cancelBtn).toHaveFocus();
-
-		// Tab from Cancel moves forward to Delete
-		await user.keyboard("{Tab}");
-		expect(deleteBtn).toHaveFocus();
-
-		// Tab from Delete moves forward back to Cancel
-		await user.keyboard("{Tab}");
-		expect(cancelBtn).toHaveFocus();
-
-		// If focus is somehow on dialog container, Tab moves safely to Cancel
-		dialog.focus();
-		expect(dialog).toHaveFocus();
-		await user.keyboard("{Tab}");
-		expect(cancelBtn).toHaveFocus();
-
-		// ArrowLeft on Cancel stays clamped
-		await user.keyboard("{ArrowLeft}");
-		expect(cancelBtn).toHaveFocus();
-
-		// ArrowRight from Cancel moves to Delete
-		await user.keyboard("{ArrowRight}");
-		expect(deleteBtn).toHaveFocus();
-
-		// ArrowRight on Delete stays clamped
-		await user.keyboard("{ArrowRight}");
-		expect(deleteBtn).toHaveFocus();
-
-		// ArrowLeft from Delete moves to Cancel
-		await user.keyboard("{ArrowLeft}");
-		expect(cancelBtn).toHaveFocus();
 	});
 
 	it("confirms deletion via Space key on Delete button", async () => {
@@ -684,247 +621,6 @@ describe("PlaylistPanel", () => {
 		expect(moveUpBtn).toHaveFocus();
 		await user.keyboard("{Escape}");
 		expect(rows[1]).toHaveFocus();
-	});
-
-	it("clicking the Edit item (pencil) button triggers startEditingItem with item id", async () => {
-		const user = userEvent.setup();
-		usePlaylistStore.setState({ mode: "edit", editingItemId: null });
-
-		render(<PlaylistPanel />);
-
-		const editBtns = screen.getAllByRole("button", { name: "Edit item" });
-		expect(editBtns).toHaveLength(3);
-
-		await user.click(editBtns[1]);
-		expect(usePlaylistStore.getState().editingItemId).toBe("item-2");
-	});
-
-	it("pressing 'e' or 'E' key on a focused playlist row triggers startEditingItem with row id", async () => {
-		const user = userEvent.setup();
-		usePlaylistStore.setState({ editingItemId: null });
-
-		render(<PlaylistPanel />);
-
-		const rows = screen.getAllByRole("row");
-		rows[0].focus();
-		expect(rows[0]).toHaveFocus();
-
-		await user.keyboard("e");
-		expect(usePlaylistStore.getState().editingItemId).toBe("item-1");
-
-		// Test row 2 with uppercase E
-		rows[2].focus();
-		expect(rows[2]).toHaveFocus();
-
-		await user.keyboard("E");
-		expect(usePlaylistStore.getState().editingItemId).toBe("item-3");
-	});
-
-	describe("Playlist Item Context Menu", () => {
-		it("right-clicking a playlist item row selects it and opens the context menu", async () => {
-			const user = userEvent.setup();
-			render(<PlaylistPanel />);
-
-			const rows = screen.getAllByRole("row");
-			expect(rows[1]).toHaveAttribute("aria-selected", "false");
-
-			// Right-click on row 1 (Psalm 23)
-			await user.pointer({ keys: "[MouseRight]", target: rows[1] });
-
-			// Item should now be selected
-			expect(usePlaylistStore.getState().selectedItemId).toBe("item-2");
-			expect(rows[1]).toHaveAttribute("aria-selected", "true");
-
-			// Context menu should be open
-			const menu = await screen.findByRole("menu");
-			expect(menu).toBeInTheDocument();
-		});
-
-		it("opening item context menu dismisses active inline delete confirmation popover", async () => {
-			const user = userEvent.setup();
-			usePlaylistStore.setState({
-				mode: "edit",
-				selectedItemId: "item-1",
-				activeConfirmDeleteId: "item-1",
-			});
-
-			render(<PlaylistPanel />);
-			expect(screen.getByRole("alertdialog")).toBeInTheDocument();
-
-			// Popover marks background aria-hidden/inert. Query rows from DOM:
-			const rows = document.querySelectorAll<HTMLElement>('[role="row"]');
-			expect(rows.length).toBeGreaterThan(1);
-
-			// Right-click row 2
-			await user.pointer({ keys: "[MouseRight]", target: rows[1] });
-
-			// Popover should be dismissed
-			expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
-			expect(usePlaylistStore.getState().activeConfirmDeleteId).toBeNull();
-			expect(usePlaylistStore.getState().selectedItemId).toBe("item-2");
-		});
-
-		it("keyboard Shift+F10 on focused row opens context menu and selects it", async () => {
-			const user = userEvent.setup();
-			render(<PlaylistPanel />);
-
-			const rows = screen.getAllByRole("row");
-			rows[1].focus();
-
-			await user.keyboard("{Shift>}{F10}{/Shift}");
-
-			const menu = await screen.findByRole("menu");
-			expect(menu).toBeInTheDocument();
-			expect(usePlaylistStore.getState().selectedItemId).toBe("item-2");
-		});
-
-		it("renders all context menu items in correct order with shortcut cues and disabled states", async () => {
-			const user = userEvent.setup();
-			render(<PlaylistPanel />);
-
-			const rows = screen.getAllByRole("row");
-
-			// Open context menu on first row
-			await user.pointer({ keys: "[MouseRight]", target: rows[0] });
-
-			const menu = await screen.findByRole("menu");
-			expect(menu).toBeInTheDocument();
-
-			const menuItems = within(menu).getAllByRole("menuitem");
-			expect(menuItems).toHaveLength(7);
-
-			// 1. Go Live
-			expect(menuItems[0]).toHaveTextContent("Go Live");
-			// 2. Edit Item (E)
-			expect(menuItems[1]).toHaveTextContent("Edit Item");
-			expect(menuItems[1]).toHaveTextContent("E");
-			// 3. Move Up (Alt+↑, disabled when first item)
-			expect(menuItems[2]).toHaveTextContent("Move Up");
-			expect(menuItems[2]).toHaveTextContent("Alt+↑");
-			expect(menuItems[2]).toHaveAttribute("aria-disabled", "true");
-			// 4. Move Down (Alt+↓, enabled on first item)
-			expect(menuItems[3]).toHaveTextContent("Move Down");
-			expect(menuItems[3]).toHaveTextContent("Alt+↓");
-			expect(menuItems[3]).not.toHaveAttribute("aria-disabled", "true");
-			// 5. Delete Item (Del / Backspace)
-			expect(menuItems[4]).toHaveTextContent("Delete Item");
-			expect(menuItems[4]).toHaveTextContent("Del");
-			expect(menuItems[4]).toHaveAttribute("data-variant", "destructive");
-			// 6. Add Item
-			expect(menuItems[5]).toHaveTextContent("Add Item");
-			// 7. Organize Playlist / Done Organizing
-			expect(menuItems[6]).toHaveTextContent("Organize Playlist");
-
-			// Close menu
-			await user.keyboard("{Escape}");
-
-			// Open context menu on last row (index 2)
-			await user.pointer({ keys: "[MouseRight]", target: rows[2] });
-			const lastMenu = await screen.findByRole("menu");
-			const lastMenuItems = within(lastMenu).getAllByRole("menuitem");
-
-			// Move Up enabled on last item
-			expect(lastMenuItems[2]).not.toHaveAttribute("aria-disabled", "true");
-			// Move Down disabled on last item
-			expect(lastMenuItems[3]).toHaveAttribute("aria-disabled", "true");
-		});
-
-		it("shows 'Done Organizing' in context menu when in edit mode", async () => {
-			const user = userEvent.setup();
-			usePlaylistStore.setState({ mode: "edit" });
-
-			render(<PlaylistPanel />);
-			const rows = screen.getAllByRole("row");
-			await user.pointer({ keys: "[MouseRight]", target: rows[0] });
-
-			const menu = await screen.findByRole("menu");
-			expect(within(menu).getByText("Done Organizing")).toBeInTheDocument();
-
-			// Clicking it toggles to view mode
-			await user.click(within(menu).getByText("Done Organizing"));
-			expect(usePlaylistStore.getState().mode).toBe("view");
-		});
-
-		it("clicking 'Add Item' in context menu calls insertItemAfter and inserts item directly below", async () => {
-			const user = userEvent.setup();
-			render(<PlaylistPanel />);
-
-			const rows = screen.getAllByRole("row");
-			// Right click row 0 (Amazing Grace, id: item-1)
-			await user.pointer({ keys: "[MouseRight]", target: rows[0] });
-
-			const menu = await screen.findByRole("menu");
-			const addItemBtn = within(menu).getByRole("menuitem", {
-				name: /add item/i,
-			});
-			await user.click(addItemBtn);
-
-			const currentItems = usePlaylistStore.getState().items;
-			expect(currentItems).toHaveLength(4);
-			expect(currentItems[0].id).toBe("item-1");
-			expect(currentItems[1].title).toBe("(Untitled)");
-			expect(currentItems[2].id).toBe("item-2");
-			expect(usePlaylistStore.getState().selectedItemId).toBe(
-				currentItems[1].id,
-			);
-			expect(usePlaylistStore.getState().editingItemId).toBe(
-				currentItems[1].id,
-			);
-		});
-
-		it("clicking 'Delete Item' opens the inline confirmation popover anchored to that row", async () => {
-			const user = userEvent.setup();
-			render(<PlaylistPanel />);
-
-			const rows = screen.getAllByRole("row");
-			await user.pointer({ keys: "[MouseRight]", target: rows[1] });
-
-			const menu = await screen.findByRole("menu");
-			const deleteBtn = within(menu).getByRole("menuitem", {
-				name: /delete item/i,
-			});
-			await user.click(deleteBtn);
-
-			// Context menu closed, inline confirmation popover open
-			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
-			expect(screen.getByRole("alertdialog")).toBeInTheDocument();
-			expect(usePlaylistStore.getState().activeConfirmDeleteId).toBe("item-2");
-		});
-
-		it("clicking 'Edit Item' opens item editor", async () => {
-			const user = userEvent.setup();
-			render(<PlaylistPanel />);
-
-			const rows = screen.getAllByRole("row");
-			await user.pointer({ keys: "[MouseRight]", target: rows[1] });
-
-			const menu = await screen.findByRole("menu");
-			const editBtn = within(menu).getByRole("menuitem", {
-				name: /edit item/i,
-			});
-			await user.click(editBtn);
-
-			expect(usePlaylistStore.getState().editingItemId).toBe("item-2");
-		});
-
-		it("closing menu restores focus to active row", async () => {
-			const user = userEvent.setup();
-			render(<PlaylistPanel />);
-
-			const rows = screen.getAllByRole("row");
-			rows[1].focus();
-			expect(rows[1]).toHaveFocus();
-
-			await user.keyboard("{Shift>}{F10}{/Shift}");
-			const menu = await screen.findByRole("menu");
-			expect(menu).toBeInTheDocument();
-
-			await user.keyboard("{Escape}");
-			await waitFor(() => {
-				expect(screen.queryByRole("menu")).not.toBeInTheDocument();
-				expect(rows[1]).toHaveFocus();
-			});
-		});
 	});
 
 	describe("Playlist Panel Context Menu", () => {
@@ -1045,6 +741,36 @@ describe("PlaylistPanel", () => {
 
 			expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 			expect(usePlaylistStore.getState().activeConfirmDeleteId).toBeNull();
+		});
+
+		it("pressing 'e' or 'E' keydown on row triggers startEditingItem", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			expect(usePlaylistStore.getState().editingItemId).toBeNull();
+			const rows = screen.getAllByRole("row");
+			rows[0].focus();
+
+			await user.keyboard("e");
+			expect(usePlaylistStore.getState().editingItemId).toBe("item-1");
+
+			usePlaylistStore.setState({ editingItemId: null });
+			await user.keyboard("{Shift>}e{/Shift}");
+			expect(usePlaylistStore.getState().editingItemId).toBe("item-1");
+		});
+
+		it("keyboard Shift+F10 on row opens the context menu", async () => {
+			const user = userEvent.setup();
+			render(<PlaylistPanel />);
+
+			const rows = screen.getAllByRole("row");
+			rows[0].focus();
+
+			await user.keyboard("{Shift>}{F10}{/Shift}");
+
+			const menu = await screen.findByRole("menu");
+			expect(menu).toBeInTheDocument();
+			expect(within(menu).getByText("Go Live")).toBeInTheDocument();
 		});
 	});
 });

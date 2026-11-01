@@ -32,23 +32,44 @@ export const playlistItemFormDefaultValues: PlaylistItemFormInput = {
 	content: "",
 };
 
-export type PlaylistItemEditorProps = {
-	itemId: string;
-};
-
 type EditorFormInnerProps = {
 	itemId: string;
+	isSwitchPending?: boolean;
+	onConfirmDiscardSwitch?: () => void;
+	onCancelSwitch?: () => void;
+	onDirtyChange?: (isDirty: boolean) => void;
 };
 
-function EditorFormInner({ itemId }: EditorFormInnerProps) {
+function EditorFormInner({
+	itemId,
+	isSwitchPending,
+	onConfirmDiscardSwitch,
+	onCancelSwitch,
+	onDirtyChange,
+}: EditorFormInnerProps) {
 	const item = usePlaylistStore((state) =>
 		state.items.find((i) => i.id === itemId),
 	);
 	const updateItem = usePlaylistStore((state) => state.updateItem);
 	const stopEditingItem = usePlaylistStore((state) => state.stopEditingItem);
+	const setPreviewDraft = usePlaylistStore((state) => state.setPreviewDraft);
+	const clearPreviewDraft = usePlaylistStore(
+		(state) => state.clearPreviewDraft,
+	);
 
 	const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
 	const titleInputRef = useRef<HTMLInputElement | null>(null);
+	const lastFocusedElementRef = useRef<HTMLElement | null>(null);
+	const discardTriggeredRef = useRef(false);
+
+	const handleFocusIn = (e: React.FocusEvent<HTMLFormElement>) => {
+		if (
+			e.target instanceof HTMLInputElement ||
+			e.target instanceof HTMLTextAreaElement
+		) {
+			lastFocusedElementRef.current = e.target;
+		}
+	};
 
 	const form = useForm<PlaylistItemFormInput, unknown, PlaylistItemFormOutput>({
 		resolver: zodResolver(playlistItemFormSchema),
@@ -57,21 +78,57 @@ function EditorFormInner({ itemId }: EditorFormInnerProps) {
 			: playlistItemFormDefaultValues,
 	});
 
-	const currentItemIdRef = useRef(itemId);
+	const { isDirty, errors } = form.formState;
 
 	useEffect(() => {
-		if (currentItemIdRef.current !== itemId) {
-			currentItemIdRef.current = itemId;
-			if (item) {
-				form.reset({
-					title: item.title,
-					content: item.content,
-				});
-			} else {
-				form.reset(playlistItemFormDefaultValues);
-			}
+		onDirtyChange?.(isDirty);
+	}, [isDirty, onDirtyChange]);
+
+	useEffect(() => {
+		if (!isDirty) return;
+
+		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+			e.preventDefault();
+			e.returnValue = "";
+		};
+
+		window.addEventListener("beforeunload", handleBeforeUnload);
+		return () => {
+			window.removeEventListener("beforeunload", handleBeforeUnload);
+		};
+	}, [isDirty]);
+
+	useEffect(() => {
+		if (isSwitchPending) {
+			lastFocusedElementRef.current =
+				document.activeElement instanceof HTMLElement
+					? document.activeElement
+					: titleInputRef.current;
+			setIsDiscardDialogOpen(true);
 		}
-	}, [itemId, item, form.reset]);
+	}, [isSwitchPending]);
+
+	useEffect(() => {
+		if (item) {
+			form.reset({
+				title: item.title,
+				content: item.content,
+			});
+			setPreviewDraft({
+				content: item.content,
+				caretOffset: 0,
+			});
+		} else {
+			form.reset(playlistItemFormDefaultValues);
+			clearPreviewDraft();
+		}
+	}, [item, form.reset, setPreviewDraft, clearPreviewDraft]);
+
+	useEffect(() => {
+		return () => {
+			clearPreviewDraft();
+		};
+	}, [clearPreviewDraft]);
 
 	useEffect(() => {
 		titleInputRef.current?.focus();
@@ -83,7 +140,18 @@ function EditorFormInner({ itemId }: EditorFormInnerProps) {
 		}
 	}, [item, stopEditingItem]);
 
+	const syncPreviewFromTextarea = (target: HTMLTextAreaElement | null) => {
+		if (!target) return;
+		setPreviewDraft({
+			content: target.value,
+			caretOffset: target.selectionStart ?? 0,
+		});
+	};
+
 	const handleValidSubmit = (data: PlaylistItemFormOutput) => {
+		clearPreviewDraft();
+		onDirtyChange?.(false);
+		form.reset(data);
 		updateItem(itemId, data);
 		stopEditingItem();
 	};
@@ -91,16 +159,51 @@ function EditorFormInner({ itemId }: EditorFormInnerProps) {
 	const attemptCancel = () => {
 		if (isDiscardDialogOpen) return;
 		if (isDirty) {
+			if (!lastFocusedElementRef.current) {
+				lastFocusedElementRef.current = titleInputRef.current;
+			}
 			setIsDiscardDialogOpen(true);
 		} else {
+			clearPreviewDraft();
 			stopEditingItem();
 		}
 	};
 
 	const handleConfirmDiscard = () => {
+		discardTriggeredRef.current = true;
 		setIsDiscardDialogOpen(false);
+		clearPreviewDraft();
 		form.reset();
-		stopEditingItem();
+		if (isSwitchPending && onConfirmDiscardSwitch) {
+			onConfirmDiscardSwitch();
+		} else {
+			stopEditingItem();
+		}
+	};
+
+	const handleCancelDiscardDialog = () => {
+		setIsDiscardDialogOpen(false);
+		if (isSwitchPending && onCancelSwitch) {
+			onCancelSwitch();
+		}
+		const elementToFocus = lastFocusedElementRef.current;
+		if (elementToFocus?.isConnected) {
+			requestAnimationFrame(() => {
+				elementToFocus.focus();
+			});
+		}
+	};
+
+	const handleOpenChange = (open: boolean) => {
+		if (!open) {
+			if (discardTriggeredRef.current) {
+				discardTriggeredRef.current = false;
+				return;
+			}
+			handleCancelDiscardDialog();
+		} else {
+			setIsDiscardDialogOpen(true);
+		}
 	};
 
 	useHotkey(
@@ -124,8 +227,6 @@ function EditorFormInner({ itemId }: EditorFormInnerProps) {
 		return null;
 	}
 
-	const { isDirty, errors } = form.formState;
-
 	const titleRegister = form.register("title");
 	const contentRegister = form.register("content");
 
@@ -133,6 +234,7 @@ function EditorFormInner({ itemId }: EditorFormInnerProps) {
 		<form
 			aria-label="Edit playlist item"
 			onSubmit={form.handleSubmit(handleValidSubmit)}
+			onFocus={handleFocusIn}
 			className="flex h-full w-full flex-col gap-4 p-4"
 		>
 			<div className="flex flex-col gap-1.5">
@@ -176,6 +278,19 @@ function EditorFormInner({ itemId }: EditorFormInnerProps) {
 				<Textarea
 					id="playlist-item-content"
 					{...contentRegister}
+					onChange={(e) => {
+						contentRegister.onChange(e);
+						syncPreviewFromTextarea(e.currentTarget);
+					}}
+					onKeyUp={(e) => {
+						syncPreviewFromTextarea(e.currentTarget);
+					}}
+					onClick={(e) => {
+						syncPreviewFromTextarea(e.currentTarget);
+					}}
+					onSelect={(e) => {
+						syncPreviewFromTextarea(e.currentTarget);
+					}}
 					placeholder="Enter slide content or lyrics..."
 					className="flex-1 resize-none"
 				/>
@@ -195,10 +310,7 @@ function EditorFormInner({ itemId }: EditorFormInnerProps) {
 				</Button>
 			</div>
 
-			<AlertDialog
-				open={isDiscardDialogOpen}
-				onOpenChange={setIsDiscardDialogOpen}
-			>
+			<AlertDialog open={isDiscardDialogOpen} onOpenChange={handleOpenChange}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
@@ -207,7 +319,7 @@ function EditorFormInner({ itemId }: EditorFormInnerProps) {
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel onClick={() => setIsDiscardDialogOpen(false)}>
+						<AlertDialogCancel onClick={handleCancelDiscardDialog}>
 							Cancel
 						</AlertDialogCancel>
 						<AlertDialogAction
@@ -223,7 +335,20 @@ function EditorFormInner({ itemId }: EditorFormInnerProps) {
 	);
 }
 
-export function PlaylistItemEditor({ itemId }: PlaylistItemEditorProps) {
+export function PlaylistItemEditor() {
+	const editingItemId = usePlaylistStore((state) => state.editingItemId);
+	const startEditingItem = usePlaylistStore((state) => state.startEditingItem);
+	const stopEditingItem = usePlaylistStore((state) => state.stopEditingItem);
+
+	const [displayedItemId, setDisplayedItemId] = useState<string | null>(
+		editingItemId,
+	);
+	const displayedItemIdRef = useRef<string | null>(editingItemId);
+	const [pendingTargetId, setPendingTargetId] = useState<string | null>(null);
+	const [isSwitchPending, setIsSwitchPending] = useState(false);
+
+	const isDirtyRef = useRef(false);
+
 	const callerElementRef = useRef<HTMLElement | null>(
 		typeof document !== "undefined" &&
 			document.activeElement instanceof HTMLElement
@@ -232,10 +357,63 @@ export function PlaylistItemEditor({ itemId }: PlaylistItemEditorProps) {
 	);
 
 	useEffect(() => {
+		const currentDisplayed = displayedItemIdRef.current;
+		if (editingItemId === currentDisplayed) {
+			return;
+		}
+
+		if (isDirtyRef.current) {
+			setPendingTargetId(editingItemId);
+			setIsSwitchPending(true);
+		} else {
+			displayedItemIdRef.current = editingItemId;
+			setDisplayedItemId(editingItemId);
+			setPendingTargetId(null);
+			setIsSwitchPending(false);
+		}
+	}, [editingItemId]);
+
+	const handleConfirmDiscardSwitch = () => {
+		setIsSwitchPending(false);
+		isDirtyRef.current = false;
+		const target = pendingTargetId;
+		setPendingTargetId(null);
+		displayedItemIdRef.current = target;
+		setDisplayedItemId(target);
+		if (target) {
+			startEditingItem(target);
+		} else {
+			stopEditingItem();
+		}
+	};
+
+	const handleCancelSwitch = () => {
+		setIsSwitchPending(false);
+		setPendingTargetId(null);
+		// Revert store editingItemId back to current displayed item
+		if (displayedItemIdRef.current) {
+			startEditingItem(displayedItemIdRef.current);
+		}
+	};
+
+	useEffect(() => {
 		return () => {
+			// In in-app switching, editingItemId is already updated or pending to a new ID.
+			// Focus restoration to the playlist row should only run when the editor unmounts completely
+			// (i.e. editing has stopped / editingItemId is null).
+			const storeEditingId = usePlaylistStore.getState().editingItemId;
+			if (
+				storeEditingId !== null &&
+				storeEditingId !== displayedItemIdRef.current
+			) {
+				return;
+			}
+			const lastId = displayedItemIdRef.current;
+			if (!lastId) return;
+
 			const rowElement =
 				document.querySelector<HTMLElement>(
-					`[role="row"][data-item-id="${itemId}"]`,
+					`[role="row"][data-item-id="${lastId}"]`,
 				) ??
 				document.querySelector<HTMLElement>(
 					'[role="row"][aria-selected="true"]',
@@ -247,11 +425,23 @@ export function PlaylistItemEditor({ itemId }: PlaylistItemEditorProps) {
 				callerElementRef.current.focus();
 			}
 		};
-	}, [itemId]);
+	}, []);
+
+	if (!displayedItemId) {
+		return null;
+	}
 
 	return (
 		<HotkeysProvider scope="playlist:item-editor" exclusive>
-			<EditorFormInner itemId={itemId} />
+			<EditorFormInner
+				itemId={displayedItemId}
+				isSwitchPending={isSwitchPending}
+				onConfirmDiscardSwitch={handleConfirmDiscardSwitch}
+				onCancelSwitch={handleCancelSwitch}
+				onDirtyChange={(dirty) => {
+					isDirtyRef.current = dirty;
+				}}
+			/>
 		</HotkeysProvider>
 	);
 }

@@ -1,6 +1,6 @@
 import { HotkeysProvider, useHotkey } from "@tanstack/react-hotkeys";
 import { cn } from "cn";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -41,7 +41,11 @@ export function WorkspaceLayout({
 }: WorkspaceLayoutProps) {
 	const groupRef = useRef<GroupImperativeHandle | null>(null);
 	const mode = useWorkspaceStore((state) => state.mode);
-	const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+	const isResetDialogOpen = useWorkspaceStore(
+		(state) => state.isResetDialogOpen,
+	);
+	const openResetDialog = useWorkspaceStore((state) => state.openResetDialog);
+	const closeResetDialog = useWorkspaceStore((state) => state.closeResetDialog);
 
 	useHotkey(
 		appHotkeys["workspace.toggleLayoutMode"],
@@ -49,28 +53,15 @@ export function WorkspaceLayout({
 		{ ignoreInputs: "auto" },
 	);
 
-	useHotkey(
-		appHotkeys["workspace.resetLayout"],
-		() => setIsResetDialogOpen(true),
-		{ ignoreInputs: "auto" },
-	);
-
-	useEffect(() => {
-		const handleResetRequest = () => {
-			setIsResetDialogOpen(true);
-		};
-
-		window.addEventListener("workspace:reset-layout", handleResetRequest);
-		return () => {
-			window.removeEventListener("workspace:reset-layout", handleResetRequest);
-		};
-	}, []);
+	useHotkey(appHotkeys["workspace.resetLayout"], () => openResetDialog(), {
+		ignoreInputs: "auto",
+	});
 
 	const isEditMode = mode === "edit";
 
 	const handleReset = () => {
 		groupRef.current?.setLayout(DEFAULT_LAYOUT);
-		setIsResetDialogOpen(false);
+		closeResetDialog();
 	};
 
 	return (
@@ -94,7 +85,10 @@ export function WorkspaceLayout({
 				</ResizablePanel>
 			</ResizablePanelGroup>
 
-			<AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+			<AlertDialog
+				open={isResetDialogOpen}
+				onOpenChange={(open) => !open && closeResetDialog()}
+			>
 				<AlertDialogContent>
 					<HotkeysProvider
 						scope="workspace:reset-dialog"
@@ -109,7 +103,9 @@ export function WorkspaceLayout({
 							</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter>
-							<AlertDialogCancel>Cancel</AlertDialogCancel>
+							<AlertDialogCancel onClick={closeResetDialog}>
+								Cancel
+							</AlertDialogCancel>
 							<AlertDialogAction onClick={handleReset}>
 								Reset layout
 							</AlertDialogAction>

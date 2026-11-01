@@ -3,7 +3,7 @@ import { appHotkeys, searchHotkeys } from "./hotkeys";
 
 describe("searchHotkeys", () => {
 	it("returns all hotkeys as structured items when query is empty", () => {
-		const results = searchHotkeys("", true);
+		const results = searchHotkeys("");
 		const expectedCount = Object.keys(appHotkeys).length;
 
 		expect(results).toHaveLength(expectedCount);
@@ -12,24 +12,17 @@ describe("searchHotkeys", () => {
 			expect(result).toHaveProperty("group");
 			expect(result).toHaveProperty("name");
 			expect(result).toHaveProperty("description");
-			expect(result).toHaveProperty("formattedChord");
-			expect(typeof result.formattedChord).toBe("string");
+			expect(result).toHaveProperty("hotkey");
+			expect(typeof result.hotkey).toBe("string");
 		}
 	});
 
-	it("formats chords with Mac symbols when isMac is true", () => {
-		const results = searchHotkeys("Toggle layout mode", true);
+	it("returns raw hotkey chord metadata", () => {
+		const results = searchHotkeys("Toggle layout mode");
 		expect(results.length).toBeGreaterThan(0);
 		const result = results.find((r) => r.id === "workspace.toggleLayoutMode");
 		expect(result).toBeDefined();
-		expect(result?.formattedChord).toBe("⌘ E");
-	});
-
-	it("formats chords with Standard/Windows symbols when isMac is false", () => {
-		const results = searchHotkeys("Toggle layout mode", false);
-		const result = results.find((r) => r.id === "workspace.toggleLayoutMode");
-		expect(result).toBeDefined();
-		expect(result?.formattedChord).toBe("Ctrl + E");
+		expect(result?.hotkey).toBe("Mod+E");
 	});
 
 	it("filters by hotkey name case-insensitively", () => {

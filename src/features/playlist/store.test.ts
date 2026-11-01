@@ -6,9 +6,10 @@ describe("usePlaylistStore", () => {
 		usePlaylistStore.setState({
 			items: [...INITIAL_PLAYLIST_ITEMS],
 			selectedItemId: "item-1",
+			selectedCueIndex: 0,
 			editingItemId: null,
-			mode: "view",
 			activeConfirmDeleteId: null,
+			previewDraft: null,
 		});
 	});
 
@@ -18,23 +19,72 @@ describe("usePlaylistStore", () => {
 		expect(state.items[0]).toEqual({
 			id: "item-1",
 			title: "Amazing Grace",
-			content:
-				"Amazing grace! How sweet the sound\nThat saved a wretch like me...",
+			content: `Amazing grace! How sweet the sound
+That saved a wretch like me!
+I once was lost, but now am found;
+Was blind, but now I see.
+
+'Twas grace that taught my heart to fear,
+And grace my fears relieved;
+How precious did that grace appear
+The hour I first believed.
+
+Through many dangers, toils and snares,
+I have already come;
+'Tis grace hath brought me safe thus far,
+And grace will lead me home.
+
+When we've been there ten thousand years,
+Bright shining as the sun,
+We've no less days to sing God's praise
+Than when we'd first begun.`,
 		});
 		expect(state.items[1]).toEqual({
 			id: "item-2",
 			title: "Psalm 23",
-			content: "The Lord is my shepherd; I shall not want...",
+			content: `The Lord is my shepherd; I shall not want.
+He makes me lie down in green pastures.
+He leads me beside still waters.
+He restores my soul.
+
+He leads me in paths of righteousness
+For His name's sake.
+Even though I walk through the valley
+Of the shadow of death, I will fear no evil,
+For You are with me;
+Your rod and Your staff, they comfort me.
+
+You prepare a table before me
+In the presence of my enemies;
+You anoint my head with oil;
+My cup overflows.
+Surely goodness and mercy shall follow me
+All the days of my life,
+And I shall dwell in the house of the Lord forever.`,
 		});
 		expect(state.items[2]).toEqual({
 			id: "item-3",
 			title: "10,000 Reasons",
-			content: "Bless the Lord, O my soul, O my soul\nWorship His holy name...",
+			content: `Bless the Lord, O my soul, O my soul
+Worship His holy name
+Sing like never before, O my soul
+I'll worship Your holy name
+
+The sun comes up, it's a new day dawning
+It's time to sing Your song again
+Whatever may pass, and whatever lies before me
+Let me be singing when the evening comes
+
+You're rich in love, and You're slow to anger
+Your name is great, and Your heart is kind
+For all Your goodness I will keep on singing
+Ten thousand reasons for my heart to find`,
 		});
 		expect(state.selectedItemId).toBe("item-1");
+		expect(state.selectedCueIndex).toBe(0);
 		expect(state.editingItemId).toBeNull();
-		expect(state.mode).toBe("view");
 		expect(state.activeConfirmDeleteId).toBeNull();
+		expect(state.previewDraft).toBeNull();
 	});
 
 	describe("selection", () => {
@@ -124,6 +174,77 @@ describe("usePlaylistStore", () => {
 			expect(state.items).toHaveLength(4);
 			expect(newItem.title).toBe("How Great Thou Art");
 			expect(newItem.content).toBe("O Lord, my God, when I in awesome wonder");
+			expect(state.selectedItemId).toBe(newItem.id);
+			expect(state.editingItemId).toBe(newItem.id);
+		});
+	});
+
+	describe("insertItemAfter", () => {
+		it("inserts item directly after first item and updates selectedItemId and editingItemId", () => {
+			const newItem = usePlaylistStore
+				.getState()
+				.insertItemAfter("item-1", "Inserted Song", "Verse 1");
+			const state = usePlaylistStore.getState();
+
+			expect(state.items).toHaveLength(4);
+			expect(state.items.map((i) => i.id)).toEqual([
+				"item-1",
+				newItem.id,
+				"item-2",
+				"item-3",
+			]);
+			expect(newItem.title).toBe("Inserted Song");
+			expect(newItem.content).toBe("Verse 1");
+			expect(state.selectedItemId).toBe(newItem.id);
+			expect(state.editingItemId).toBe(newItem.id);
+		});
+
+		it("inserts item in the middle of the playlist", () => {
+			const newItem = usePlaylistStore
+				.getState()
+				.insertItemAfter("item-2", "Middle Song", "Middle lyrics");
+			const state = usePlaylistStore.getState();
+
+			expect(state.items).toHaveLength(4);
+			expect(state.items.map((i) => i.id)).toEqual([
+				"item-1",
+				"item-2",
+				newItem.id,
+				"item-3",
+			]);
+			expect(state.selectedItemId).toBe(newItem.id);
+			expect(state.editingItemId).toBe(newItem.id);
+		});
+
+		it("inserts item after the last item", () => {
+			const newItem = usePlaylistStore
+				.getState()
+				.insertItemAfter("item-3", "Last Song");
+			const state = usePlaylistStore.getState();
+
+			expect(state.items).toHaveLength(4);
+			expect(state.items.map((i) => i.id)).toEqual([
+				"item-1",
+				"item-2",
+				"item-3",
+				newItem.id,
+			]);
+			expect(newItem.title).toBe("Last Song");
+			expect(newItem.content).toBe("");
+			expect(state.selectedItemId).toBe(newItem.id);
+			expect(state.editingItemId).toBe(newItem.id);
+		});
+
+		it("falls back to appending when targetId is not found", () => {
+			const newItem = usePlaylistStore
+				.getState()
+				.insertItemAfter("non-existent-id");
+			const state = usePlaylistStore.getState();
+
+			expect(state.items).toHaveLength(4);
+			expect(state.items[3]).toEqual(newItem);
+			expect(newItem.title).toBe("(Untitled)");
+			expect(newItem.content).toBe("");
 			expect(state.selectedItemId).toBe(newItem.id);
 			expect(state.editingItemId).toBe(newItem.id);
 		});
@@ -259,20 +380,6 @@ describe("usePlaylistStore", () => {
 			expect(state.selectedItemId).toBeNull();
 		});
 
-		it("resets mode to view when deleting the last item in edit mode", () => {
-			usePlaylistStore.setState({
-				items: [{ id: "solo", title: "Solo", content: "" }],
-				selectedItemId: "solo",
-				mode: "edit",
-			});
-
-			usePlaylistStore.getState().deleteItem("solo");
-
-			const state = usePlaylistStore.getState();
-			expect(state.items).toHaveLength(0);
-			expect(state.mode).toBe("view");
-		});
-
 		it("preserves selection if deleted item was not selected", () => {
 			usePlaylistStore.getState().selectItem("item-1");
 			usePlaylistStore.getState().deleteItem("item-2");
@@ -318,29 +425,235 @@ describe("usePlaylistStore", () => {
 		});
 	});
 
-	describe("mode and delete confirm controls", () => {
-		it("setMode sets mode explicitly", () => {
-			usePlaylistStore.getState().setMode("edit");
-			expect(usePlaylistStore.getState().mode).toBe("edit");
-
-			usePlaylistStore.getState().setMode("view");
-			expect(usePlaylistStore.getState().mode).toBe("view");
-		});
-
-		it("toggleMode toggles between view and edit", () => {
-			usePlaylistStore.getState().toggleMode();
-			expect(usePlaylistStore.getState().mode).toBe("edit");
-
-			usePlaylistStore.getState().toggleMode();
-			expect(usePlaylistStore.getState().mode).toBe("view");
-		});
-
+	describe("delete confirm controls", () => {
 		it("openDeleteConfirm and closeDeleteConfirm manage confirm id", () => {
 			usePlaylistStore.getState().openDeleteConfirm("item-2");
 			expect(usePlaylistStore.getState().activeConfirmDeleteId).toBe("item-2");
 
 			usePlaylistStore.getState().closeDeleteConfirm();
 			expect(usePlaylistStore.getState().activeConfirmDeleteId).toBeNull();
+		});
+	});
+
+	describe("cue state and navigation", () => {
+		beforeEach(() => {
+			usePlaylistStore.setState({
+				items: [
+					{
+						id: "item-multicue",
+						title: "Multi Cue Song",
+						content: "Cue 1 Line 1\n\nCue 2 Line 1\n\nCue 3 Line 1",
+					},
+					{
+						id: "item-empty-cues",
+						title: "Empty Item",
+						content: "   \n\n  ",
+					},
+				],
+				selectedItemId: "item-multicue",
+				selectedCueIndex: 0,
+				editingItemId: null,
+				activeConfirmDeleteId: null,
+			});
+		});
+
+		it("selectCue sets selectedCueIndex directly", () => {
+			usePlaylistStore.getState().selectCue(2);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(2);
+
+			usePlaylistStore.getState().selectCue(null);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+		});
+
+		it("selectNextCue advances cue and clamps at cues.length - 1", () => {
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(0);
+
+			usePlaylistStore.getState().selectNextCue();
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(1);
+
+			usePlaylistStore.getState().selectNextCue();
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(2);
+
+			// Clamped at 2
+			usePlaylistStore.getState().selectNextCue();
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(2);
+		});
+
+		it("selectPreviousCue decrements cue and clamps at 0", () => {
+			usePlaylistStore.getState().selectCue(2);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(2);
+
+			usePlaylistStore.getState().selectPreviousCue();
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(1);
+
+			usePlaylistStore.getState().selectPreviousCue();
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(0);
+
+			// Clamped at 0
+			usePlaylistStore.getState().selectPreviousCue();
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(0);
+		});
+
+		it("selectCue/selectPreviousCue/selectNextCue handle empty or no item safely", () => {
+			usePlaylistStore.getState().selectItem("item-empty-cues");
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+
+			usePlaylistStore.getState().selectNextCue();
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+
+			usePlaylistStore.getState().selectPreviousCue();
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+
+			usePlaylistStore.getState().selectItem(null);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+
+			usePlaylistStore.getState().selectNextCue();
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+		});
+
+		it("synchronizes selectedCueIndex on selectItem, selectPrevious, and selectNext", () => {
+			usePlaylistStore.getState().selectCue(2);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(2);
+
+			// Switch item with cues -> reset to 0
+			usePlaylistStore.getState().selectItem("item-multicue");
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(0);
+
+			// Switch to item without cues -> null
+			usePlaylistStore.getState().selectItem("item-empty-cues");
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+
+			// selectPrevious to multicue -> 0
+			usePlaylistStore.getState().selectPrevious();
+			expect(usePlaylistStore.getState().selectedItemId).toBe("item-multicue");
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(0);
+
+			// selectNext to empty cues -> null
+			usePlaylistStore.getState().selectNext();
+			expect(usePlaylistStore.getState().selectedItemId).toBe(
+				"item-empty-cues",
+			);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+		});
+
+		it("synchronizes selectedCueIndex on addItem and insertItemAfter", () => {
+			const addedWithCues = usePlaylistStore
+				.getState()
+				.addItem("New Item", "Cue 1\n\nCue 2");
+			expect(usePlaylistStore.getState().selectedItemId).toBe(addedWithCues.id);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(0);
+
+			const addedEmpty = usePlaylistStore.getState().addItem("Empty Item", "");
+			expect(usePlaylistStore.getState().selectedItemId).toBe(addedEmpty.id);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+
+			const insertedWithCues = usePlaylistStore
+				.getState()
+				.insertItemAfter(addedEmpty.id, "Inserted Item", "Cue A\n\nCue B");
+			expect(usePlaylistStore.getState().selectedItemId).toBe(
+				insertedWithCues.id,
+			);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(0);
+
+			const insertedEmpty = usePlaylistStore
+				.getState()
+				.insertItemAfter(insertedWithCues.id, "Inserted Empty", "   ");
+			expect(usePlaylistStore.getState().selectedItemId).toBe(insertedEmpty.id);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+		});
+
+		it("synchronizes selectedCueIndex on deleteItem", () => {
+			usePlaylistStore.getState().selectItem("item-multicue");
+			usePlaylistStore.getState().selectCue(2);
+
+			// Deleting item-multicue will select item-empty-cues which has no cues
+			usePlaylistStore.getState().deleteItem("item-multicue");
+			expect(usePlaylistStore.getState().selectedItemId).toBe(
+				"item-empty-cues",
+			);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+
+			// Deleting item-empty-cues empties the playlist
+			usePlaylistStore.getState().deleteItem("item-empty-cues");
+			expect(usePlaylistStore.getState().selectedItemId).toBeNull();
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+		});
+
+		it("clamps selectedCueIndex on updateItem when selected item cues shorten or empty", () => {
+			usePlaylistStore.getState().selectCue(2);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(2);
+
+			// Shorten cues to 2 cues (indices 0 and 1)
+			usePlaylistStore.getState().updateItem("item-multicue", {
+				title: "Updated",
+				content: "Cue 1\n\nCue 2",
+			});
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(1);
+
+			// Update non-selected item does not change selectedCueIndex
+			usePlaylistStore.getState().updateItem("item-empty-cues", {
+				title: "Still empty",
+				content: "",
+			});
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(1);
+
+			// Empty cues on selected item sets selectedCueIndex to null
+			usePlaylistStore.getState().updateItem("item-multicue", {
+				title: "Updated Empty",
+				content: "   ",
+			});
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+		});
+	});
+
+	describe("previewDraft", () => {
+		it("initializes with null previewDraft", () => {
+			expect(usePlaylistStore.getState().previewDraft).toBeNull();
+		});
+
+		it("updates draft via setPreviewDraft", () => {
+			const draft = {
+				content: "Draft verse 1\n\nDraft verse 2",
+				caretOffset: 15,
+			};
+			usePlaylistStore.getState().setPreviewDraft(draft);
+			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
+		});
+
+		it("clears draft via clearPreviewDraft and setPreviewDraft(null)", () => {
+			usePlaylistStore
+				.getState()
+				.setPreviewDraft({ content: "Testing", caretOffset: 3 });
+			expect(usePlaylistStore.getState().previewDraft).not.toBeNull();
+
+			usePlaylistStore.getState().clearPreviewDraft();
+			expect(usePlaylistStore.getState().previewDraft).toBeNull();
+
+			usePlaylistStore
+				.getState()
+				.setPreviewDraft({ content: "Testing 2", caretOffset: 0 });
+			usePlaylistStore.getState().setPreviewDraft(null);
+			expect(usePlaylistStore.getState().previewDraft).toBeNull();
+		});
+
+		it("preserves active previewDraft across cue and item selection transitions", () => {
+			const draft = {
+				content: "Draft in progress\n\nSecond cue",
+				caretOffset: 5,
+			};
+			usePlaylistStore.getState().setPreviewDraft(draft);
+
+			usePlaylistStore.getState().selectItem("item-2");
+			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
+
+			usePlaylistStore.getState().selectPrevious();
+			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
+
+			usePlaylistStore.getState().selectNext();
+			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
+
+			usePlaylistStore.getState().selectCue(1);
+			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
 		});
 	});
 });

@@ -13,33 +13,13 @@ import { useWorkspaceStore } from "@/features/workspace/store";
 
 export type WorkspaceMenubarProps = {
 	className?: string;
-	onResetLayout?: () => void;
-	onOpenCheatsheet?: () => void;
 };
 
-export function WorkspaceMenubar({
-	className,
-	onResetLayout,
-	onOpenCheatsheet,
-}: WorkspaceMenubarProps = {}) {
+export function WorkspaceMenubar({ className }: WorkspaceMenubarProps = {}) {
 	const mode = useWorkspaceStore((state) => state.mode);
 	const isEditMode = mode === "edit";
-
-	const handleResetLayout = () => {
-		if (onResetLayout) {
-			onResetLayout();
-		} else {
-			window.dispatchEvent(new CustomEvent("workspace:reset-layout"));
-		}
-	};
-
-	const handleOpenCheatsheet = () => {
-		if (onOpenCheatsheet) {
-			onOpenCheatsheet();
-		} else {
-			window.dispatchEvent(new CustomEvent("workspace:open-cheatsheet"));
-		}
-	};
+	const openResetDialog = useWorkspaceStore((state) => state.openResetDialog);
+	const openCheatsheet = useWorkspaceStore((state) => state.openCheatsheet);
 
 	return (
 		<Menubar className={cn(className)}>
@@ -60,7 +40,7 @@ export function WorkspaceMenubar({
 					<MenubarSeparator />
 					<MenubarItem
 						variant="destructive"
-						onClick={handleResetLayout}
+						onClick={openResetDialog}
 						className="flex items-center justify-between gap-4"
 					>
 						<span className="whitespace-nowrap">
@@ -74,7 +54,7 @@ export function WorkspaceMenubar({
 				<MenubarTrigger>Help</MenubarTrigger>
 				<MenubarContent>
 					<MenubarItem
-						onClick={handleOpenCheatsheet}
+						onClick={openCheatsheet}
 						className="flex items-center justify-between gap-4"
 					>
 						<span className="whitespace-nowrap">

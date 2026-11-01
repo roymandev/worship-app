@@ -8,6 +8,8 @@ describe("WorkspaceLayout", () => {
 	beforeEach(() => {
 		useWorkspaceStore.setState({
 			mode: "view",
+			isResetDialogOpen: false,
+			isCheatsheetOpen: false,
 		});
 	});
 
@@ -29,7 +31,7 @@ describe("WorkspaceLayout", () => {
 		expect(screen.getByText("Right Content")).toBeInTheDocument();
 	});
 
-	it("opens reset dialog on workspace:reset-layout event and cancels", async () => {
+	it("opens reset dialog via store action and cancels", async () => {
 		const user = userEvent.setup();
 		render(
 			<WorkspaceLayout
@@ -42,7 +44,7 @@ describe("WorkspaceLayout", () => {
 		expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 
 		act(() => {
-			window.dispatchEvent(new CustomEvent("workspace:reset-layout"));
+			useWorkspaceStore.getState().openResetDialog();
 		});
 
 		expect(screen.getByRole("alertdialog")).toBeInTheDocument();
@@ -52,6 +54,7 @@ describe("WorkspaceLayout", () => {
 		await user.click(cancelButton);
 
 		expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+		expect(useWorkspaceStore.getState().isResetDialogOpen).toBe(false);
 	});
 
 	it("executes layout reset when reset button in dialog is clicked", async () => {
@@ -65,12 +68,13 @@ describe("WorkspaceLayout", () => {
 		);
 
 		act(() => {
-			window.dispatchEvent(new CustomEvent("workspace:reset-layout"));
+			useWorkspaceStore.getState().openResetDialog();
 		});
 
 		const resetButton = screen.getByRole("button", { name: "Reset layout" });
 		await user.click(resetButton);
 
 		expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+		expect(useWorkspaceStore.getState().isResetDialogOpen).toBe(false);
 	});
 });

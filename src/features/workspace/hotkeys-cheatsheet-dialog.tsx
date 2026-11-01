@@ -1,6 +1,6 @@
 import { IconSearch } from "@tabler/icons-react";
 import { HotkeysProvider, useHotkey } from "@tanstack/react-hotkeys";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import {
 	Dialog,
 	DialogContent,
@@ -8,12 +8,13 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Kbd } from "@/components/ui/kbd";
+import { HotkeyChordKbd } from "@/features/workspace/app-hotkey-kbd";
 import {
 	appHotkeys,
 	type HotkeySearchResult,
 	searchHotkeys,
 } from "@/features/workspace/hotkeys";
+import { useWorkspaceStore } from "@/features/workspace/store";
 
 type CheatsheetBodyProps = {
 	onClose: () => void;
@@ -100,8 +101,11 @@ function CheatsheetBody({ onClose }: CheatsheetBodyProps) {
 													</span>
 												)}
 											</div>
-											{item.formattedChord ? (
-												<Kbd className="shrink-0">{item.formattedChord}</Kbd>
+											{typeof item.hotkey === "string" ? (
+												<HotkeyChordKbd
+													chord={item.hotkey}
+													className="shrink-0"
+												/>
 											) : (
 												<span className="text-[0.625rem] text-muted-foreground">
 													Unassigned
@@ -119,58 +123,25 @@ function CheatsheetBody({ onClose }: CheatsheetBodyProps) {
 	);
 }
 
-export type HotkeysCheatsheetDialogProps = {
-	open?: boolean;
-	onOpenChange?: (open: boolean) => void;
-};
-
-export function HotkeysCheatsheetDialog({
-	open: controlledOpen,
-	onOpenChange: controlledOnOpenChange,
-}: HotkeysCheatsheetDialogProps = {}) {
+export function HotkeysCheatsheetDialog() {
 	const dialogScopeId = useId();
-	const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
-
-	const isControlled = controlledOpen !== undefined;
-	const isOpen = isControlled ? controlledOpen : uncontrolledOpen;
+	const isCheatsheetOpen = useWorkspaceStore((state) => state.isCheatsheetOpen);
+	const closeCheatsheet = useWorkspaceStore((state) => state.closeCheatsheet);
+	const toggleCheatsheet = useWorkspaceStore((state) => state.toggleCheatsheet);
 
 	useHotkey(
 		appHotkeys["help.shortcuts"],
 		() => {
-			if (isControlled) {
-				controlledOnOpenChange?.(!controlledOpen);
-			} else {
-				setUncontrolledOpen((prev) => !prev);
-			}
+			toggleCheatsheet();
 		},
 		{ ignoreInputs: "auto" },
 	);
 
-	useEffect(() => {
-		const handleOpenEvent = () => {
-			if (isControlled) {
-				controlledOnOpenChange?.(true);
-			} else {
-				setUncontrolledOpen(true);
-			}
-		};
-
-		window.addEventListener("workspace:open-cheatsheet", handleOpenEvent);
-		return () => {
-			window.removeEventListener("workspace:open-cheatsheet", handleOpenEvent);
-		};
-	}, [isControlled, controlledOnOpenChange]);
-
-	const handleOpenChange = (nextOpen: boolean) => {
-		if (isControlled) {
-			controlledOnOpenChange?.(nextOpen);
-		} else {
-			setUncontrolledOpen(nextOpen);
-		}
-	};
-
 	return (
-		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
+		<Dialog
+			open={isCheatsheetOpen}
+			onOpenChange={(open) => !open && closeCheatsheet()}
+		>
 			<DialogContent className="flex max-h-[85vh] flex-col gap-4 sm:max-w-2xl md:max-w-3xl">
 				<DialogHeader>
 					<DialogTitle>Keyboard Shortcuts</DialogTitle>
@@ -180,7 +151,7 @@ export function HotkeysCheatsheetDialog({
 				</DialogHeader>
 
 				<HotkeysProvider scope={`dialog-${dialogScopeId}`} exclusive>
-					<CheatsheetBody onClose={() => handleOpenChange(false)} />
+					<CheatsheetBody onClose={closeCheatsheet} />
 				</HotkeysProvider>
 			</DialogContent>
 		</Dialog>

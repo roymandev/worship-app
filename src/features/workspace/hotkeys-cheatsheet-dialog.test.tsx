@@ -1,9 +1,18 @@
-import { afterEach, describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HotkeysCheatsheetDialog } from "./hotkeys-cheatsheet-dialog";
+import { useWorkspaceStore } from "./store";
 
 describe("HotkeysCheatsheetDialog", () => {
+	beforeEach(() => {
+		useWorkspaceStore.setState({
+			mode: "view",
+			isResetDialogOpen: false,
+			isCheatsheetOpen: false,
+		});
+	});
+
 	afterEach(() => {
 		cleanup();
 	});
@@ -15,7 +24,8 @@ describe("HotkeysCheatsheetDialog", () => {
 	});
 
 	it("renders dialog content and header when open, with accessible attributes", () => {
-		render(<HotkeysCheatsheetDialog open={true} />);
+		useWorkspaceStore.setState({ isCheatsheetOpen: true });
+		render(<HotkeysCheatsheetDialog />);
 
 		const dialog = screen.getByRole("dialog");
 		expect(dialog).toBeInTheDocument();
@@ -27,12 +37,12 @@ describe("HotkeysCheatsheetDialog", () => {
 		).toBeInTheDocument();
 	});
 
-	it("opens when workspace:open-cheatsheet event is dispatched", () => {
+	it("opens when openCheatsheet action is invoked", () => {
 		render(<HotkeysCheatsheetDialog />);
 		expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
 		act(() => {
-			window.dispatchEvent(new CustomEvent("workspace:open-cheatsheet"));
+			useWorkspaceStore.getState().openCheatsheet();
 		});
 
 		expect(screen.getByRole("dialog")).toBeInTheDocument();
@@ -40,7 +50,8 @@ describe("HotkeysCheatsheetDialog", () => {
 
 	it("filters shortcuts list based on search input query and updates live region", async () => {
 		const user = userEvent.setup();
-		render(<HotkeysCheatsheetDialog open={true} />);
+		useWorkspaceStore.setState({ isCheatsheetOpen: true });
+		render(<HotkeysCheatsheetDialog />);
 
 		const searchInput = screen.getByPlaceholderText("Search shortcuts...");
 		expect(searchInput).toBeInTheDocument();
@@ -67,7 +78,8 @@ describe("HotkeysCheatsheetDialog", () => {
 
 	it("shows empty state when search query matches no shortcuts and announces zero results", async () => {
 		const user = userEvent.setup();
-		render(<HotkeysCheatsheetDialog open={true} />);
+		useWorkspaceStore.setState({ isCheatsheetOpen: true });
+		render(<HotkeysCheatsheetDialog />);
 
 		const searchInput = screen.getByPlaceholderText("Search shortcuts...");
 		await user.type(searchInput, "nonexistent-action-xyz");
@@ -80,37 +92,17 @@ describe("HotkeysCheatsheetDialog", () => {
 		).toBeInTheDocument();
 	});
 
-	it("closes dialog when close button is clicked", async () => {
+	it("closes dialog and updates store when close button is clicked", async () => {
 		const user = userEvent.setup();
+		useWorkspaceStore.setState({ isCheatsheetOpen: true });
 		render(<HotkeysCheatsheetDialog />);
 
-		act(() => {
-			window.dispatchEvent(new CustomEvent("workspace:open-cheatsheet"));
-		});
 		expect(screen.getByRole("dialog")).toBeInTheDocument();
 
 		const closeButton = screen.getByRole("button", { name: /close/i });
 		await user.click(closeButton);
 
 		expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-	});
-
-	it("calls onOpenChange when controlled close button is clicked", async () => {
-		const user = userEvent.setup();
-		let nextOpenState: boolean | undefined;
-
-		render(
-			<HotkeysCheatsheetDialog
-				open={true}
-				onOpenChange={(open) => {
-					nextOpenState = open;
-				}}
-			/>,
-		);
-
-		const closeButton = screen.getByRole("button", { name: /close/i });
-		await user.click(closeButton);
-
-		expect(nextOpenState).toBe(false);
+		expect(useWorkspaceStore.getState().isCheatsheetOpen).toBe(false);
 	});
 });

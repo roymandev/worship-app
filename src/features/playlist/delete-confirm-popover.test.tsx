@@ -4,44 +4,54 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { PlaylistDeleteConfirmPopover } from "./delete-confirm-popover";
 
+type UserEvent = ReturnType<typeof userEvent.setup>;
+
+type Props = {
+	onConfirm?: () => void;
+	onClose?: () => void;
+};
+
+function TestWrapper({ onConfirm = mock(), onClose }: Props) {
+	const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
+	const [isOpen, setIsOpen] = useState(false);
+
+	return (
+		<div>
+			<button ref={setAnchor} type="button" onClick={() => setIsOpen(true)}>
+				Open
+			</button>
+			<PlaylistDeleteConfirmPopover
+				open={isOpen}
+				anchor={anchor}
+				itemId="test-item-1"
+				onConfirm={onConfirm}
+				onClose={() => {
+					setIsOpen(false);
+					onClose?.();
+				}}
+			/>
+		</div>
+	);
+}
+
+async function openPopover(user: UserEvent) {
+	await user.click(screen.getByRole("button", { name: "Open" }));
+}
+
 describe("PlaylistDeleteConfirmPopover", () => {
 	afterEach(() => {
 		cleanup();
 	});
 
-	function TestWrapper({
-		open = true,
-		itemId = "test-item-1",
-		onConfirm = mock(),
-		onClose = mock(),
-	}: {
-		open?: boolean;
-		itemId?: string | null;
-		onConfirm?: () => void;
-		onClose?: () => void;
-	}) {
-		const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
-
-		return (
-			<div>
-				<button ref={setAnchor} type="button" id="anchor-btn">
-					Anchor
-				</button>
-				{anchor && (
-					<PlaylistDeleteConfirmPopover
-						open={open}
-						anchor={anchor}
-						itemId={itemId}
-						onConfirm={onConfirm}
-						onClose={onClose}
-					/>
-				)}
-			</div>
-		);
-	}
-
-	it("renders title and description when open with an anchor element", () => {
+	it("does not render alertdialog when closed", () => {
 		render(<TestWrapper />);
+		expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+	});
+
+	it("renders title and description when open with an anchor element", async () => {
+		const user = userEvent.setup();
+		render(<TestWrapper />);
+		await openPopover(user);
 
 		expect(screen.getByRole("alertdialog")).toBeInTheDocument();
 		expect(screen.getByText("Delete this item?")).toBeInTheDocument();
@@ -53,7 +63,9 @@ describe("PlaylistDeleteConfirmPopover", () => {
 	});
 
 	it("initial focus is placed on the Cancel button", async () => {
+		const user = userEvent.setup();
 		render(<TestWrapper />);
+		await openPopover(user);
 
 		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
 		await waitFor(() => expect(cancelBtn).toHaveFocus());
@@ -63,6 +75,7 @@ describe("PlaylistDeleteConfirmPopover", () => {
 		const user = userEvent.setup();
 		const onClose = mock();
 		render(<TestWrapper onClose={onClose} />);
+		await openPopover(user);
 
 		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
 		await user.click(cancelBtn);
@@ -73,6 +86,7 @@ describe("PlaylistDeleteConfirmPopover", () => {
 		const user = userEvent.setup();
 		const onClose = mock();
 		render(<TestWrapper onClose={onClose} />);
+		await openPopover(user);
 
 		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
 		await waitFor(() => expect(cancelBtn).toHaveFocus());
@@ -84,6 +98,7 @@ describe("PlaylistDeleteConfirmPopover", () => {
 		const user = userEvent.setup();
 		const onConfirm = mock();
 		render(<TestWrapper onConfirm={onConfirm} />);
+		await openPopover(user);
 
 		const deleteBtn = screen.getByRole("button", { name: "Delete" });
 		await user.click(deleteBtn);
@@ -93,6 +108,7 @@ describe("PlaylistDeleteConfirmPopover", () => {
 	it("ArrowRight moves focus from Cancel to Delete; ArrowLeft moves focus from Delete to Cancel", async () => {
 		const user = userEvent.setup();
 		render(<TestWrapper />);
+		await openPopover(user);
 
 		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
 		const deleteBtn = screen.getByRole("button", { name: "Delete" });
@@ -119,6 +135,7 @@ describe("PlaylistDeleteConfirmPopover", () => {
 	it("ArrowUp and ArrowDown are prevented/ignored", async () => {
 		const user = userEvent.setup();
 		render(<TestWrapper />);
+		await openPopover(user);
 
 		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
 		await waitFor(() => expect(cancelBtn).toHaveFocus());
@@ -133,6 +150,7 @@ describe("PlaylistDeleteConfirmPopover", () => {
 	it("Tab and Shift+Tab cycle focus between Cancel and Delete with boundary clamping", async () => {
 		const user = userEvent.setup();
 		render(<TestWrapper />);
+		await openPopover(user);
 
 		const cancelBtn = screen.getByRole("button", { name: "Cancel" });
 		const deleteBtn = screen.getByRole("button", { name: "Delete" });

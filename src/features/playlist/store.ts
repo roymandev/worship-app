@@ -77,12 +77,15 @@ Ten thousand reasons for my heart to find`,
 	},
 ];
 
+export type PreviewDraft = { content: string; caretOffset: number };
+
 export type PlaylistState = {
 	items: PlaylistItem[];
 	selectedItemId: string | null;
 	selectedCueIndex: number | null;
 	editingItemId: string | null;
 	activeConfirmDeleteId: string | null;
+	previewDraft: PreviewDraft | null;
 	selectItem: (id: string | null) => void;
 	selectPrevious: () => void;
 	selectNext: () => void;
@@ -103,6 +106,8 @@ export type PlaylistState = {
 	updateItem: (id: string, updates: PlaylistItemDraft) => void;
 	openDeleteConfirm: (id: string) => void;
 	closeDeleteConfirm: () => void;
+	setPreviewDraft: (draft: PreviewDraft | null) => void;
+	clearPreviewDraft: () => void;
 };
 
 function getInitialCueIndex(
@@ -121,6 +126,7 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 	selectedCueIndex: getInitialCueIndex(INITIAL_PLAYLIST_ITEMS, "item-1"),
 	editingItemId: null,
 	activeConfirmDeleteId: null,
+	previewDraft: null,
 
 	selectItem: (id) => {
 		const { items } = get();
@@ -367,4 +373,8 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 	openDeleteConfirm: (id) => set({ activeConfirmDeleteId: id }),
 
 	closeDeleteConfirm: () => set({ activeConfirmDeleteId: null }),
+
+	setPreviewDraft: (draft) => set({ previewDraft: draft }),
+
+	clearPreviewDraft: () => set({ previewDraft: null }),
 }));

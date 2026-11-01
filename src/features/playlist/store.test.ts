@@ -9,6 +9,7 @@ describe("usePlaylistStore", () => {
 			selectedCueIndex: 0,
 			editingItemId: null,
 			activeConfirmDeleteId: null,
+			previewDraft: null,
 		});
 	});
 
@@ -83,6 +84,7 @@ Ten thousand reasons for my heart to find`,
 		expect(state.selectedCueIndex).toBe(0);
 		expect(state.editingItemId).toBeNull();
 		expect(state.activeConfirmDeleteId).toBeNull();
+		expect(state.previewDraft).toBeNull();
 	});
 
 	describe("selection", () => {
@@ -601,6 +603,57 @@ Ten thousand reasons for my heart to find`,
 				content: "   ",
 			});
 			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+		});
+	});
+
+	describe("previewDraft", () => {
+		it("initializes with null previewDraft", () => {
+			expect(usePlaylistStore.getState().previewDraft).toBeNull();
+		});
+
+		it("updates draft via setPreviewDraft", () => {
+			const draft = {
+				content: "Draft verse 1\n\nDraft verse 2",
+				caretOffset: 15,
+			};
+			usePlaylistStore.getState().setPreviewDraft(draft);
+			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
+		});
+
+		it("clears draft via clearPreviewDraft and setPreviewDraft(null)", () => {
+			usePlaylistStore
+				.getState()
+				.setPreviewDraft({ content: "Testing", caretOffset: 3 });
+			expect(usePlaylistStore.getState().previewDraft).not.toBeNull();
+
+			usePlaylistStore.getState().clearPreviewDraft();
+			expect(usePlaylistStore.getState().previewDraft).toBeNull();
+
+			usePlaylistStore
+				.getState()
+				.setPreviewDraft({ content: "Testing 2", caretOffset: 0 });
+			usePlaylistStore.getState().setPreviewDraft(null);
+			expect(usePlaylistStore.getState().previewDraft).toBeNull();
+		});
+
+		it("preserves active previewDraft across cue and item selection transitions", () => {
+			const draft = {
+				content: "Draft in progress\n\nSecond cue",
+				caretOffset: 5,
+			};
+			usePlaylistStore.getState().setPreviewDraft(draft);
+
+			usePlaylistStore.getState().selectItem("item-2");
+			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
+
+			usePlaylistStore.getState().selectPrevious();
+			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
+
+			usePlaylistStore.getState().selectNext();
+			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
+
+			usePlaylistStore.getState().selectCue(1);
+			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
 		});
 	});
 });

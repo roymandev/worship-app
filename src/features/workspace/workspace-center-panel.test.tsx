@@ -31,7 +31,7 @@ describe("Workspace Center Panel Integration", () => {
 		cleanup();
 	});
 
-	it("renders CueListPanel when editingItemId is null and selectedItemId is resolved", () => {
+	it("renders CueListPanel and PreviewScreenPanel when editingItemId is null and selectedItemId is resolved", () => {
 		render(<WorkspaceCenterPanel />);
 
 		expect(
@@ -43,9 +43,12 @@ describe("Workspace Center Panel Integration", () => {
 		expect(
 			screen.queryByRole("form", { name: "Edit playlist item" }),
 		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("region", { name: "Preview screen panel" }),
+		).toBeInTheDocument();
 	});
 
-	it("renders CueListPanel when editingItemId cannot be resolved in playlistItems", () => {
+	it("renders CueListPanel and PreviewScreenPanel when editingItemId cannot be resolved in playlistItems", () => {
 		usePlaylistStore.setState({ editingItemId: "non-existent-id" });
 		render(<WorkspaceCenterPanel />);
 
@@ -53,11 +56,17 @@ describe("Workspace Center Panel Integration", () => {
 			screen.getByRole("region", { name: "Cue list panel" }),
 		).toBeInTheDocument();
 		expect(
+			screen.getByRole("heading", { name: "Amazing Grace" }),
+		).toBeInTheDocument();
+		expect(
 			screen.queryByRole("form", { name: "Edit playlist item" }),
 		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("region", { name: "Preview screen panel" }),
+		).toBeInTheDocument();
 	});
 
-	it("renders EmptyState when selectedItemId is null", () => {
+	it("renders EmptyState and PreviewScreenPanel when selectedItemId is null", () => {
 		usePlaylistStore.setState({ selectedItemId: null });
 		render(<WorkspaceCenterPanel />);
 
@@ -71,9 +80,12 @@ describe("Workspace Center Panel Integration", () => {
 		expect(
 			screen.queryByRole("form", { name: "Edit playlist item" }),
 		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("region", { name: "Preview screen panel" }),
+		).toBeInTheDocument();
 	});
 
-	it("renders EmptyState when selectedItemId cannot be resolved in playlistItems", () => {
+	it("renders EmptyState and PreviewScreenPanel when selectedItemId cannot be resolved in playlistItems", () => {
 		usePlaylistStore.setState({ selectedItemId: "non-existent-id" });
 		render(<WorkspaceCenterPanel />);
 
@@ -81,9 +93,12 @@ describe("Workspace Center Panel Integration", () => {
 		expect(
 			screen.getByText("Select an item from the playlist to view its cues."),
 		).toBeInTheDocument();
+		expect(
+			screen.getByRole("region", { name: "Preview screen panel" }),
+		).toBeInTheDocument();
 	});
 
-	it("renders PlaylistItemEditor when editingItemId is set and resolved", () => {
+	it("renders PlaylistItemEditor and PreviewScreenPanel when editingItemId is set and resolved", () => {
 		usePlaylistStore.setState({ editingItemId: "item-1" });
 		render(<WorkspaceCenterPanel />);
 
@@ -94,6 +109,9 @@ describe("Workspace Center Panel Integration", () => {
 			screen.getByRole("form", { name: "Edit playlist item" }),
 		).toBeInTheDocument();
 		expect(screen.getByLabelText("Title")).toHaveValue("Amazing Grace");
+		expect(
+			screen.getByRole("region", { name: "Preview screen panel" }),
+		).toBeInTheDocument();
 	});
 
 	it("automatically opens editor in center panel when adding an item", async () => {

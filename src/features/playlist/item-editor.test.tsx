@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
 	PlaylistItemEditor,
@@ -558,6 +565,112 @@ describe("PlaylistItemEditor", () => {
 			await waitFor(() => {
 				expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 				expect(usePlaylistStore.getState().editingItemId).toBeNull();
+			});
+		});
+	});
+
+	describe("live preview synchronisation", () => {
+		it("initializes previewDraft on mount with item content and caretOffset 0", () => {
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistItemEditor />);
+
+			expect(usePlaylistStore.getState().previewDraft).toEqual({
+				content: INITIAL_PLAYLIST_ITEMS[0].content,
+				caretOffset: 0,
+			});
+		});
+
+		it("updates previewDraft when typing into the content textarea", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistItemEditor />);
+
+			const contentTextarea = screen.getByLabelText("Content");
+			await user.clear(contentTextarea);
+			await user.type(contentTextarea, "Line 1\n\nLine 2");
+
+			expect(usePlaylistStore.getState().previewDraft?.content).toBe(
+				"Line 1\n\nLine 2",
+			);
+		});
+
+		it("updates previewDraft caretOffset on cursor movement and click", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistItemEditor />);
+
+			const contentTextarea = screen.getByLabelText(
+				"Content",
+			) as HTMLTextAreaElement;
+			await user.clear(contentTextarea);
+			await user.type(contentTextarea, "Hello world");
+
+			// In happy-dom / testing-library, user.click resets selectionStart to length (11) unless selection is dispatched
+			// Test select and keyup events
+			contentTextarea.selectionStart = 5;
+			contentTextarea.selectionEnd = 5;
+			fireEvent.select(contentTextarea);
+
+			expect(usePlaylistStore.getState().previewDraft?.caretOffset).toBe(5);
+
+			contentTextarea.selectionStart = 2;
+			contentTextarea.selectionEnd = 2;
+			fireEvent.keyUp(contentTextarea);
+
+			expect(usePlaylistStore.getState().previewDraft?.caretOffset).toBe(2);
+
+			contentTextarea.selectionStart = 7;
+			contentTextarea.selectionEnd = 7;
+			fireEvent.click(contentTextarea);
+
+			expect(usePlaylistStore.getState().previewDraft?.caretOffset).toBe(7);
+		});
+
+		it("clears previewDraft on cancel, discard, and component unmount", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			const { unmount } = render(<PlaylistItemEditor />);
+
+			expect(usePlaylistStore.getState().previewDraft).not.toBeNull();
+
+			const cancelButton = screen.getByRole("button", { name: "Cancel" });
+			await user.click(cancelButton);
+
+			expect(usePlaylistStore.getState().previewDraft).toBeNull();
+
+			unmount();
+			expect(usePlaylistStore.getState().previewDraft).toBeNull();
+		});
+
+		it("clears previewDraft when discarding dirty changes", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistItemEditor />);
+
+			const titleInput = screen.getByLabelText("Title");
+			await user.type(titleInput, " modified");
+
+			const cancelButton = screen.getByRole("button", { name: "Cancel" });
+			await user.click(cancelButton);
+
+			const discardButton = await screen.findByRole("button", {
+				name: "Discard",
+			});
+			await user.click(discardButton);
+
+			expect(usePlaylistStore.getState().previewDraft).toBeNull();
+		});
+
+		it("clears previewDraft on save", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistItemEditor />);
+
+			const saveButton = screen.getByRole("button", { name: "Save" });
+			await user.click(saveButton);
+
+			await waitFor(() => {
+				expect(usePlaylistStore.getState().previewDraft).toBeNull();
 			});
 		});
 	});

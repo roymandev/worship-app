@@ -52,6 +52,10 @@ function EditorFormInner({
 	);
 	const updateItem = usePlaylistStore((state) => state.updateItem);
 	const stopEditingItem = usePlaylistStore((state) => state.stopEditingItem);
+	const setPreviewDraft = usePlaylistStore((state) => state.setPreviewDraft);
+	const clearPreviewDraft = usePlaylistStore(
+		(state) => state.clearPreviewDraft,
+	);
 
 	const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
 	const titleInputRef = useRef<HTMLInputElement | null>(null);
@@ -110,10 +114,21 @@ function EditorFormInner({
 				title: item.title,
 				content: item.content,
 			});
+			setPreviewDraft({
+				content: item.content,
+				caretOffset: 0,
+			});
 		} else {
 			form.reset(playlistItemFormDefaultValues);
+			clearPreviewDraft();
 		}
-	}, [item, form.reset]);
+	}, [item, form.reset, setPreviewDraft, clearPreviewDraft]);
+
+	useEffect(() => {
+		return () => {
+			clearPreviewDraft();
+		};
+	}, [clearPreviewDraft]);
 
 	useEffect(() => {
 		titleInputRef.current?.focus();
@@ -125,7 +140,16 @@ function EditorFormInner({
 		}
 	}, [item, stopEditingItem]);
 
+	const syncPreviewFromTextarea = (target: HTMLTextAreaElement | null) => {
+		if (!target) return;
+		setPreviewDraft({
+			content: target.value,
+			caretOffset: target.selectionStart ?? 0,
+		});
+	};
+
 	const handleValidSubmit = (data: PlaylistItemFormOutput) => {
+		clearPreviewDraft();
 		onDirtyChange?.(false);
 		form.reset(data);
 		updateItem(itemId, data);
@@ -140,6 +164,7 @@ function EditorFormInner({
 			}
 			setIsDiscardDialogOpen(true);
 		} else {
+			clearPreviewDraft();
 			stopEditingItem();
 		}
 	};
@@ -147,6 +172,7 @@ function EditorFormInner({
 	const handleConfirmDiscard = () => {
 		discardTriggeredRef.current = true;
 		setIsDiscardDialogOpen(false);
+		clearPreviewDraft();
 		form.reset();
 		if (isSwitchPending && onConfirmDiscardSwitch) {
 			onConfirmDiscardSwitch();
@@ -252,6 +278,19 @@ function EditorFormInner({
 				<Textarea
 					id="playlist-item-content"
 					{...contentRegister}
+					onChange={(e) => {
+						contentRegister.onChange(e);
+						syncPreviewFromTextarea(e.currentTarget);
+					}}
+					onKeyUp={(e) => {
+						syncPreviewFromTextarea(e.currentTarget);
+					}}
+					onClick={(e) => {
+						syncPreviewFromTextarea(e.currentTarget);
+					}}
+					onSelect={(e) => {
+						syncPreviewFromTextarea(e.currentTarget);
+					}}
 					placeholder="Enter slide content or lyrics..."
 					className="flex-1 resize-none"
 				/>

@@ -12,17 +12,23 @@ export function CueListPanel() {
 		items,
 		selectedItemId,
 		selectedCueIndex,
+		liveItemId,
+		liveCueIndex,
 		selectCue,
 		selectPreviousCue,
 		selectNextCue,
+		goLive,
 	} = usePlaylistStore(
 		useShallow((s) => ({
 			items: s.items,
 			selectedItemId: s.selectedItemId,
 			selectedCueIndex: s.selectedCueIndex,
+			liveItemId: s.liveItemId,
+			liveCueIndex: s.liveCueIndex,
 			selectCue: s.selectCue,
 			selectPreviousCue: s.selectPreviousCue,
 			selectNextCue: s.selectNextCue,
+			goLive: s.goLive,
 		})),
 	);
 
@@ -37,6 +43,23 @@ export function CueListPanel() {
 				'[role="row"][aria-selected="true"]',
 			);
 			activeRow?.focus();
+		});
+	};
+
+	const triggerGoLiveForCue = (index: number) => {
+		if (selectedItemId === null) return;
+		if (selectedItemId === liveItemId && index === liveCueIndex) return;
+
+		goLive(selectedItemId, index);
+		requestAnimationFrame(() => {
+			const liveCueRow =
+				document.querySelector<HTMLElement>(
+					`[data-live-cue-index="${index}"]`,
+				) ??
+				document.querySelector<HTMLElement>(
+					'[role="grid"][aria-label="Live cue items"] [role="row"][aria-selected="true"]',
+				);
+			liveCueRow?.focus();
 		});
 	};
 
@@ -64,6 +87,15 @@ export function CueListPanel() {
 			e.preventDefault();
 			selectPreviousCue();
 			focusActiveRow();
+			return;
+		}
+
+		if (e.key === "Enter") {
+			const targetIndex = selectedCueIndex ?? 0;
+			if (cues.length > 0 && targetIndex >= 0 && targetIndex < cues.length) {
+				e.preventDefault();
+				triggerGoLiveForCue(targetIndex);
+			}
 			return;
 		}
 	};
@@ -113,6 +145,7 @@ export function CueListPanel() {
 									aria-selected={isSelected}
 									data-cue-index={index}
 									onClick={() => selectCue(index)}
+									onDoubleClick={() => triggerGoLiveForCue(index)}
 									className={cn(
 										"group flex items-center justify-between gap-2 rounded-md px-3 py-2 text-xs transition-colors focus-ring-inset select-none",
 										isSelected

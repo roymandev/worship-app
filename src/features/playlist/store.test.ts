@@ -7,6 +7,8 @@ describe("usePlaylistStore", () => {
 			items: [...INITIAL_PLAYLIST_ITEMS],
 			selectedItemId: "item-1",
 			selectedCueIndex: 0,
+			liveItemId: null,
+			liveCueIndex: null,
 			editingItemId: null,
 			activeConfirmDeleteId: null,
 			previewDraft: null,
@@ -82,6 +84,8 @@ Ten thousand reasons for my heart to find`,
 		});
 		expect(state.selectedItemId).toBe("item-1");
 		expect(state.selectedCueIndex).toBe(0);
+		expect(state.liveItemId).toBeNull();
+		expect(state.liveCueIndex).toBeNull();
 		expect(state.editingItemId).toBeNull();
 		expect(state.activeConfirmDeleteId).toBeNull();
 		expect(state.previewDraft).toBeNull();
@@ -654,6 +658,195 @@ Ten thousand reasons for my heart to find`,
 
 			usePlaylistStore.getState().selectCue(1);
 			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
+		});
+	});
+
+	describe("live state", () => {
+		beforeEach(() => {
+			usePlaylistStore.setState({
+				items: [
+					{
+						id: "item-live-1",
+						title: "Live Item 1",
+						content: "Cue 1\n\nCue 2\n\nCue 3",
+					},
+					{
+						id: "item-live-2",
+						title: "Live Item 2",
+						content: "Single Cue",
+					},
+					{
+						id: "item-empty-cues",
+						title: "Empty Cues",
+						content: "   \n\n  ",
+					},
+				],
+				selectedItemId: "item-live-1",
+				selectedCueIndex: 1,
+				liveItemId: null,
+				liveCueIndex: null,
+				editingItemId: null,
+				activeConfirmDeleteId: null,
+				previewDraft: null,
+			});
+		});
+
+		it("initializes with null liveItemId and null liveCueIndex", () => {
+			const state = usePlaylistStore.getState();
+			expect(state.liveItemId).toBeNull();
+			expect(state.liveCueIndex).toBeNull();
+		});
+
+		it("goLive transitions item and explicit cueIndex into live state with clamping", () => {
+			usePlaylistStore.getState().goLive("item-live-1", 2);
+			expect(usePlaylistStore.getState().liveItemId).toBe("item-live-1");
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(2);
+
+			// Clamps index beyond bounds
+			usePlaylistStore.getState().goLive("item-live-1", 10);
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(2);
+
+			usePlaylistStore.getState().goLive("item-live-1", -5);
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(0);
+		});
+
+		it("goLive uses staged selectedCueIndex if item is currently selected and cueIndex is omitted", () => {
+			usePlaylistStore.getState().selectItem("item-live-1");
+			usePlaylistStore.getState().selectCue(2);
+
+			usePlaylistStore.getState().goLive("item-live-1");
+			expect(usePlaylistStore.getState().liveItemId).toBe("item-live-1");
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(2);
+		});
+
+		it("goLive defaults cueIndex to 0 if item is not currently selected and cueIndex is omitted", () => {
+			usePlaylistStore.getState().selectItem("item-live-1");
+			usePlaylistStore.getState().selectCue(2);
+
+			usePlaylistStore.getState().goLive("item-live-2");
+			expect(usePlaylistStore.getState().liveItemId).toBe("item-live-2");
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(0);
+		});
+
+		it("goLive sets liveCueIndex to null if item has no cues", () => {
+			usePlaylistStore.getState().goLive("item-empty-cues");
+			expect(usePlaylistStore.getState().liveItemId).toBe("item-empty-cues");
+			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+		});
+
+		it("goLive ignores non-existent item IDs", () => {
+			usePlaylistStore.getState().goLive("non-existent-id");
+			expect(usePlaylistStore.getState().liveItemId).toBeNull();
+			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+		});
+
+		it("selectLiveCue clamps index between 0 and cues.length - 1", () => {
+			usePlaylistStore.getState().goLive("item-live-1", 0);
+
+			usePlaylistStore.getState().selectLiveCue(1);
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(1);
+
+			usePlaylistStore.getState().selectLiveCue(10);
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(2);
+
+			usePlaylistStore.getState().selectLiveCue(-3);
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(0);
+		});
+
+		it("selectLiveCue handles empty cues and null liveItemId safely", () => {
+			usePlaylistStore.getState().selectLiveCue(0);
+			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+
+			usePlaylistStore.getState().goLive("item-empty-cues");
+			usePlaylistStore.getState().selectLiveCue(0);
+			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+		});
+
+		it("selectPreviousLiveCue clamps to 0", () => {
+			usePlaylistStore.getState().goLive("item-live-1", 2);
+
+			usePlaylistStore.getState().selectPreviousLiveCue();
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(1);
+
+			usePlaylistStore.getState().selectPreviousLiveCue();
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(0);
+
+			usePlaylistStore.getState().selectPreviousLiveCue();
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(0);
+		});
+
+		it("selectNextLiveCue clamps to cues.length - 1", () => {
+			usePlaylistStore.getState().goLive("item-live-1", 0);
+
+			usePlaylistStore.getState().selectNextLiveCue();
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(1);
+
+			usePlaylistStore.getState().selectNextLiveCue();
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(2);
+
+			usePlaylistStore.getState().selectNextLiveCue();
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(2);
+		});
+
+		it("selectPreviousLiveCue and selectNextLiveCue handle null or empty live items safely", () => {
+			usePlaylistStore.getState().selectPreviousLiveCue();
+			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+
+			usePlaylistStore.getState().selectNextLiveCue();
+			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+
+			usePlaylistStore.getState().goLive("item-empty-cues");
+			usePlaylistStore.getState().selectPreviousLiveCue();
+			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+
+			usePlaylistStore.getState().selectNextLiveCue();
+			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+		});
+
+		it("clearLive resets liveItemId and liveCueIndex to null", () => {
+			usePlaylistStore.getState().goLive("item-live-1", 1);
+			expect(usePlaylistStore.getState().liveItemId).toBe("item-live-1");
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(1);
+
+			usePlaylistStore.getState().clearLive();
+			expect(usePlaylistStore.getState().liveItemId).toBeNull();
+			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+		});
+
+		it("deleteItem resets live state to null if deleted item was live", () => {
+			usePlaylistStore.getState().goLive("item-live-1", 1);
+			usePlaylistStore.getState().deleteItem("item-live-2"); // non-live item
+			expect(usePlaylistStore.getState().liveItemId).toBe("item-live-1");
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(1);
+
+			usePlaylistStore.getState().deleteItem("item-live-1"); // live item
+			expect(usePlaylistStore.getState().liveItemId).toBeNull();
+			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+		});
+
+		it("updateItem clamps liveCueIndex if live item cues shrink, or sets to null if emptied", () => {
+			usePlaylistStore.getState().goLive("item-live-1", 2);
+
+			// Updating non-live item does not alter liveCueIndex
+			usePlaylistStore.getState().updateItem("item-live-2", {
+				title: "Updated Other",
+				content: "New content",
+			});
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(2);
+
+			// Shorten cues on live item to 2 cues (indices 0 and 1)
+			usePlaylistStore.getState().updateItem("item-live-1", {
+				title: "Live Item 1",
+				content: "Cue 1\n\nCue 2",
+			});
+			expect(usePlaylistStore.getState().liveCueIndex).toBe(1);
+
+			// Empty cues on live item
+			usePlaylistStore.getState().updateItem("item-live-1", {
+				title: "Live Item 1",
+				content: "   ",
+			});
+			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
 		});
 	});
 });

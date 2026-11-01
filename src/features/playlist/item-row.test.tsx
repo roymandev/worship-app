@@ -20,6 +20,8 @@ describe("PlaylistItemRow", () => {
 			selectedItemId: "item-1",
 			editingItemId: null,
 			activeConfirmDeleteId: null,
+			liveItemId: null,
+			liveCueIndex: null,
 		});
 	});
 
@@ -49,7 +51,7 @@ describe("PlaylistItemRow", () => {
 		expect(gridcells[1]).toHaveAttribute("data-action-cell", "item-1");
 	});
 
-	it("renders editing indicator and attributes when isEditing is true", () => {
+	it("renders editing indicator in action cell when isEditing is true", () => {
 		render(
 			<PlaylistItemRow
 				item={sampleItem}
@@ -63,11 +65,21 @@ describe("PlaylistItemRow", () => {
 		const row = screen.getByRole("row");
 		expect(row).toHaveAttribute("data-editing", "true");
 
-		const titleEl = screen.getByTitle("In item editor");
-		expect(titleEl).toBeInTheDocument();
-		expect(titleEl.parentElement).toHaveAttribute("aria-hidden", "true");
-
-		expect(screen.getByText("(editing)")).toBeInTheDocument();
+		const editingIndicator = screen.getByRole("status", {
+			name: "Currently editing in item editor",
+		});
+		expect(editingIndicator).toBeInTheDocument();
+		expect(editingIndicator).toHaveAttribute("role", "status");
+		expect(editingIndicator).toHaveAttribute(
+			"aria-label",
+			"Currently editing in item editor",
+		);
+		expect(editingIndicator).toHaveAttribute(
+			"title",
+			"Currently editing in item editor",
+		);
+		expect(editingIndicator).toHaveAttribute("data-editing-indicator", "true");
+		expect(within(editingIndicator).getByText("(editing)")).toBeInTheDocument();
 	});
 
 	it("omits editing indicator and attributes when isEditing is false or undefined", () => {
@@ -83,7 +95,11 @@ describe("PlaylistItemRow", () => {
 
 		const row = screen.getByRole("row");
 		expect(row).not.toHaveAttribute("data-editing");
-		expect(screen.queryByTitle("In item editor")).toBeNull();
+		expect(
+			screen.queryByRole("status", {
+				name: "Currently editing in item editor",
+			}),
+		).toBeNull();
 		expect(screen.queryByText("(editing)")).toBeNull();
 
 		rerender(
@@ -95,7 +111,11 @@ describe("PlaylistItemRow", () => {
 			/>,
 		);
 		expect(row).not.toHaveAttribute("data-editing");
-		expect(screen.queryByTitle("In item editor")).toBeNull();
+		expect(
+			screen.queryByRole("status", {
+				name: "Currently editing in item editor",
+			}),
+		).toBeNull();
 		expect(screen.queryByText("(editing)")).toBeNull();
 	});
 
@@ -114,10 +134,11 @@ describe("PlaylistItemRow", () => {
 		expect(row).toHaveAttribute("data-editing", "true");
 		expect(row).toHaveAttribute("aria-selected", "true");
 
-		const titleEl = screen.getByTitle("In item editor");
-		expect(titleEl).toBeInTheDocument();
-		expect(titleEl.parentElement).toHaveAttribute("aria-hidden", "true");
-		expect(screen.getByText("(editing)")).toBeInTheDocument();
+		const editingIndicator = screen.getByRole("status", {
+			name: "Currently editing in item editor",
+		});
+		expect(editingIndicator).toBeInTheDocument();
+		expect(within(editingIndicator).getByText("(editing)")).toBeInTheDocument();
 	});
 
 	it("preserves keyboard roving and action cell behavior when isEditing is true", async () => {
@@ -175,8 +196,7 @@ describe("PlaylistItemRow", () => {
 		expect(goLiveBtn).toBeInTheDocument();
 		expect(goLiveBtn).toHaveAttribute("tabindex", "-1");
 		const icon = goLiveBtn.querySelector("svg");
-		expect(icon).toHaveClass("size-3.5");
-		expect(icon).not.toHaveClass("fill-current");
+		expect(icon).toBeInTheDocument();
 		expect(screen.queryByRole("button", { name: "Move up" })).toBeNull();
 		expect(screen.queryByRole("button", { name: "Move down" })).toBeNull();
 		expect(screen.queryByRole("button", { name: "Edit item" })).toBeNull();
@@ -241,9 +261,10 @@ describe("PlaylistItemRow", () => {
 		await user.keyboard("{Shift>}e{/Shift}");
 		expect(usePlaylistStore.getState().editingItemId).toBeNull();
 
-		// 'Enter' does NOT trigger startEditingItem
+		// 'Enter' triggers Go Live, NOT startEditingItem
 		await user.keyboard("{Enter}");
 		expect(usePlaylistStore.getState().editingItemId).toBeNull();
+		expect(usePlaylistStore.getState().liveItemId).toBe("item-2");
 
 		// 'F2' starts editing
 		await user.keyboard("{F2}");
@@ -465,5 +486,178 @@ describe("PlaylistItemRow", () => {
 		await waitFor(() => {
 			expect(row).toHaveFocus();
 		});
+	});
+
+	it("double-clicking row triggers Go Live", async () => {
+		const user = userEvent.setup();
+		render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalItems={3}
+				isSelected={true}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		await user.dblClick(row);
+
+		expect(usePlaylistStore.getState().liveItemId).toBe("item-1");
+	});
+
+	it("clicking Go Live button triggers Go Live", async () => {
+		const user = userEvent.setup();
+		render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalItems={3}
+				isSelected={true}
+			/>,
+		);
+
+		const goLiveBtn = screen.getByRole("button", { name: "Go Live" });
+		await user.click(goLiveBtn);
+
+		expect(usePlaylistStore.getState().liveItemId).toBe("item-1");
+	});
+
+	it("selecting Go Live from context menu triggers Go Live", async () => {
+		const user = userEvent.setup();
+		render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalItems={3}
+				isSelected={true}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		await user.pointer({ keys: "[MouseRight]", target: row });
+
+		const menu = await screen.findByRole("menu");
+		const goLiveMenuItem = within(menu).getByRole("menuitem", {
+			name: /go live/i,
+		});
+		await user.click(goLiveMenuItem);
+
+		expect(usePlaylistStore.getState().liveItemId).toBe("item-1");
+	});
+
+	it("when item is active live: disables all triggers, replaces Go Live button with active live indicator", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({
+			liveItemId: "item-1",
+			liveCueIndex: 0,
+		});
+
+		render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalItems={3}
+				isSelected={true}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		expect(row).toHaveAttribute("data-live", "true");
+
+		// Go Live button should NOT be rendered when isLive
+		expect(
+			screen.queryByRole("button", { name: "Go Live" }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: "Active Live" }),
+		).not.toBeInTheDocument();
+
+		// Active Live status indicator rendered instead
+		const liveIndicator = screen.getByRole("status", {
+			name: "Currently live in presentation",
+		});
+		expect(liveIndicator).toBeInTheDocument();
+		expect(liveIndicator).toHaveAttribute("role", "status");
+		expect(liveIndicator).toHaveAttribute(
+			"aria-label",
+			"Currently live in presentation",
+		);
+		expect(liveIndicator).toHaveAttribute(
+			"title",
+			"Currently live in presentation",
+		);
+		expect(liveIndicator).toHaveAttribute("data-live-indicator", "true");
+		expect(within(liveIndicator).getByText("(live)")).toBeInTheDocument();
+
+		// Double clicking does not change or re-trigger
+		await user.dblClick(row);
+		expect(usePlaylistStore.getState().liveItemId).toBe("item-1");
+
+		// Enter does not change or re-trigger
+		act(() => {
+			row.focus();
+		});
+		await user.keyboard("{Enter}");
+		expect(usePlaylistStore.getState().liveItemId).toBe("item-1");
+
+		// Context menu item Go Live is disabled
+		await user.pointer({ keys: "[MouseRight]", target: row });
+		const menu = await screen.findByRole("menu");
+		const goLiveMenuItem = within(menu).getByRole("menuitem", {
+			name: /go live/i,
+		});
+		expect(goLiveMenuItem).toHaveAttribute("aria-disabled", "true");
+	});
+
+	it("renders both editing and live status indicators cleanly in slot order when both are active", () => {
+		usePlaylistStore.setState({
+			liveItemId: "item-1",
+			liveCueIndex: 0,
+		});
+
+		render(
+			<PlaylistItemRow
+				item={sampleItem}
+				index={0}
+				totalItems={3}
+				isSelected={true}
+				isEditing={true}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		const gridcells = within(row).getAllByRole("gridcell");
+		const actionCell = gridcells[1];
+		expect(actionCell).toBeInTheDocument();
+
+		const statuses = within(actionCell as HTMLElement).getAllByRole("status");
+		expect(statuses).toHaveLength(2);
+
+		// Order: Editing indicator in Slot 1 (left), then Live indicator in Slot 2 (right)
+		expect(statuses[0]).toHaveAttribute("data-editing-indicator", "true");
+		expect(statuses[0]).toHaveAttribute("role", "status");
+		expect(statuses[0]).toHaveAttribute(
+			"aria-label",
+			"Currently editing in item editor",
+		);
+		expect(statuses[0]).toHaveAttribute(
+			"title",
+			"Currently editing in item editor",
+		);
+
+		expect(statuses[1]).toHaveAttribute("data-live-indicator", "true");
+		expect(statuses[1]).toHaveAttribute("role", "status");
+		expect(statuses[1]).toHaveAttribute(
+			"aria-label",
+			"Currently live in presentation",
+		);
+		expect(statuses[1]).toHaveAttribute(
+			"title",
+			"Currently live in presentation",
+		);
+
+		// No interactive buttons in action cell when live
+		const buttons = within(actionCell as HTMLElement).queryAllByRole("button");
+		expect(buttons).toHaveLength(0);
 	});
 });

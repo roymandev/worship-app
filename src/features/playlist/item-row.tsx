@@ -5,6 +5,7 @@ import {
 	IconPlayerPlay,
 	IconPlus,
 	IconTrash,
+	IconVideo,
 } from "@tabler/icons-react";
 import { cn } from "cn";
 import { useRef } from "react";
@@ -37,6 +38,18 @@ export function PlaylistItemRow({
 }: Props) {
 	const localRowRef = useRef<HTMLDivElement | null>(null);
 	const actionCellRef = useRef<HTMLDivElement | null>(null);
+	const isLive = usePlaylistStore((s) => s.liveItemId === item.id);
+
+	const handleGoLive = () => {
+		if (isLive) return;
+		usePlaylistStore.getState().goLive(item.id);
+		requestAnimationFrame(() => {
+			const activeCueRow = document.querySelector<HTMLElement>(
+				'[role="grid"][aria-label="Live cue items"] [role="row"][aria-selected="true"]',
+			);
+			activeCueRow?.focus();
+		});
+	};
 
 	const handleMoveUp = () => {
 		if (index > 0) {
@@ -113,6 +126,22 @@ export function PlaylistItemRow({
 			e.preventDefault();
 			e.stopPropagation();
 			usePlaylistStore.getState().startEditingItem(item.id);
+			return;
+		}
+
+		// Enter: Go Live (if not already live)
+		if (
+			!e.altKey &&
+			!e.ctrlKey &&
+			!e.metaKey &&
+			!e.shiftKey &&
+			e.key === "Enter"
+		) {
+			if (!isLive) {
+				e.preventDefault();
+				e.stopPropagation();
+				handleGoLive();
+			}
 			return;
 		}
 
@@ -197,11 +226,15 @@ export function PlaylistItemRow({
 						role="row"
 						data-item-id={item.id}
 						data-editing={isEditing ? "true" : undefined}
+						data-live={isLive ? "true" : undefined}
 						tabIndex={isSelected ? 0 : -1}
 						aria-selected={isSelected}
 						onClick={() => {
 							usePlaylistStore.getState().selectItem(item.id);
 							usePlaylistStore.getState().closeDeleteConfirm();
+						}}
+						onDoubleClick={() => {
+							handleGoLive();
 						}}
 						onKeyDown={handleRowKeyDown}
 						className={cn(
@@ -220,15 +253,7 @@ export function PlaylistItemRow({
 					role="gridcell"
 					className="flex min-w-0 flex-1 items-center gap-1.5 truncate"
 				>
-					{isEditing && (
-						<IconPencil
-							className="size-3.5 text-primary shrink-0"
-							title="In item editor"
-							aria-hidden="true"
-						/>
-					)}
 					<span className="truncate">{item.title}</span>
-					{isEditing && <span className="sr-only">(editing)</span>}
 				</div>
 
 				{/* biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Cell */}
@@ -243,23 +268,53 @@ export function PlaylistItemRow({
 						e.stopPropagation();
 					}}
 				>
-					<Button
-						variant="ghost"
-						size="icon-xs"
-						tabIndex={-1}
-						title="Go Live"
-						aria-label="Go Live"
-						className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground"
-					>
-						<IconPlayerPlay className="size-3.5" />
-					</Button>
+					{isEditing && (
+						// biome-ignore lint/a11y/useSemanticElements: ARIA live status indicator inside gridcell
+						<span
+							role="status"
+							aria-label="Currently editing in item editor"
+							title="Currently editing in item editor"
+							data-editing-indicator="true"
+							className="flex size-5 items-center justify-center text-amber-500 dark:text-amber-400"
+						>
+							<IconPencil className="size-3.5 shrink-0" />
+							<span className="sr-only">(editing)</span>
+						</span>
+					)}
+
+					{isLive ? (
+						// biome-ignore lint/a11y/useSemanticElements: ARIA live status indicator inside gridcell
+						<span
+							role="status"
+							aria-label="Currently live in presentation"
+							title="Currently live in presentation"
+							data-live-indicator="true"
+							className="flex size-5 items-center justify-center text-destructive"
+						>
+							<IconVideo className="size-3.5 shrink-0" />
+							<span className="sr-only">(live)</span>
+						</span>
+					) : (
+						<Button
+							variant="ghost"
+							size="icon-xs"
+							tabIndex={-1}
+							title="Go Live"
+							aria-label="Go Live"
+							onClick={handleGoLive}
+							className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
+						>
+							<IconPlayerPlay className="size-3.5" />
+						</Button>
+					)}
 				</div>
 			</ContextMenuTrigger>
 
 			<ContextMenuContent>
 				<ContextMenuItem
+					disabled={isLive}
 					onClick={() => {
-						usePlaylistStore.getState().selectItem(item.id);
+						handleGoLive();
 					}}
 				>
 					<IconPlayerPlay />

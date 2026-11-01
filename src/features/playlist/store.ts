@@ -83,6 +83,8 @@ export const INITIAL_PLAYLIST_STATE = {
 	items: INITIAL_PLAYLIST_ITEMS,
 	selectedItemId: INITIAL_PLAYLIST_ITEMS[0]?.id ?? null,
 	selectedCueIndex: 0,
+	liveItemId: null,
+	liveCueIndex: null,
 	editingItemId: null,
 	activeConfirmDeleteId: null,
 	previewDraft: null,
@@ -92,6 +94,8 @@ export type PlaylistState = {
 	items: PlaylistItem[];
 	selectedItemId: string | null;
 	selectedCueIndex: number | null;
+	liveItemId: string | null;
+	liveCueIndex: number | null;
 	editingItemId: string | null;
 	activeConfirmDeleteId: string | null;
 	previewDraft: PreviewDraft | null;
@@ -101,6 +105,11 @@ export type PlaylistState = {
 	selectCue: (index: number | null) => void;
 	selectPreviousCue: () => void;
 	selectNextCue: () => void;
+	goLive: (itemId: string, cueIndex?: number) => void;
+	selectLiveCue: (index: number) => void;
+	selectPreviousLiveCue: () => void;
+	selectNextLiveCue: () => void;
+	clearLive: () => void;
 	addItem: (title?: string, content?: string) => PlaylistItem;
 	insertItemAfter: (
 		targetId: string,
@@ -206,6 +215,83 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 		const currentIndex = selectedCueIndex ?? 0;
 		const nextIndex = Math.min(cues.length - 1, currentIndex + 1);
 		set({ selectedCueIndex: nextIndex });
+	},
+
+	goLive: (itemId, cueIndex) => {
+		const { items, selectedItemId, selectedCueIndex } = get();
+		const item = items.find((i) => i.id === itemId);
+		if (!item) return;
+
+		let targetCueIndex: number | null = null;
+		const cues = parseCues(item.content);
+		if (cues.length > 0) {
+			if (cueIndex !== undefined) {
+				targetCueIndex = Math.max(0, Math.min(cues.length - 1, cueIndex));
+			} else if (selectedItemId === itemId) {
+				targetCueIndex =
+					selectedCueIndex !== null
+						? Math.max(0, Math.min(cues.length - 1, selectedCueIndex))
+						: 0;
+			} else {
+				targetCueIndex = 0;
+			}
+		}
+
+		set({
+			liveItemId: itemId,
+			liveCueIndex: targetCueIndex,
+		});
+	},
+
+	selectLiveCue: (index) => {
+		const { items, liveItemId } = get();
+		if (liveItemId === null) return;
+		const liveItem = items.find((item) => item.id === liveItemId);
+		if (!liveItem) return;
+		const cues = parseCues(liveItem.content);
+		if (cues.length === 0) {
+			set({ liveCueIndex: null });
+			return;
+		}
+		const clampedIndex = Math.max(0, Math.min(cues.length - 1, index));
+		set({ liveCueIndex: clampedIndex });
+	},
+
+	selectPreviousLiveCue: () => {
+		const { items, liveItemId, liveCueIndex } = get();
+		if (liveItemId === null) return;
+		const liveItem = items.find((item) => item.id === liveItemId);
+		if (!liveItem) return;
+		const cues = parseCues(liveItem.content);
+		if (cues.length === 0) {
+			set({ liveCueIndex: null });
+			return;
+		}
+		const currentIndex = liveCueIndex ?? 0;
+		const nextIndex = Math.max(0, currentIndex - 1);
+		set({ liveCueIndex: nextIndex });
+	},
+
+	selectNextLiveCue: () => {
+		const { items, liveItemId, liveCueIndex } = get();
+		if (liveItemId === null) return;
+		const liveItem = items.find((item) => item.id === liveItemId);
+		if (!liveItem) return;
+		const cues = parseCues(liveItem.content);
+		if (cues.length === 0) {
+			set({ liveCueIndex: null });
+			return;
+		}
+		const currentIndex = liveCueIndex ?? 0;
+		const nextIndex = Math.min(cues.length - 1, currentIndex + 1);
+		set({ liveCueIndex: nextIndex });
+	},
+
+	clearLive: () => {
+		set({
+			liveItemId: null,
+			liveCueIndex: null,
+		});
 	},
 
 	addItem: (title = "(Untitled)", content = "") => {
@@ -322,6 +408,8 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 				items: newItems,
 				selectedItemId: nextSelectedId,
 				selectedCueIndex: nextSelectedCueIndex,
+				liveItemId: state.liveItemId === id ? null : state.liveItemId,
+				liveCueIndex: state.liveItemId === id ? null : state.liveCueIndex,
 				editingItemId: state.editingItemId === id ? null : state.editingItemId,
 				activeConfirmDeleteId:
 					state.activeConfirmDeleteId === id
@@ -347,8 +435,10 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 			};
 
 			let nextSelectedCueIndex = state.selectedCueIndex;
+			let nextLiveCueIndex = state.liveCueIndex;
+			const updatedCues = parseCues(newItems[index].content);
+
 			if (state.selectedItemId === id) {
-				const updatedCues = parseCues(newItems[index].content);
 				if (updatedCues.length === 0) {
 					nextSelectedCueIndex = null;
 				} else {
@@ -357,9 +447,19 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 				}
 			}
 
+			if (state.liveItemId === id) {
+				if (updatedCues.length === 0) {
+					nextLiveCueIndex = null;
+				} else {
+					const currentIndex = state.liveCueIndex ?? 0;
+					nextLiveCueIndex = Math.min(currentIndex, updatedCues.length - 1);
+				}
+			}
+
 			return {
 				items: newItems,
 				selectedCueIndex: nextSelectedCueIndex,
+				liveCueIndex: nextLiveCueIndex,
 			};
 		});
 	},

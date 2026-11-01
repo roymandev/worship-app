@@ -2,19 +2,16 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WorkspaceMenubar } from "./menubar";
-import { useWorkspaceStore } from "./store";
+import { INITIAL_WORKSPACE_STATE, useWorkspaceStore } from "./store";
 
 describe("WorkspaceMenubar", () => {
 	beforeEach(() => {
-		useWorkspaceStore.setState({
-			mode: "view",
-			isResetDialogOpen: false,
-			isCheatsheetOpen: false,
-		});
+		useWorkspaceStore.setState(INITIAL_WORKSPACE_STATE);
 	});
 
 	afterEach(() => {
 		cleanup();
+		useWorkspaceStore.setState(INITIAL_WORKSPACE_STATE);
 	});
 
 	it("renders menubar and top-level triggers with accessible roles", () => {

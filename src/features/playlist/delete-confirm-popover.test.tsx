@@ -1,10 +1,14 @@
-import { describe, expect, it, mock } from "bun:test";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, mock } from "bun:test";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { PlaylistDeleteConfirmPopover } from "./delete-confirm-popover";
 
 describe("PlaylistDeleteConfirmPopover", () => {
+	afterEach(() => {
+		cleanup();
+	});
+
 	function TestWrapper({
 		open = true,
 		itemId = "test-item-1",
@@ -23,13 +27,15 @@ describe("PlaylistDeleteConfirmPopover", () => {
 				<button ref={setAnchor} type="button" id="anchor-btn">
 					Anchor
 				</button>
-				<PlaylistDeleteConfirmPopover
-					open={open}
-					anchor={anchor}
-					itemId={itemId}
-					onConfirm={onConfirm}
-					onClose={onClose}
-				/>
+				{anchor && (
+					<PlaylistDeleteConfirmPopover
+						open={open}
+						anchor={anchor}
+						itemId={itemId}
+						onConfirm={onConfirm}
+						onClose={onClose}
+					/>
+				)}
 			</div>
 		);
 	}

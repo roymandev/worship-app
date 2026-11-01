@@ -2,6 +2,12 @@ import { create } from "zustand";
 
 export type WorkspaceLayoutMode = "view" | "edit";
 
+export const INITIAL_WORKSPACE_STATE = {
+	mode: "view" as const,
+	isResetDialogOpen: false,
+	isCheatsheetOpen: false,
+} as const;
+
 type WorkspaceState = {
 	mode: WorkspaceLayoutMode;
 	isResetDialogOpen: boolean;
@@ -16,9 +22,7 @@ type WorkspaceState = {
 };
 
 export const useWorkspaceStore = create<WorkspaceState>()((set) => ({
-	mode: "view",
-	isResetDialogOpen: false,
-	isCheatsheetOpen: false,
+	...INITIAL_WORKSPACE_STATE,
 	setMode: (mode) => set({ mode }),
 	toggleMode: () =>
 		set((state) => ({

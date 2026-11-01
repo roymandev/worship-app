@@ -9,9 +9,14 @@ import {
 import userEvent from "@testing-library/user-event";
 import {
 	INITIAL_PLAYLIST_ITEMS,
+	INITIAL_PLAYLIST_STATE,
 	usePlaylistStore,
 } from "@/features/playlist/store";
 import { WorkspaceCenterPanel } from "@/features/workspace/center-panel";
+import {
+	INITIAL_WORKSPACE_STATE,
+	useWorkspaceStore,
+} from "@/features/workspace/store";
 import { Route } from "@/routes/index";
 
 // tanstack router file route exports Route which has component
@@ -20,15 +25,19 @@ const WorkspaceView = Route.options.component ?? (() => null);
 describe("Workspace Center Panel Integration", () => {
 	beforeEach(() => {
 		usePlaylistStore.setState({
+			...INITIAL_PLAYLIST_STATE,
 			items: [...INITIAL_PLAYLIST_ITEMS],
-			selectedItemId: "item-1",
-			editingItemId: null,
-			activeConfirmDeleteId: null,
 		});
+		useWorkspaceStore.setState(INITIAL_WORKSPACE_STATE);
 	});
 
 	afterEach(() => {
 		cleanup();
+		usePlaylistStore.setState({
+			...INITIAL_PLAYLIST_STATE,
+			items: [...INITIAL_PLAYLIST_ITEMS],
+		});
+		useWorkspaceStore.setState(INITIAL_WORKSPACE_STATE);
 	});
 
 	it("renders CueListPanel and PreviewScreenPanel when editingItemId is null and selectedItemId is resolved", () => {

@@ -79,6 +79,15 @@ Ten thousand reasons for my heart to find`,
 
 export type PreviewDraft = { content: string; caretOffset: number };
 
+export const INITIAL_PLAYLIST_STATE = {
+	items: INITIAL_PLAYLIST_ITEMS,
+	selectedItemId: INITIAL_PLAYLIST_ITEMS[0]?.id ?? null,
+	selectedCueIndex: 0,
+	editingItemId: null,
+	activeConfirmDeleteId: null,
+	previewDraft: null,
+} as const;
+
 export type PlaylistState = {
 	items: PlaylistItem[];
 	selectedItemId: string | null;
@@ -110,23 +119,8 @@ export type PlaylistState = {
 	clearPreviewDraft: () => void;
 };
 
-function getInitialCueIndex(
-	items: PlaylistItem[],
-	selectedId: string | null,
-): number | null {
-	if (!selectedId) return null;
-	const item = items.find((i) => i.id === selectedId);
-	if (!item) return null;
-	return parseCues(item.content).length > 0 ? 0 : null;
-}
-
 export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
-	items: INITIAL_PLAYLIST_ITEMS,
-	selectedItemId: "item-1",
-	selectedCueIndex: getInitialCueIndex(INITIAL_PLAYLIST_ITEMS, "item-1"),
-	editingItemId: null,
-	activeConfirmDeleteId: null,
-	previewDraft: null,
+	...INITIAL_PLAYLIST_STATE,
 
 	selectItem: (id) => {
 		const { items } = get();

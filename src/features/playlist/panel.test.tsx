@@ -9,20 +9,45 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PlaylistPanel } from "./panel";
-import { INITIAL_PLAYLIST_ITEMS, usePlaylistStore } from "./store";
+import { INITIAL_PLAYLIST_STATE, usePlaylistStore } from "./store";
 
 describe("PlaylistPanel", () => {
 	beforeEach(() => {
 		usePlaylistStore.setState({
-			items: [...INITIAL_PLAYLIST_ITEMS],
-			selectedItemId: "item-1",
-			editingItemId: null,
-			activeConfirmDeleteId: null,
+			...INITIAL_PLAYLIST_STATE,
+			hydrationStatus: "ready",
 		});
 	});
 
 	afterEach(() => {
 		cleanup();
+	});
+
+	it("renders accessible loading skeleton when hydrationStatus is idle or hydrating", () => {
+		usePlaylistStore.setState({ hydrationStatus: "idle" });
+		const { rerender } = render(<PlaylistPanel />);
+
+		let loader = screen.getByRole("status", { name: "Loading playlist" });
+		expect(loader).toBeInTheDocument();
+		expect(screen.queryByRole("grid")).not.toBeInTheDocument();
+		expect(screen.queryByText("Playlist is empty")).not.toBeInTheDocument();
+
+		usePlaylistStore.setState({ hydrationStatus: "hydrating" });
+		rerender(<PlaylistPanel />);
+
+		loader = screen.getByRole("status", { name: "Loading playlist" });
+		expect(loader).toBeInTheDocument();
+		expect(screen.queryByRole("grid")).not.toBeInTheDocument();
+	});
+
+	it("renders accessible error state when hydrationStatus is error", () => {
+		usePlaylistStore.setState({ hydrationStatus: "error" });
+		render(<PlaylistPanel />);
+
+		const alert = screen.getByRole("alert", { name: "Playlist error" });
+		expect(alert).toBeInTheDocument();
+		expect(screen.getByText("Failed to load playlist")).toBeInTheDocument();
+		expect(screen.queryByRole("grid")).not.toBeInTheDocument();
 	});
 
 	it("renders the 3 initial dummy items with header containing only Add button", () => {

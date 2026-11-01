@@ -79,6 +79,8 @@ Ten thousand reasons for my heart to find`,
 
 export type PreviewDraft = { content: string; caretOffset: number };
 
+export type HydrationStatus = "idle" | "hydrating" | "ready" | "error";
+
 export const INITIAL_PLAYLIST_STATE = {
 	items: INITIAL_PLAYLIST_ITEMS,
 	selectedItemId: INITIAL_PLAYLIST_ITEMS[0]?.id ?? null,
@@ -88,6 +90,7 @@ export const INITIAL_PLAYLIST_STATE = {
 	editingItemId: null,
 	activeConfirmDeleteId: null,
 	previewDraft: null,
+	hydrationStatus: "idle" as HydrationStatus,
 } as const;
 
 export type PlaylistState = {
@@ -99,6 +102,9 @@ export type PlaylistState = {
 	editingItemId: string | null;
 	activeConfirmDeleteId: string | null;
 	previewDraft: PreviewDraft | null;
+	hydrationStatus: HydrationStatus;
+	setHydrationStatus: (status: HydrationStatus) => void;
+	setHydratedItems: (items: PlaylistItem[]) => void;
 	selectItem: (id: string | null) => void;
 	selectPrevious: () => void;
 	selectNext: () => void;
@@ -130,6 +136,58 @@ export type PlaylistState = {
 
 export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 	...INITIAL_PLAYLIST_STATE,
+
+	setHydrationStatus: (status) => set({ hydrationStatus: status }),
+
+	setHydratedItems: (items) => {
+		const { selectedItemId, selectedCueIndex, liveItemId, liveCueIndex } =
+			get();
+
+		let nextSelectedId: string | null = null;
+		let nextSelectedCueIndex: number | null = null;
+		let nextLiveId: string | null = null;
+		let nextLiveCueIndex: number | null = null;
+
+		if (items.length > 0) {
+			const matchingItem = items.find((i) => i.id === selectedItemId);
+			const targetItem = matchingItem ?? items[0];
+			nextSelectedId = targetItem.id;
+			const cues = parseCues(targetItem.content);
+			if (cues.length > 0) {
+				if (matchingItem && selectedCueIndex !== null) {
+					nextSelectedCueIndex = Math.min(selectedCueIndex, cues.length - 1);
+				} else {
+					nextSelectedCueIndex = 0;
+				}
+			} else {
+				nextSelectedCueIndex = null;
+			}
+		}
+
+		if (liveItemId !== null) {
+			const matchingLiveItem = items.find((i) => i.id === liveItemId);
+			if (matchingLiveItem) {
+				nextLiveId = matchingLiveItem.id;
+				const liveCues = parseCues(matchingLiveItem.content);
+				if (liveCues.length > 0) {
+					nextLiveCueIndex =
+						liveCueIndex !== null
+							? Math.min(liveCueIndex, liveCues.length - 1)
+							: 0;
+				} else {
+					nextLiveCueIndex = null;
+				}
+			}
+		}
+
+		set({
+			items,
+			selectedItemId: nextSelectedId,
+			selectedCueIndex: nextSelectedCueIndex,
+			liveItemId: nextLiveId,
+			liveCueIndex: nextLiveCueIndex,
+		});
+	},
 
 	selectItem: (id) => {
 		const { items } = get();

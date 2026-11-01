@@ -1,4 +1,4 @@
-import { IconList, IconPlus } from "@tabler/icons-react";
+import { IconAlertCircle, IconList, IconPlus } from "@tabler/icons-react";
 import type * as React from "react";
 import { useEffect, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
@@ -15,15 +15,21 @@ import { PlaylistItemRow } from "@/features/playlist/item-row";
 import { usePlaylistStore } from "@/features/playlist/store";
 
 export function PlaylistPanel() {
-	const { items, selectedItemId, editingItemId, activeConfirmDeleteId } =
-		usePlaylistStore(
-			useShallow((s) => ({
-				items: s.items,
-				selectedItemId: s.selectedItemId,
-				editingItemId: s.editingItemId,
-				activeConfirmDeleteId: s.activeConfirmDeleteId,
-			})),
-		);
+	const {
+		items,
+		selectedItemId,
+		editingItemId,
+		activeConfirmDeleteId,
+		hydrationStatus,
+	} = usePlaylistStore(
+		useShallow((s) => ({
+			items: s.items,
+			selectedItemId: s.selectedItemId,
+			editingItemId: s.editingItemId,
+			activeConfirmDeleteId: s.activeConfirmDeleteId,
+			hydrationStatus: s.hydrationStatus,
+		})),
+	);
 
 	const gridRef = useRef<HTMLDivElement | null>(null);
 	const addButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -160,7 +166,34 @@ export function PlaylistPanel() {
 				}}
 			>
 				<ContextMenuTrigger className="min-h-0 flex-1 overflow-y-auto p-2">
-					{items.length === 0 ? (
+					{hydrationStatus === "idle" || hydrationStatus === "hydrating" ? (
+						<output
+							aria-label="Loading playlist"
+							className="flex flex-col gap-2 p-1"
+						>
+							<div className="h-9 w-full animate-pulse rounded bg-muted/50" />
+							<div className="h-9 w-full animate-pulse rounded bg-muted/50" />
+							<div className="h-9 w-full animate-pulse rounded bg-muted/50" />
+						</output>
+					) : hydrationStatus === "error" ? (
+						<div
+							role="alert"
+							aria-label="Playlist error"
+							className="flex flex-col items-center justify-center gap-3 p-6 text-center text-destructive"
+						>
+							<div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-destructive/10 text-destructive">
+								<IconAlertCircle className="size-4" />
+							</div>
+							<div className="flex flex-col gap-1">
+								<h3 className="font-heading text-sm font-medium tracking-tight">
+									Failed to load playlist
+								</h3>
+								<p className="text-muted-foreground text-xs">
+									An error occurred while loading your saved playlist data.
+								</p>
+							</div>
+						</div>
+					) : items.length === 0 ? (
 						<EmptyState
 							className="border-none"
 							icon={<IconList className="size-4" />}

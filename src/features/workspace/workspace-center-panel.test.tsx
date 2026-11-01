@@ -27,6 +27,7 @@ describe("Workspace Center Panel Integration", () => {
 		usePlaylistStore.setState({
 			...INITIAL_PLAYLIST_STATE,
 			items: [...INITIAL_PLAYLIST_ITEMS],
+			hydrationStatus: "ready",
 		});
 		useWorkspaceStore.setState(INITIAL_WORKSPACE_STATE);
 	});
@@ -36,6 +37,7 @@ describe("Workspace Center Panel Integration", () => {
 		usePlaylistStore.setState({
 			...INITIAL_PLAYLIST_STATE,
 			items: [...INITIAL_PLAYLIST_ITEMS],
+			hydrationStatus: "ready",
 		});
 		useWorkspaceStore.setState(INITIAL_WORKSPACE_STATE);
 	});

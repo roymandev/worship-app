@@ -166,7 +166,7 @@ export function PlaylistPanel() {
 					}
 				}}
 			>
-				<ContextMenuTrigger className="min-h-0 flex-1 overflow-y-auto p-2">
+				<ContextMenuTrigger className="flex min-h-0 flex-1 flex-col overflow-y-auto p-2">
 					{hydrationStatus === "idle" || hydrationStatus === "hydrating" ? (
 						<output
 							aria-label="Loading playlist"
@@ -196,7 +196,6 @@ export function PlaylistPanel() {
 						</div>
 					) : items.length === 0 ? (
 						<EmptyState
-							className="border-none"
 							icon={<IconList className="size-4" />}
 							title="Playlist is empty"
 							description="Add items to build your worship service order."

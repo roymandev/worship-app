@@ -20,7 +20,7 @@ export function CueListPanel() {
 				</h2>
 			</header>
 
-			<div className="min-h-0 flex-1 overflow-y-auto p-2">
+			<div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-2">
 				<CueList
 					target="stage"
 					ariaLabel="Cue items"

@@ -113,13 +113,7 @@ export function CueList({
 	};
 
 	if (cues.length === 0) {
-		return (
-			<EmptyState
-				className="border-none"
-				title="No cues"
-				description={emptyMessage}
-			/>
-		);
+		return <EmptyState title="No cues" description={emptyMessage} />;
 	}
 
 	return (

@@ -38,14 +38,11 @@ export function StagePanel() {
 					) : isSelectedItemResolved ? (
 						<CueListPanel />
 					) : (
-						<div className="flex h-full items-center justify-center p-6">
-							<EmptyState
-								className="border-none"
-								icon={<IconList className="size-4" />}
-								title="No playlist item selected"
-								description="Select an item from the playlist to view its cues."
-							/>
-						</div>
+						<EmptyState
+							icon={<IconList className="size-4" />}
+							title="No playlist item selected"
+							description="Select an item from the playlist to view its cues."
+						/>
 					)}
 				</ResizablePanel>
 				<ResizableHandle disabled={!isEditMode} withHandle={isEditMode} />

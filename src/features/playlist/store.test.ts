@@ -1,17 +1,13 @@
 import { beforeEach, describe, expect, it } from "bun:test";
-import { INITIAL_PLAYLIST_ITEMS, usePlaylistStore } from "./store";
+import {
+	INITIAL_PLAYLIST_ITEMS,
+	INITIAL_PLAYLIST_STATE,
+	usePlaylistStore,
+} from "./store";
 
 describe("usePlaylistStore", () => {
 	beforeEach(() => {
-		usePlaylistStore.setState({
-			items: [...INITIAL_PLAYLIST_ITEMS],
-			selectedItemId: "item-1",
-			selectedCueIndex: 0,
-			liveItemId: null,
-			liveCueIndex: null,
-			editingItemId: null,
-			activeConfirmDeleteId: null,
-		});
+		usePlaylistStore.setState(INITIAL_PLAYLIST_STATE);
 	});
 
 	it("initializes with default state", () => {
@@ -85,6 +81,8 @@ Ten thousand reasons for my heart to find`,
 		expect(state.selectedCueIndex).toBe(0);
 		expect(state.liveItemId).toBeNull();
 		expect(state.liveCueIndex).toBeNull();
+		expect(state.isLiveClear).toBe(false);
+		expect(state.isLiveBlackout).toBe(false);
 		expect(state.editingItemId).toBeNull();
 		expect(state.activeConfirmDeleteId).toBeNull();
 	});
@@ -768,25 +766,36 @@ Ten thousand reasons for my heart to find`,
 			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
 		});
 
-		it("clearLive resets liveItemId and liveCueIndex to null", () => {
+		it("clearLive resets liveItemId, liveCueIndex to null, and isLiveClear to false, but preserves isLiveBlackout", () => {
 			usePlaylistStore.getState().goLive("item-live-1", 1);
+			usePlaylistStore.getState().setLiveClear(true);
+			usePlaylistStore.getState().setLiveBlackout(true);
 			expect(usePlaylistStore.getState().liveItemId).toBe("item-live-1");
 			expect(usePlaylistStore.getState().liveCueIndex).toBe(1);
+			expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+			expect(usePlaylistStore.getState().isLiveBlackout).toBe(true);
 
 			usePlaylistStore.getState().clearLive();
 			expect(usePlaylistStore.getState().liveItemId).toBeNull();
 			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+			expect(usePlaylistStore.getState().isLiveClear).toBe(false);
+			expect(usePlaylistStore.getState().isLiveBlackout).toBe(true);
 		});
 
-		it("deleteItem resets live state to null if deleted item was live", () => {
+		it("deleteItem resets live state to null and isLiveClear to false if deleted item was live", () => {
 			usePlaylistStore.getState().goLive("item-live-1", 1);
+			usePlaylistStore.getState().toggleLiveClear();
+			expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+
 			usePlaylistStore.getState().deleteItem("item-live-2"); // non-live item
 			expect(usePlaylistStore.getState().liveItemId).toBe("item-live-1");
 			expect(usePlaylistStore.getState().liveCueIndex).toBe(1);
+			expect(usePlaylistStore.getState().isLiveClear).toBe(true);
 
 			usePlaylistStore.getState().deleteItem("item-live-1"); // live item
 			expect(usePlaylistStore.getState().liveItemId).toBeNull();
 			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+			expect(usePlaylistStore.getState().isLiveClear).toBe(false);
 		});
 
 		it("updateItem clamps liveCueIndex if live item cues shrink, or sets to null if emptied", () => {
@@ -812,6 +821,120 @@ Ten thousand reasons for my heart to find`,
 				content: "   ",
 			});
 			expect(usePlaylistStore.getState().liveCueIndex).toBeNull();
+		});
+
+		describe("live clear and blackout presentation controls", () => {
+			it("toggles and sets isLiveClear", () => {
+				expect(usePlaylistStore.getState().isLiveClear).toBe(false);
+
+				usePlaylistStore.getState().toggleLiveClear();
+				expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+
+				usePlaylistStore.getState().toggleLiveClear();
+				expect(usePlaylistStore.getState().isLiveClear).toBe(false);
+
+				usePlaylistStore.getState().setLiveClear(true);
+				expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+
+				usePlaylistStore.getState().setLiveClear(false);
+				expect(usePlaylistStore.getState().isLiveClear).toBe(false);
+			});
+
+			it("toggles and sets isLiveBlackout", () => {
+				expect(usePlaylistStore.getState().isLiveBlackout).toBe(false);
+
+				usePlaylistStore.getState().toggleLiveBlackout();
+				expect(usePlaylistStore.getState().isLiveBlackout).toBe(true);
+
+				usePlaylistStore.getState().toggleLiveBlackout();
+				expect(usePlaylistStore.getState().isLiveBlackout).toBe(false);
+
+				usePlaylistStore.getState().setLiveBlackout(true);
+				expect(usePlaylistStore.getState().isLiveBlackout).toBe(true);
+
+				usePlaylistStore.getState().setLiveBlackout(false);
+				expect(usePlaylistStore.getState().isLiveBlackout).toBe(false);
+			});
+
+			it("auto-dismisses isLiveClear on selectCue with target live", () => {
+				usePlaylistStore.getState().goLive("item-live-1", 0);
+				usePlaylistStore.getState().setLiveClear(true);
+				expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+
+				// selectCue on stage should NOT dismiss isLiveClear
+				usePlaylistStore.getState().selectCue("stage", 1);
+				expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+
+				// selectCue on live should dismiss isLiveClear
+				usePlaylistStore.getState().selectCue("live", 1);
+				expect(usePlaylistStore.getState().isLiveClear).toBe(false);
+			});
+
+			it("auto-dismisses isLiveClear on selectLiveCue", () => {
+				usePlaylistStore.getState().goLive("item-live-1", 0);
+				usePlaylistStore.getState().setLiveClear(true);
+				expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+
+				usePlaylistStore.getState().selectLiveCue(2);
+				expect(usePlaylistStore.getState().isLiveClear).toBe(false);
+			});
+
+			it("auto-dismisses isLiveClear on navigateCue with target live", () => {
+				usePlaylistStore.getState().goLive("item-live-1", 0);
+				usePlaylistStore.getState().setLiveClear(true);
+				expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+
+				// navigateCue on stage should NOT dismiss isLiveClear
+				usePlaylistStore.getState().navigateCue("stage", "next");
+				expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+
+				// navigateCue on live should dismiss isLiveClear
+				usePlaylistStore.getState().navigateCue("live", "next");
+				expect(usePlaylistStore.getState().isLiveClear).toBe(false);
+			});
+
+			it("auto-dismisses isLiveClear on selectPreviousLiveCue and selectNextLiveCue", () => {
+				usePlaylistStore.getState().goLive("item-live-1", 1);
+
+				usePlaylistStore.getState().setLiveClear(true);
+				expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+				usePlaylistStore.getState().selectPreviousLiveCue();
+				expect(usePlaylistStore.getState().isLiveClear).toBe(false);
+
+				usePlaylistStore.getState().setLiveClear(true);
+				expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+				usePlaylistStore.getState().selectNextLiveCue();
+				expect(usePlaylistStore.getState().isLiveClear).toBe(false);
+			});
+
+			it("auto-dismisses isLiveClear on goLive", () => {
+				usePlaylistStore.getState().setLiveClear(true);
+				expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+
+				usePlaylistStore.getState().goLive("item-live-1", 1);
+				expect(usePlaylistStore.getState().isLiveClear).toBe(false);
+			});
+
+			it("does not auto-dismiss isLiveBlackout during cue transitions or goLive", () => {
+				usePlaylistStore.getState().goLive("item-live-1", 0);
+				usePlaylistStore.getState().setLiveBlackout(true);
+				expect(usePlaylistStore.getState().isLiveBlackout).toBe(true);
+
+				usePlaylistStore.getState().selectCue("live", 1);
+				expect(usePlaylistStore.getState().isLiveBlackout).toBe(true);
+
+				usePlaylistStore.getState().navigateCue("live", "next");
+				expect(usePlaylistStore.getState().isLiveBlackout).toBe(true);
+
+				usePlaylistStore.getState().selectNextLiveCue();
+				expect(usePlaylistStore.getState().isLiveBlackout).toBe(true);
+
+				usePlaylistStore.getState().selectPreviousLiveCue();
+				expect(usePlaylistStore.getState().isLiveBlackout).toBe(true);
+
+				usePlaylistStore.getState().goLive("item-live-2", 0);
+				expect(usePlaylistStore.getState().isLiveBlackout).toBe(true);
+			});
 		});
 	});
 });

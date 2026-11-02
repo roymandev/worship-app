@@ -85,6 +85,8 @@ export const INITIAL_PLAYLIST_STATE = {
 	selectedCueIndex: 0,
 	liveItemId: null,
 	liveCueIndex: null,
+	isLiveClear: false,
+	isLiveBlackout: false,
 	editingItemId: null,
 	activeConfirmDeleteId: null,
 	hydrationStatus: "idle" as HydrationStatus,
@@ -96,6 +98,8 @@ export type PlaylistState = {
 	selectedCueIndex: number | null;
 	liveItemId: string | null;
 	liveCueIndex: number | null;
+	isLiveClear: boolean;
+	isLiveBlackout: boolean;
 	editingItemId: string | null;
 	activeConfirmDeleteId: string | null;
 	hydrationStatus: HydrationStatus;
@@ -119,6 +123,10 @@ export type PlaylistState = {
 	selectPreviousLiveCue: () => void;
 	selectNextLiveCue: () => void;
 	clearLive: () => void;
+	toggleLiveClear: () => void;
+	setLiveClear: (cleared: boolean) => void;
+	toggleLiveBlackout: () => void;
+	setLiveBlackout: (blackout: boolean) => void;
 	addItem: (title?: string, content?: string) => PlaylistItem;
 	insertItemAfter: (
 		targetId: string,
@@ -304,7 +312,7 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 		if (target === "stage") {
 			set({ selectedCueIndex: nextIndex });
 		} else {
-			set({ liveCueIndex: nextIndex });
+			set({ liveCueIndex: nextIndex, isLiveClear: false });
 		}
 	}) as PlaylistState["selectCue"],
 
@@ -365,7 +373,7 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 		if (target === "stage") {
 			set({ selectedCueIndex: nextIndex });
 		} else {
-			set({ liveCueIndex: nextIndex });
+			set({ liveCueIndex: nextIndex, isLiveClear: false });
 		}
 	},
 
@@ -400,6 +408,7 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 		set({
 			liveItemId: itemId,
 			liveCueIndex: targetCueIndex,
+			isLiveClear: false,
 		});
 	},
 
@@ -419,6 +428,31 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 		set({
 			liveItemId: null,
 			liveCueIndex: null,
+			isLiveClear: false,
+		});
+	},
+
+	toggleLiveClear: () => {
+		set((state) => ({
+			isLiveClear: !state.isLiveClear,
+		}));
+	},
+
+	setLiveClear: (cleared) => {
+		set({
+			isLiveClear: cleared,
+		});
+	},
+
+	toggleLiveBlackout: () => {
+		set((state) => ({
+			isLiveBlackout: !state.isLiveBlackout,
+		}));
+	},
+
+	setLiveBlackout: (blackout) => {
+		set({
+			isLiveBlackout: blackout,
 		});
 	},
 
@@ -532,12 +566,15 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 				}
 			}
 
+			const isDeletingLiveItem = state.liveItemId === id;
+
 			return {
 				items: newItems,
 				selectedItemId: nextSelectedId,
 				selectedCueIndex: nextSelectedCueIndex,
-				liveItemId: state.liveItemId === id ? null : state.liveItemId,
-				liveCueIndex: state.liveItemId === id ? null : state.liveCueIndex,
+				liveItemId: isDeletingLiveItem ? null : state.liveItemId,
+				liveCueIndex: isDeletingLiveItem ? null : state.liveCueIndex,
+				isLiveClear: isDeletingLiveItem ? false : state.isLiveClear,
 				editingItemId: state.editingItemId === id ? null : state.editingItemId,
 				activeConfirmDeleteId:
 					state.activeConfirmDeleteId === id

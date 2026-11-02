@@ -1,5 +1,6 @@
 import { IconDeviceTv } from "@tabler/icons-react";
 import { parseCues } from "@/features/playlist/cues";
+import { PreviewCanvas } from "@/features/playlist/preview-canvas";
 import {
 	type PlaylistState,
 	usePlaylistStore,
@@ -33,16 +34,7 @@ export function LivePreviewScreenPanel() {
 			</header>
 
 			<div className="@container [container-type:size] flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-muted/20 p-3">
-				<section
-					aria-label="Live preview canvas"
-					className="flex aspect-video w-[min(100%,calc(100cqh*16/9))] max-h-full max-w-full items-center justify-center overflow-hidden rounded-sm bg-black p-[clamp(0.75rem,2.5cqw,1.5rem)] text-center text-white select-none"
-				>
-					{displayText ? (
-						<p className="break-words font-medium text-[clamp(0.875rem,3.5cqw,1.25rem)] leading-relaxed whitespace-pre-line">
-							{displayText}
-						</p>
-					) : null}
-				</section>
+				<PreviewCanvas text={displayText} variant="live" />
 			</div>
 		</section>
 	);

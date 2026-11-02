@@ -134,6 +134,7 @@ export function PlaylistPanel() {
 
 	return (
 		<section
+			data-workspace-panel="playlist"
 			aria-label="Playlist panel"
 			className="flex h-full w-full flex-col overflow-hidden bg-background text-foreground"
 		>

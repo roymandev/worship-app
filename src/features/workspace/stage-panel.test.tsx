@@ -12,7 +12,7 @@ import {
 	INITIAL_PLAYLIST_STATE,
 	usePlaylistStore,
 } from "@/features/playlist/store";
-import { WorkspaceCenterPanel } from "@/features/workspace/center-panel";
+import { StagePanel } from "@/features/workspace/stage-panel";
 import {
 	INITIAL_WORKSPACE_STATE,
 	useWorkspaceStore,
@@ -22,7 +22,7 @@ import { Route } from "@/routes/index";
 // tanstack router file route exports Route which has component
 const WorkspaceView = Route.options.component ?? (() => null);
 
-describe("Workspace Center Panel Integration", () => {
+describe("Stage Panel Integration", () => {
 	beforeEach(() => {
 		usePlaylistStore.setState({
 			...INITIAL_PLAYLIST_STATE,
@@ -43,7 +43,7 @@ describe("Workspace Center Panel Integration", () => {
 	});
 
 	it("renders CueListPanel and PreviewScreenPanel when editingItemId is null and selectedItemId is resolved", () => {
-		render(<WorkspaceCenterPanel />);
+		render(<StagePanel />);
 
 		expect(
 			screen.getByRole("region", { name: "Cue list panel" }),
@@ -61,7 +61,7 @@ describe("Workspace Center Panel Integration", () => {
 
 	it("renders CueListPanel and PreviewScreenPanel when editingItemId cannot be resolved in playlistItems", () => {
 		usePlaylistStore.setState({ editingItemId: "non-existent-id" });
-		render(<WorkspaceCenterPanel />);
+		render(<StagePanel />);
 
 		expect(
 			screen.getByRole("region", { name: "Cue list panel" }),
@@ -79,7 +79,7 @@ describe("Workspace Center Panel Integration", () => {
 
 	it("renders EmptyState and PreviewScreenPanel when selectedItemId is null", () => {
 		usePlaylistStore.setState({ selectedItemId: null });
-		render(<WorkspaceCenterPanel />);
+		render(<StagePanel />);
 
 		expect(screen.getByText("No playlist item selected")).toBeInTheDocument();
 		expect(
@@ -98,7 +98,7 @@ describe("Workspace Center Panel Integration", () => {
 
 	it("renders EmptyState and PreviewScreenPanel when selectedItemId cannot be resolved in playlistItems", () => {
 		usePlaylistStore.setState({ selectedItemId: "non-existent-id" });
-		render(<WorkspaceCenterPanel />);
+		render(<StagePanel />);
 
 		expect(screen.getByText("No playlist item selected")).toBeInTheDocument();
 		expect(
@@ -111,7 +111,7 @@ describe("Workspace Center Panel Integration", () => {
 
 	it("renders PlaylistItemEditor and PreviewScreenPanel when editingItemId is set and resolved", () => {
 		usePlaylistStore.setState({ editingItemId: "item-1" });
-		render(<WorkspaceCenterPanel />);
+		render(<StagePanel />);
 
 		expect(
 			screen.queryByRole("region", { name: "Cue list panel" }),
@@ -122,6 +122,13 @@ describe("Workspace Center Panel Integration", () => {
 		expect(screen.getByLabelText("Title")).toHaveValue("Amazing Grace");
 		expect(
 			screen.getByRole("region", { name: "Preview screen panel" }),
+		).toBeInTheDocument();
+	});
+
+	it("has data-workspace-panel='stage' on the outer container", () => {
+		const { container } = render(<StagePanel />);
+		expect(
+			container.querySelector('[data-workspace-panel="stage"]'),
 		).toBeInTheDocument();
 	});
 

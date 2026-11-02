@@ -1,4 +1,7 @@
 import { defineAppHotkeys } from "@tanstack/react-hotkeys";
+import { focusWorkspacePanel } from "@/features/workspace/panel-focus";
+
+export { focusWorkspacePanel };
 
 export type AppHotkeyMeta = {
 	name: string;

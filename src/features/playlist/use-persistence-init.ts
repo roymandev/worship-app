@@ -1,18 +1,10 @@
 import { useEffect } from "react";
-import {
-	db,
-	hydratePlaylistStore,
-	initDatabase,
-	resetDatabase,
-	seedDemoData,
-	startPlaylistPersistence,
-} from "@/db";
+import { db, resetDatabase, seedDemoData } from "@/db";
+import { createPlaylistPersistenceCoordinator } from "./persistence";
+import { usePlaylistStore } from "./store";
 
 export function usePlaylistPersistenceInit() {
 	useEffect(() => {
-		let isCancelled = false;
-		let stopPersistence: (() => void) | null = null;
-
 		if (import.meta.env.DEV && typeof window !== "undefined") {
 			window.__db = {
 				db,
@@ -21,28 +13,18 @@ export function usePlaylistPersistenceInit() {
 			};
 		}
 
-		async function init() {
-			try {
-				await initDatabase();
-				if (isCancelled) return;
+		const coordinator = createPlaylistPersistenceCoordinator(
+			usePlaylistStore,
+			db,
+			{ debounceMs: 500 },
+		);
 
-				await hydratePlaylistStore();
-				if (isCancelled) return;
-
-				const syncManager = startPlaylistPersistence();
-				stopPersistence = syncManager.stop;
-			} catch (error) {
-				console.error("Failed to initialize playlist persistence:", error);
-			}
-		}
-
-		void init();
+		void coordinator.init().catch((error) => {
+			console.error("Failed to initialize playlist persistence:", error);
+		});
 
 		return () => {
-			isCancelled = true;
-			if (stopPersistence) {
-				stopPersistence();
-			}
+			coordinator.destroy();
 		};
 	}, []);
 }

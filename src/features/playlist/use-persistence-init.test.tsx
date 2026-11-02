@@ -28,7 +28,6 @@ describe("usePlaylistPersistenceInit Integration", () => {
 			liveCueIndex: null,
 			editingItemId: null,
 			activeConfirmDeleteId: null,
-			previewDraft: null,
 			hydrationStatus: "idle",
 		});
 	});

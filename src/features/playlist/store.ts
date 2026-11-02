@@ -77,8 +77,6 @@ Ten thousand reasons for my heart to find`,
 	},
 ];
 
-export type PreviewDraft = { content: string; caretOffset: number };
-
 export type HydrationStatus = "idle" | "hydrating" | "ready" | "error";
 
 export const INITIAL_PLAYLIST_STATE = {
@@ -89,7 +87,6 @@ export const INITIAL_PLAYLIST_STATE = {
 	liveCueIndex: null,
 	editingItemId: null,
 	activeConfirmDeleteId: null,
-	previewDraft: null,
 	hydrationStatus: "idle" as HydrationStatus,
 } as const;
 
@@ -101,14 +98,20 @@ export type PlaylistState = {
 	liveCueIndex: number | null;
 	editingItemId: string | null;
 	activeConfirmDeleteId: string | null;
-	previewDraft: PreviewDraft | null;
 	hydrationStatus: HydrationStatus;
 	setHydrationStatus: (status: HydrationStatus) => void;
 	setHydratedItems: (items: PlaylistItem[]) => void;
 	selectItem: (id: string | null) => void;
 	selectPrevious: () => void;
 	selectNext: () => void;
-	selectCue: (index: number | null) => void;
+	selectCue: {
+		(target: "stage" | "live", index: number | null): void;
+		(index: number | null): void;
+	};
+	navigateCue: (
+		target: "stage" | "live",
+		direction: "prev" | "next" | "first" | "last",
+	) => void;
 	selectPreviousCue: () => void;
 	selectNextCue: () => void;
 	goLive: (itemId: string, cueIndex?: number) => void;
@@ -130,14 +133,15 @@ export type PlaylistState = {
 	updateItem: (id: string, updates: PlaylistItemDraft) => void;
 	openDeleteConfirm: (id: string) => void;
 	closeDeleteConfirm: () => void;
-	setPreviewDraft: (draft: PreviewDraft | null) => void;
-	clearPreviewDraft: () => void;
 };
 
 export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 	...INITIAL_PLAYLIST_STATE,
 
-	setHydrationStatus: (status) => set({ hydrationStatus: status }),
+	setHydrationStatus: (status) =>
+		set({
+			hydrationStatus: status,
+		}),
 
 	setHydratedItems: (items) => {
 		const { selectedItemId, selectedCueIndex, liveItemId, liveCueIndex } =
@@ -243,36 +247,134 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 		});
 	},
 
-	selectCue: (index) => set({ selectedCueIndex: index }),
+	selectCue: ((...args: [unknown, unknown?]) => {
+		let target: "stage" | "live" = "stage";
+		let targetIndex: number | null = null;
 
-	selectPreviousCue: () => {
-		const { items, selectedItemId, selectedCueIndex } = get();
-		if (selectedItemId === null) return;
-		const currentItem = items.find((item) => item.id === selectedItemId);
-		if (!currentItem) return;
-		const cues = parseCues(currentItem.content);
-		if (cues.length === 0) {
-			set({ selectedCueIndex: null });
+		if (args.length === 1) {
+			if (args[0] === null || typeof args[0] === "number") {
+				target = "stage";
+				targetIndex = args[0];
+			}
+		} else if (args.length >= 2) {
+			if (args[0] === "stage" || args[0] === "live") {
+				target = args[0];
+			}
+			if (args[1] === null || typeof args[1] === "number") {
+				targetIndex = args[1];
+			}
+		}
+
+		const { items, selectedItemId, liveItemId } = get();
+		const currentItemId = target === "stage" ? selectedItemId : liveItemId;
+		if (currentItemId === null) {
+			if (target === "stage") {
+				set({ selectedCueIndex: null });
+			} else {
+				set({ liveCueIndex: null });
+			}
 			return;
 		}
-		const currentIndex = selectedCueIndex ?? 0;
-		const nextIndex = Math.max(0, currentIndex - 1);
-		set({ selectedCueIndex: nextIndex });
+
+		const currentItem = items.find((item) => item.id === currentItemId);
+		if (!currentItem) {
+			if (target === "stage") {
+				set({ selectedCueIndex: null });
+			} else {
+				set({ liveCueIndex: null });
+			}
+			return;
+		}
+
+		const cues = parseCues(currentItem.content);
+		if (cues.length === 0) {
+			if (target === "stage") {
+				set({ selectedCueIndex: null });
+			} else {
+				set({ liveCueIndex: null });
+			}
+			return;
+		}
+
+		let nextIndex: number | null = null;
+		if (targetIndex !== null) {
+			nextIndex = Math.max(0, Math.min(cues.length - 1, targetIndex));
+		}
+
+		if (target === "stage") {
+			set({ selectedCueIndex: nextIndex });
+		} else {
+			set({ liveCueIndex: nextIndex });
+		}
+	}) as PlaylistState["selectCue"],
+
+	navigateCue: (target, direction) => {
+		const {
+			items,
+			selectedItemId,
+			selectedCueIndex,
+			liveItemId,
+			liveCueIndex,
+		} = get();
+		const currentItemId = target === "stage" ? selectedItemId : liveItemId;
+		const currentCueIndex =
+			target === "stage" ? selectedCueIndex : liveCueIndex;
+
+		if (currentItemId === null) return;
+		const currentItem = items.find((item) => item.id === currentItemId);
+		if (!currentItem) return;
+
+		const cues = parseCues(currentItem.content);
+		if (cues.length === 0) {
+			if (target === "stage") {
+				set({ selectedCueIndex: null });
+			} else {
+				set({ liveCueIndex: null });
+			}
+			return;
+		}
+
+		let nextIndex: number;
+		switch (direction) {
+			case "prev": {
+				if (currentCueIndex === null) {
+					nextIndex = 0;
+				} else {
+					nextIndex = Math.max(0, currentCueIndex - 1);
+				}
+				break;
+			}
+			case "next": {
+				if (currentCueIndex === null) {
+					nextIndex = 0;
+				} else {
+					nextIndex = Math.min(cues.length - 1, currentCueIndex + 1);
+				}
+				break;
+			}
+			case "first": {
+				nextIndex = 0;
+				break;
+			}
+			case "last": {
+				nextIndex = cues.length - 1;
+				break;
+			}
+		}
+
+		if (target === "stage") {
+			set({ selectedCueIndex: nextIndex });
+		} else {
+			set({ liveCueIndex: nextIndex });
+		}
+	},
+
+	selectPreviousCue: () => {
+		get().navigateCue("stage", "prev");
 	},
 
 	selectNextCue: () => {
-		const { items, selectedItemId, selectedCueIndex } = get();
-		if (selectedItemId === null) return;
-		const currentItem = items.find((item) => item.id === selectedItemId);
-		if (!currentItem) return;
-		const cues = parseCues(currentItem.content);
-		if (cues.length === 0) {
-			set({ selectedCueIndex: null });
-			return;
-		}
-		const currentIndex = selectedCueIndex ?? 0;
-		const nextIndex = Math.min(cues.length - 1, currentIndex + 1);
-		set({ selectedCueIndex: nextIndex });
+		get().navigateCue("stage", "next");
 	},
 
 	goLive: (itemId, cueIndex) => {
@@ -302,47 +404,15 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 	},
 
 	selectLiveCue: (index) => {
-		const { items, liveItemId } = get();
-		if (liveItemId === null) return;
-		const liveItem = items.find((item) => item.id === liveItemId);
-		if (!liveItem) return;
-		const cues = parseCues(liveItem.content);
-		if (cues.length === 0) {
-			set({ liveCueIndex: null });
-			return;
-		}
-		const clampedIndex = Math.max(0, Math.min(cues.length - 1, index));
-		set({ liveCueIndex: clampedIndex });
+		get().selectCue("live", index);
 	},
 
 	selectPreviousLiveCue: () => {
-		const { items, liveItemId, liveCueIndex } = get();
-		if (liveItemId === null) return;
-		const liveItem = items.find((item) => item.id === liveItemId);
-		if (!liveItem) return;
-		const cues = parseCues(liveItem.content);
-		if (cues.length === 0) {
-			set({ liveCueIndex: null });
-			return;
-		}
-		const currentIndex = liveCueIndex ?? 0;
-		const nextIndex = Math.max(0, currentIndex - 1);
-		set({ liveCueIndex: nextIndex });
+		get().navigateCue("live", "prev");
 	},
 
 	selectNextLiveCue: () => {
-		const { items, liveItemId, liveCueIndex } = get();
-		if (liveItemId === null) return;
-		const liveItem = items.find((item) => item.id === liveItemId);
-		if (!liveItem) return;
-		const cues = parseCues(liveItem.content);
-		if (cues.length === 0) {
-			set({ liveCueIndex: null });
-			return;
-		}
-		const currentIndex = liveCueIndex ?? 0;
-		const nextIndex = Math.min(cues.length - 1, currentIndex + 1);
-		set({ liveCueIndex: nextIndex });
+		get().navigateCue("live", "next");
 	},
 
 	clearLive: () => {
@@ -525,8 +595,12 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 	openDeleteConfirm: (id) => set({ activeConfirmDeleteId: id }),
 
 	closeDeleteConfirm: () => set({ activeConfirmDeleteId: null }),
-
-	setPreviewDraft: (draft) => set({ previewDraft: draft }),
-
-	clearPreviewDraft: () => set({ previewDraft: null }),
 }));
+
+export type PlaylistStore = typeof usePlaylistStore;
+
+export const selectIsHydrated = (
+	s: PlaylistState | ReturnType<PlaylistStore["getState"]>,
+): boolean => s.hydrationStatus === "ready";
+
+export { useCueListCursor } from "./use-cue-list-cursor";

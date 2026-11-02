@@ -29,7 +29,6 @@ describe("Playlist Sync & Hydration", () => {
 			liveCueIndex: null,
 			editingItemId: null,
 			activeConfirmDeleteId: null,
-			previewDraft: null,
 			hydrationStatus: "idle",
 		});
 	});

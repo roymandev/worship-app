@@ -8,6 +8,7 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useEditorDraftStore } from "./editor-draft-store";
 import {
 	PlaylistItemEditor,
 	playlistItemFormDefaultValues,
@@ -17,6 +18,7 @@ import { INITIAL_PLAYLIST_ITEMS, usePlaylistStore } from "./store";
 
 describe("PlaylistItemEditor", () => {
 	beforeEach(() => {
+		useEditorDraftStore.getState().clearDraft();
 		usePlaylistStore.setState({
 			items: [...INITIAL_PLAYLIST_ITEMS],
 			selectedItemId: "item-1",
@@ -27,6 +29,7 @@ describe("PlaylistItemEditor", () => {
 
 	afterEach(() => {
 		cleanup();
+		useEditorDraftStore.getState().clearDraft();
 	});
 
 	it("exports schema, types, and default values matching conventions", () => {
@@ -570,17 +573,17 @@ describe("PlaylistItemEditor", () => {
 	});
 
 	describe("live preview synchronisation", () => {
-		it("initializes previewDraft on mount with item content and caretOffset 0", () => {
+		it("initializes editor draft on mount with item content and caretOffset 0", () => {
 			usePlaylistStore.setState({ editingItemId: "item-1" });
 			render(<PlaylistItemEditor />);
 
-			expect(usePlaylistStore.getState().previewDraft).toEqual({
-				content: INITIAL_PLAYLIST_ITEMS[0].content,
-				caretOffset: 0,
-			});
+			expect(useEditorDraftStore.getState().draftContent).toBe(
+				INITIAL_PLAYLIST_ITEMS[0].content,
+			);
+			expect(useEditorDraftStore.getState().caretOffset).toBe(0);
 		});
 
-		it("updates previewDraft when typing into the content textarea", async () => {
+		it("updates editor draft when typing into the content textarea", async () => {
 			const user = userEvent.setup();
 			usePlaylistStore.setState({ editingItemId: "item-1" });
 			render(<PlaylistItemEditor />);
@@ -589,12 +592,12 @@ describe("PlaylistItemEditor", () => {
 			await user.clear(contentTextarea);
 			await user.type(contentTextarea, "Line 1\n\nLine 2");
 
-			expect(usePlaylistStore.getState().previewDraft?.content).toBe(
+			expect(useEditorDraftStore.getState().draftContent).toBe(
 				"Line 1\n\nLine 2",
 			);
 		});
 
-		it("updates previewDraft caretOffset on cursor movement and click", async () => {
+		it("updates editor draft caretOffset on cursor movement and click", async () => {
 			const user = userEvent.setup();
 			usePlaylistStore.setState({ editingItemId: "item-1" });
 			render(<PlaylistItemEditor />);
@@ -611,38 +614,38 @@ describe("PlaylistItemEditor", () => {
 			contentTextarea.selectionEnd = 5;
 			fireEvent.select(contentTextarea);
 
-			expect(usePlaylistStore.getState().previewDraft?.caretOffset).toBe(5);
+			expect(useEditorDraftStore.getState().caretOffset).toBe(5);
 
 			contentTextarea.selectionStart = 2;
 			contentTextarea.selectionEnd = 2;
 			fireEvent.keyUp(contentTextarea);
 
-			expect(usePlaylistStore.getState().previewDraft?.caretOffset).toBe(2);
+			expect(useEditorDraftStore.getState().caretOffset).toBe(2);
 
 			contentTextarea.selectionStart = 7;
 			contentTextarea.selectionEnd = 7;
 			fireEvent.click(contentTextarea);
 
-			expect(usePlaylistStore.getState().previewDraft?.caretOffset).toBe(7);
+			expect(useEditorDraftStore.getState().caretOffset).toBe(7);
 		});
 
-		it("clears previewDraft on cancel, discard, and component unmount", async () => {
+		it("clears editor draft on cancel, discard, and component unmount", async () => {
 			const user = userEvent.setup();
 			usePlaylistStore.setState({ editingItemId: "item-1" });
 			const { unmount } = render(<PlaylistItemEditor />);
 
-			expect(usePlaylistStore.getState().previewDraft).not.toBeNull();
+			expect(useEditorDraftStore.getState().draftContent).not.toBeNull();
 
 			const cancelButton = screen.getByRole("button", { name: "Cancel" });
 			await user.click(cancelButton);
 
-			expect(usePlaylistStore.getState().previewDraft).toBeNull();
+			expect(useEditorDraftStore.getState().draftContent).toBeNull();
 
 			unmount();
-			expect(usePlaylistStore.getState().previewDraft).toBeNull();
+			expect(useEditorDraftStore.getState().draftContent).toBeNull();
 		});
 
-		it("clears previewDraft when discarding dirty changes", async () => {
+		it("clears editor draft when discarding dirty changes", async () => {
 			const user = userEvent.setup();
 			usePlaylistStore.setState({ editingItemId: "item-1" });
 			render(<PlaylistItemEditor />);
@@ -658,10 +661,10 @@ describe("PlaylistItemEditor", () => {
 			});
 			await user.click(discardButton);
 
-			expect(usePlaylistStore.getState().previewDraft).toBeNull();
+			expect(useEditorDraftStore.getState().draftContent).toBeNull();
 		});
 
-		it("clears previewDraft on save", async () => {
+		it("clears editor draft on save", async () => {
 			const user = userEvent.setup();
 			usePlaylistStore.setState({ editingItemId: "item-1" });
 			render(<PlaylistItemEditor />);
@@ -670,8 +673,28 @@ describe("PlaylistItemEditor", () => {
 			await user.click(saveButton);
 
 			await waitFor(() => {
-				expect(usePlaylistStore.getState().previewDraft).toBeNull();
+				expect(useEditorDraftStore.getState().draftContent).toBeNull();
 			});
+		});
+
+		it("commits content changes to usePlaylistStore on blur if form is valid", async () => {
+			const user = userEvent.setup();
+			usePlaylistStore.setState({ editingItemId: "item-1" });
+			render(<PlaylistItemEditor />);
+
+			const contentTextarea = screen.getByLabelText("Content");
+			await user.clear(contentTextarea);
+			await user.type(contentTextarea, "Committed on blur");
+
+			// Before blur, global store item content shouldn't have changed immediately
+			// (since debounce is 500ms)
+			// Trigger blur
+			fireEvent.blur(contentTextarea);
+
+			expect(
+				usePlaylistStore.getState().items.find((i) => i.id === "item-1")
+					?.content,
+			).toBe("Committed on blur");
 		});
 	});
 });

@@ -11,7 +11,7 @@ import { PreviewScreenPanel } from "@/features/playlist/preview-screen-panel";
 import { usePlaylistStore } from "@/features/playlist/store";
 import { useWorkspaceStore } from "@/features/workspace/store";
 
-export function WorkspaceCenterPanel() {
+export function StagePanel() {
 	const editingItemId = usePlaylistStore((state) => state.editingItemId);
 	const selectedItemId = usePlaylistStore((state) => state.selectedItemId);
 	const playlistItems = usePlaylistStore((state) => state.items);
@@ -26,31 +26,33 @@ export function WorkspaceCenterPanel() {
 		playlistItems.some((item) => item.id === selectedItemId);
 
 	return (
-		<ResizablePanelGroup
-			orientation="vertical"
-			autoSaveId="workspace-center-layout"
-			className="h-full w-full"
-		>
-			<ResizablePanel id="center-top" defaultSize={65} minSize={30}>
-				{isEditingItemResolved ? (
-					<PlaylistItemEditor />
-				) : isSelectedItemResolved ? (
-					<CueListPanel />
-				) : (
-					<div className="flex h-full items-center justify-center p-6">
-						<EmptyState
-							className="border-none"
-							icon={<IconList className="size-4" />}
-							title="No playlist item selected"
-							description="Select an item from the playlist to view its cues."
-						/>
-					</div>
-				)}
-			</ResizablePanel>
-			<ResizableHandle disabled={!isEditMode} withHandle={isEditMode} />
-			<ResizablePanel id="center-bottom" defaultSize={35} minSize={20}>
-				<PreviewScreenPanel />
-			</ResizablePanel>
-		</ResizablePanelGroup>
+		<div data-workspace-panel="stage" className="h-full w-full">
+			<ResizablePanelGroup
+				orientation="vertical"
+				autoSaveId="workspace-center-layout"
+				className="h-full w-full"
+			>
+				<ResizablePanel id="center-top" defaultSize={65} minSize={30}>
+					{isEditingItemResolved ? (
+						<PlaylistItemEditor />
+					) : isSelectedItemResolved ? (
+						<CueListPanel />
+					) : (
+						<div className="flex h-full items-center justify-center p-6">
+							<EmptyState
+								className="border-none"
+								icon={<IconList className="size-4" />}
+								title="No playlist item selected"
+								description="Select an item from the playlist to view its cues."
+							/>
+						</div>
+					)}
+				</ResizablePanel>
+				<ResizableHandle disabled={!isEditMode} withHandle={isEditMode} />
+				<ResizablePanel id="center-bottom" defaultSize={35} minSize={20}>
+					<PreviewScreenPanel />
+				</ResizablePanel>
+			</ResizablePanelGroup>
+		</div>
 	);
 }

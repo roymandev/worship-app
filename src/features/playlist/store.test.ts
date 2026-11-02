@@ -11,7 +11,6 @@ describe("usePlaylistStore", () => {
 			liveCueIndex: null,
 			editingItemId: null,
 			activeConfirmDeleteId: null,
-			previewDraft: null,
 		});
 	});
 
@@ -88,7 +87,6 @@ Ten thousand reasons for my heart to find`,
 		expect(state.liveCueIndex).toBeNull();
 		expect(state.editingItemId).toBeNull();
 		expect(state.activeConfirmDeleteId).toBeNull();
-		expect(state.previewDraft).toBeNull();
 	});
 
 	describe("selection", () => {
@@ -515,6 +513,20 @@ Ten thousand reasons for my heart to find`,
 			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
 		});
 
+		it("navigateCue selects 0 when currentCueIndex is null for next and prev", () => {
+			usePlaylistStore.getState().selectCue("stage", null);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+
+			usePlaylistStore.getState().navigateCue("stage", "next");
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(0);
+
+			usePlaylistStore.getState().selectCue("stage", null);
+			expect(usePlaylistStore.getState().selectedCueIndex).toBeNull();
+
+			usePlaylistStore.getState().navigateCue("stage", "prev");
+			expect(usePlaylistStore.getState().selectedCueIndex).toBe(0);
+		});
+
 		it("synchronizes selectedCueIndex on selectItem, selectPrevious, and selectNext", () => {
 			usePlaylistStore.getState().selectCue(2);
 			expect(usePlaylistStore.getState().selectedCueIndex).toBe(2);
@@ -610,55 +622,9 @@ Ten thousand reasons for my heart to find`,
 		});
 	});
 
-	describe("previewDraft", () => {
-		it("initializes with null previewDraft", () => {
-			expect(usePlaylistStore.getState().previewDraft).toBeNull();
-		});
-
-		it("updates draft via setPreviewDraft", () => {
-			const draft = {
-				content: "Draft verse 1\n\nDraft verse 2",
-				caretOffset: 15,
-			};
-			usePlaylistStore.getState().setPreviewDraft(draft);
-			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
-		});
-
-		it("clears draft via clearPreviewDraft and setPreviewDraft(null)", () => {
-			usePlaylistStore
-				.getState()
-				.setPreviewDraft({ content: "Testing", caretOffset: 3 });
-			expect(usePlaylistStore.getState().previewDraft).not.toBeNull();
-
-			usePlaylistStore.getState().clearPreviewDraft();
-			expect(usePlaylistStore.getState().previewDraft).toBeNull();
-
-			usePlaylistStore
-				.getState()
-				.setPreviewDraft({ content: "Testing 2", caretOffset: 0 });
-			usePlaylistStore.getState().setPreviewDraft(null);
-			expect(usePlaylistStore.getState().previewDraft).toBeNull();
-		});
-
-		it("preserves active previewDraft across cue and item selection transitions", () => {
-			const draft = {
-				content: "Draft in progress\n\nSecond cue",
-				caretOffset: 5,
-			};
-			usePlaylistStore.getState().setPreviewDraft(draft);
-
-			usePlaylistStore.getState().selectItem("item-2");
-			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
-
-			usePlaylistStore.getState().selectPrevious();
-			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
-
-			usePlaylistStore.getState().selectNext();
-			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
-
-			usePlaylistStore.getState().selectCue(1);
-			expect(usePlaylistStore.getState().previewDraft).toEqual(draft);
-		});
+	it("preserves active selection state", () => {
+		usePlaylistStore.getState().selectItem("item-2");
+		expect(usePlaylistStore.getState().selectedItemId).toBe("item-2");
 	});
 
 	describe("live state", () => {
@@ -687,7 +653,6 @@ Ten thousand reasons for my heart to find`,
 				liveCueIndex: null,
 				editingItemId: null,
 				activeConfirmDeleteId: null,
-				previewDraft: null,
 			});
 		});
 

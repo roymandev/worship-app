@@ -1,20 +1,16 @@
 import { IconDeviceTv } from "@tabler/icons-react";
-import { findCueIndexAtCaret, parseCues } from "@/features/playlist/cues";
+import { parseCues } from "@/features/playlist/cues";
+import {
+	selectDraftDisplayText,
+	useEditorDraftStore,
+} from "@/features/playlist/editor-draft-store";
+import { PreviewCanvas } from "@/features/playlist/preview-canvas";
 import {
 	type PlaylistState,
 	usePlaylistStore,
 } from "@/features/playlist/store";
 
 export function selectPreviewDisplayText(state: PlaylistState): string | null {
-	if (state.previewDraft !== null) {
-		const cues = parseCues(state.previewDraft.content);
-		const activeCueIndex = findCueIndexAtCaret(
-			state.previewDraft.content,
-			state.previewDraft.caretOffset,
-		);
-		return cues[activeCueIndex] ?? null;
-	}
-
 	if (state.selectedItemId === null || state.selectedCueIndex === null) {
 		return null;
 	}
@@ -29,7 +25,15 @@ export function selectPreviewDisplayText(state: PlaylistState): string | null {
 }
 
 export function PreviewScreenPanel() {
-	const displayText = usePlaylistStore(selectPreviewDisplayText);
+	const activeEditingItemId = usePlaylistStore((state) => state.editingItemId);
+	const draftContent = useEditorDraftStore((state) => state.draftContent);
+	const caretOffset = useEditorDraftStore((state) => state.caretOffset);
+	const activeCueText = usePlaylistStore(selectPreviewDisplayText);
+
+	const displayText =
+		activeEditingItemId !== null && draftContent !== null
+			? selectDraftDisplayText(draftContent, caretOffset)
+			: activeCueText;
 
 	return (
 		<section
@@ -42,16 +46,7 @@ export function PreviewScreenPanel() {
 			</header>
 
 			<div className="@container [container-type:size] flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-muted/20 p-3">
-				<section
-					aria-label="Preview canvas"
-					className="flex aspect-video w-[min(100%,calc(100cqh*16/9))] max-h-full max-w-full items-center justify-center overflow-hidden rounded-sm bg-black p-[clamp(0.75rem,2.5cqw,1.5rem)] text-center text-white select-none"
-				>
-					{displayText ? (
-						<p className="break-words font-medium text-[clamp(0.875rem,3.5cqw,1.25rem)] leading-relaxed whitespace-pre-line">
-							{displayText}
-						</p>
-					) : null}
-				</section>
+				<PreviewCanvas text={displayText} variant="stage" />
 			</div>
 		</section>
 	);

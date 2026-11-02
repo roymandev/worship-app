@@ -97,7 +97,7 @@ describe("LivePreviewScreenPanel", () => {
 		expect(screen.getByText("Verse 2 line 1")).toBeInTheDocument();
 	});
 
-	it("renders blank canvas when no item is live", () => {
+	it("renders blank screen indicator when no item is live", () => {
 		usePlaylistStore.setState({
 			items: [],
 			liveItemId: null,
@@ -108,10 +108,11 @@ describe("LivePreviewScreenPanel", () => {
 
 		const canvas = screen.getByRole("region", { name: "Live preview canvas" });
 		expect(canvas).toBeInTheDocument();
-		expect(canvas).toBeEmptyDOMElement();
+		expect(screen.getByText("Blank screen")).toBeInTheDocument();
+		expect(screen.queryByRole("paragraph")).not.toBeInTheDocument();
 	});
 
-	it("renders blank canvas when live item content is empty", () => {
+	it("renders blank screen indicator when live item content is empty", () => {
 		usePlaylistStore.setState({
 			items: [
 				{
@@ -128,7 +129,8 @@ describe("LivePreviewScreenPanel", () => {
 
 		const canvas = screen.getByRole("region", { name: "Live preview canvas" });
 		expect(canvas).toBeInTheDocument();
-		expect(canvas).toBeEmptyDOMElement();
+		expect(screen.getByText("Blank screen")).toBeInTheDocument();
+		expect(screen.queryByRole("paragraph")).not.toBeInTheDocument();
 	});
 
 	it("does not introduce interactive tab stops", () => {

@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useEditorDraftStore } from "@/features/playlist/editor-draft-store";
 import { usePlaylistStore } from "@/features/playlist/store";
 import { appHotkeys } from "@/features/workspace/hotkeys";
 
@@ -52,10 +53,8 @@ function EditorFormInner({
 	);
 	const updateItem = usePlaylistStore((state) => state.updateItem);
 	const stopEditingItem = usePlaylistStore((state) => state.stopEditingItem);
-	const setPreviewDraft = usePlaylistStore((state) => state.setPreviewDraft);
-	const clearPreviewDraft = usePlaylistStore(
-		(state) => state.clearPreviewDraft,
-	);
+	const setDraft = useEditorDraftStore((state) => state.setDraft);
+	const clearDraft = useEditorDraftStore((state) => state.clearDraft);
 
 	const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
 	const titleInputRef = useRef<HTMLInputElement | null>(null);
@@ -108,27 +107,31 @@ function EditorFormInner({
 		}
 	}, [isSwitchPending]);
 
+	// Synchronously track current itemId to avoid resetting dirty form on self-updates from debounce/blur
+	const currentItemIdRef = useRef<string | null>(null);
+
 	useEffect(() => {
 		if (item) {
-			form.reset({
-				title: item.title,
-				content: item.content,
-			});
-			setPreviewDraft({
-				content: item.content,
-				caretOffset: 0,
-			});
+			if (currentItemIdRef.current !== item.id) {
+				currentItemIdRef.current = item.id;
+				form.reset({
+					title: item.title,
+					content: item.content,
+				});
+				setDraft(item.content, 0);
+			}
 		} else {
+			currentItemIdRef.current = null;
 			form.reset(playlistItemFormDefaultValues);
-			clearPreviewDraft();
+			clearDraft();
 		}
-	}, [item, form.reset, setPreviewDraft, clearPreviewDraft]);
+	}, [item, form.reset, setDraft, clearDraft]);
 
 	useEffect(() => {
 		return () => {
-			clearPreviewDraft();
+			clearDraft();
 		};
-	}, [clearPreviewDraft]);
+	}, [clearDraft]);
 
 	useEffect(() => {
 		titleInputRef.current?.focus();
@@ -142,14 +145,20 @@ function EditorFormInner({
 
 	const syncPreviewFromTextarea = (target: HTMLTextAreaElement | null) => {
 		if (!target) return;
-		setPreviewDraft({
-			content: target.value,
-			caretOffset: target.selectionStart ?? 0,
-		});
+		setDraft(target.value, target.selectionStart ?? 0);
+	};
+
+	const handleContentBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+		contentRegister.onBlur(e);
+		const values = form.getValues();
+		const parsed = playlistItemFormSchema.safeParse(values);
+		if (parsed.success) {
+			updateItem(itemId, parsed.data);
+		}
 	};
 
 	const handleValidSubmit = (data: PlaylistItemFormOutput) => {
-		clearPreviewDraft();
+		clearDraft();
 		onDirtyChange?.(false);
 		form.reset(data);
 		updateItem(itemId, data);
@@ -164,7 +173,7 @@ function EditorFormInner({
 			}
 			setIsDiscardDialogOpen(true);
 		} else {
-			clearPreviewDraft();
+			clearDraft();
 			stopEditingItem();
 		}
 	};
@@ -172,7 +181,7 @@ function EditorFormInner({
 	const handleConfirmDiscard = () => {
 		discardTriggeredRef.current = true;
 		setIsDiscardDialogOpen(false);
-		clearPreviewDraft();
+		clearDraft();
 		form.reset();
 		if (isSwitchPending && onConfirmDiscardSwitch) {
 			onConfirmDiscardSwitch();
@@ -278,6 +287,7 @@ function EditorFormInner({
 				<Textarea
 					id="playlist-item-content"
 					{...contentRegister}
+					onBlur={handleContentBlur}
 					onChange={(e) => {
 						contentRegister.onChange(e);
 						syncPreviewFromTextarea(e.currentTarget);

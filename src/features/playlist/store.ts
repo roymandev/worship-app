@@ -1,14 +1,31 @@
 import { nanoid } from "nanoid";
 import { create } from "zustand";
-import { parseCues } from "./cues";
+import { findCueIndexAtCaret, parseCues } from "./cues";
+import type { RecentBackgroundImage } from "./recent-images";
+
+export type PlaylistItemBackground =
+	| { type: "image"; url: string; brightness: number; color?: string }
+	| { type: "color"; color: string; brightness?: number }
+	| null;
 
 export type PlaylistItem = {
 	id: string;
 	title: string;
 	content: string;
+	background?: PlaylistItemBackground;
 };
 
-export type PlaylistItemDraft = Pick<PlaylistItem, "title" | "content">;
+export type PlaylistItemDraft = Pick<PlaylistItem, "title" | "content"> & {
+	background?: PlaylistItemBackground;
+};
+
+export type EditorDraftState = {
+	activeItemId: string | null;
+	draft: PlaylistItemDraft | null;
+	isDirty: boolean;
+	draftContent: string | null;
+	caretOffset: number;
+};
 
 export const INITIAL_PLAYLIST_ITEMS: PlaylistItem[] = [
 	{
@@ -77,30 +94,97 @@ Ten thousand reasons for my heart to find`,
 	},
 ];
 
-export type PreviewDraft = { content: string; caretOffset: number };
+export type HydrationStatus = "idle" | "hydrating" | "ready" | "error";
+
+export const INITIAL_EDITOR_DRAFT_STATE: EditorDraftState = {
+	activeItemId: null,
+	draft: null,
+	isDirty: false,
+	draftContent: null,
+	caretOffset: 0,
+};
+
+export function selectDraftDisplayText(
+	draftContent: string | null,
+	caretOffset: number,
+): string | null {
+	if (draftContent === null) {
+		return null;
+	}
+	const cues = parseCues(draftContent);
+	const activeCueIndex = findCueIndexAtCaret(draftContent, caretOffset);
+	return cues[activeCueIndex] ?? null;
+}
 
 export const INITIAL_PLAYLIST_STATE = {
 	items: INITIAL_PLAYLIST_ITEMS,
 	selectedItemId: INITIAL_PLAYLIST_ITEMS[0]?.id ?? null,
 	selectedCueIndex: 0,
+	liveItemId: null,
+	liveCueIndex: null,
+	isLiveClear: false,
+	isLiveBlackout: false,
 	editingItemId: null,
 	activeConfirmDeleteId: null,
-	previewDraft: null,
-} as const;
+	hydrationStatus: "idle" as HydrationStatus,
+	editorDraft: INITIAL_EDITOR_DRAFT_STATE,
+	backgroundGallery: [] as RecentBackgroundImage[],
+};
 
 export type PlaylistState = {
 	items: PlaylistItem[];
 	selectedItemId: string | null;
 	selectedCueIndex: number | null;
+	liveItemId: string | null;
+	liveCueIndex: number | null;
+	isLiveClear: boolean;
+	isLiveBlackout: boolean;
 	editingItemId: string | null;
 	activeConfirmDeleteId: string | null;
-	previewDraft: PreviewDraft | null;
+	hydrationStatus: HydrationStatus;
+	editorDraft: EditorDraftState;
+	backgroundGallery: RecentBackgroundImage[];
+	setHydrationStatus: (status: HydrationStatus) => void;
+	setHydratedItems: (items: PlaylistItem[]) => void;
+	setEditorDraft: (
+		updates:
+			| {
+					activeItemId?: string | null;
+					draft?: PlaylistItemDraft | null;
+					isDirty?: boolean;
+					draftContent?: string | null;
+					caretOffset?: number;
+			  }
+			| string,
+		caretOffset?: number,
+	) => void;
+	updateEditorDraft: (updates: Partial<PlaylistItemDraft>) => void;
+	clearEditorDraft: () => void;
+	setBackgroundGallery: (images: RecentBackgroundImage[]) => void;
+	addGalleryImage: (image: RecentBackgroundImage) => void;
+	removeGalleryImage: (id: string) => void;
 	selectItem: (id: string | null) => void;
 	selectPrevious: () => void;
 	selectNext: () => void;
-	selectCue: (index: number | null) => void;
+	selectCue: {
+		(target: "stage" | "live", index: number | null): void;
+		(index: number | null): void;
+	};
+	navigateCue: (
+		target: "stage" | "live",
+		direction: "prev" | "next" | "first" | "last",
+	) => void;
 	selectPreviousCue: () => void;
 	selectNextCue: () => void;
+	goLive: (itemId: string, cueIndex?: number) => void;
+	selectLiveCue: (index: number) => void;
+	selectPreviousLiveCue: () => void;
+	selectNextLiveCue: () => void;
+	clearLive: () => void;
+	toggleLiveClear: () => void;
+	setLiveClear: (cleared: boolean) => void;
+	toggleLiveBlackout: () => void;
+	setLiveBlackout: (blackout: boolean) => void;
 	addItem: (title?: string, content?: string) => PlaylistItem;
 	insertItemAfter: (
 		targetId: string,
@@ -115,12 +199,147 @@ export type PlaylistState = {
 	updateItem: (id: string, updates: PlaylistItemDraft) => void;
 	openDeleteConfirm: (id: string) => void;
 	closeDeleteConfirm: () => void;
-	setPreviewDraft: (draft: PreviewDraft | null) => void;
-	clearPreviewDraft: () => void;
 };
 
 export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 	...INITIAL_PLAYLIST_STATE,
+
+	setEditorDraft: (updates, caretOffset = 0) => {
+		if (typeof updates === "string") {
+			set((state) => ({
+				editorDraft: {
+					...state.editorDraft,
+					draftContent: updates,
+					caretOffset,
+					draft: state.editorDraft.draft
+						? { ...state.editorDraft.draft, content: updates }
+						: null,
+				},
+			}));
+			return;
+		}
+
+		set((state) => ({
+			editorDraft: {
+				...state.editorDraft,
+				...updates,
+				draftContent:
+					updates.draftContent !== undefined
+						? updates.draftContent
+						: updates.draft?.content !== undefined
+							? updates.draft.content
+							: state.editorDraft.draftContent,
+				caretOffset:
+					updates.caretOffset !== undefined
+						? updates.caretOffset
+						: state.editorDraft.caretOffset,
+			},
+		}));
+	},
+
+	updateEditorDraft: (updates) => {
+		set((state) => {
+			const currentDraft = state.editorDraft.draft;
+			const nextDraft = currentDraft
+				? { ...currentDraft, ...updates }
+				: (updates as PlaylistItemDraft);
+			return {
+				editorDraft: {
+					...state.editorDraft,
+					draft: nextDraft,
+					isDirty: true,
+					draftContent:
+						updates.content !== undefined
+							? updates.content
+							: state.editorDraft.draftContent,
+				},
+			};
+		});
+	},
+
+	clearEditorDraft: () => {
+		set({
+			editorDraft: INITIAL_EDITOR_DRAFT_STATE,
+		});
+	},
+
+	setBackgroundGallery: (images) => {
+		set({ backgroundGallery: images });
+	},
+
+	addGalleryImage: (image) => {
+		set((state) => {
+			const filtered = state.backgroundGallery.filter(
+				(item) => item.url !== image.url,
+			);
+			return {
+				backgroundGallery: [image, ...filtered].slice(0, 8),
+			};
+		});
+	},
+
+	removeGalleryImage: (id) => {
+		set((state) => ({
+			backgroundGallery: state.backgroundGallery.filter(
+				(item) => item.id !== id,
+			),
+		}));
+	},
+
+	setHydrationStatus: (status) =>
+		set({
+			hydrationStatus: status,
+		}),
+
+	setHydratedItems: (items) => {
+		const { selectedItemId, selectedCueIndex, liveItemId, liveCueIndex } =
+			get();
+
+		let nextSelectedId: string | null = null;
+		let nextSelectedCueIndex: number | null = null;
+		let nextLiveId: string | null = null;
+		let nextLiveCueIndex: number | null = null;
+
+		if (items.length > 0) {
+			const matchingItem = items.find((i) => i.id === selectedItemId);
+			const targetItem = matchingItem ?? items[0];
+			nextSelectedId = targetItem.id;
+			const cues = parseCues(targetItem.content);
+			if (cues.length > 0) {
+				if (matchingItem && selectedCueIndex !== null) {
+					nextSelectedCueIndex = Math.min(selectedCueIndex, cues.length - 1);
+				} else {
+					nextSelectedCueIndex = 0;
+				}
+			} else {
+				nextSelectedCueIndex = null;
+			}
+		}
+
+		if (liveItemId !== null) {
+			const matchingLiveItem = items.find((i) => i.id === liveItemId);
+			if (matchingLiveItem) {
+				nextLiveId = matchingLiveItem.id;
+				const liveCues = parseCues(matchingLiveItem.content);
+				if (liveCues.length > 0) {
+					nextLiveCueIndex =
+						liveCueIndex !== null
+							? Math.min(liveCueIndex, liveCues.length - 1)
+							: 0;
+				} else {
+					nextLiveCueIndex = null;
+				}
+			}
+		}
+
+		set({
+			items,
+			selectedItemId: nextSelectedId,
+			selectedCueIndex: nextSelectedCueIndex,
+			liveItemId: nextLiveId,
+			liveCueIndex: nextLiveCueIndex,
+		});
+	},
 
 	selectItem: (id) => {
 		const { items } = get();
@@ -176,36 +395,205 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 		});
 	},
 
-	selectCue: (index) => set({ selectedCueIndex: index }),
+	selectCue: ((...args: [unknown, unknown?]) => {
+		let target: "stage" | "live" = "stage";
+		let targetIndex: number | null = null;
 
-	selectPreviousCue: () => {
-		const { items, selectedItemId, selectedCueIndex } = get();
-		if (selectedItemId === null) return;
-		const currentItem = items.find((item) => item.id === selectedItemId);
-		if (!currentItem) return;
-		const cues = parseCues(currentItem.content);
-		if (cues.length === 0) {
-			set({ selectedCueIndex: null });
+		if (args.length === 1) {
+			if (args[0] === null || typeof args[0] === "number") {
+				target = "stage";
+				targetIndex = args[0];
+			}
+		} else if (args.length >= 2) {
+			if (args[0] === "stage" || args[0] === "live") {
+				target = args[0];
+			}
+			if (args[1] === null || typeof args[1] === "number") {
+				targetIndex = args[1];
+			}
+		}
+
+		const { items, selectedItemId, liveItemId } = get();
+		const currentItemId = target === "stage" ? selectedItemId : liveItemId;
+		if (currentItemId === null) {
+			if (target === "stage") {
+				set({ selectedCueIndex: null });
+			} else {
+				set({ liveCueIndex: null });
+			}
 			return;
 		}
-		const currentIndex = selectedCueIndex ?? 0;
-		const nextIndex = Math.max(0, currentIndex - 1);
-		set({ selectedCueIndex: nextIndex });
+
+		const currentItem = items.find((item) => item.id === currentItemId);
+		if (!currentItem) {
+			if (target === "stage") {
+				set({ selectedCueIndex: null });
+			} else {
+				set({ liveCueIndex: null });
+			}
+			return;
+		}
+
+		const cues = parseCues(currentItem.content);
+		if (cues.length === 0) {
+			if (target === "stage") {
+				set({ selectedCueIndex: null });
+			} else {
+				set({ liveCueIndex: null });
+			}
+			return;
+		}
+
+		let nextIndex: number | null = null;
+		if (targetIndex !== null) {
+			nextIndex = Math.max(0, Math.min(cues.length - 1, targetIndex));
+		}
+
+		if (target === "stage") {
+			set({ selectedCueIndex: nextIndex });
+		} else {
+			set({ liveCueIndex: nextIndex, isLiveClear: false });
+		}
+	}) as PlaylistState["selectCue"],
+
+	navigateCue: (target, direction) => {
+		const {
+			items,
+			selectedItemId,
+			selectedCueIndex,
+			liveItemId,
+			liveCueIndex,
+		} = get();
+		const currentItemId = target === "stage" ? selectedItemId : liveItemId;
+		const currentCueIndex =
+			target === "stage" ? selectedCueIndex : liveCueIndex;
+
+		if (currentItemId === null) return;
+		const currentItem = items.find((item) => item.id === currentItemId);
+		if (!currentItem) return;
+
+		const cues = parseCues(currentItem.content);
+		if (cues.length === 0) {
+			if (target === "stage") {
+				set({ selectedCueIndex: null });
+			} else {
+				set({ liveCueIndex: null });
+			}
+			return;
+		}
+
+		let nextIndex: number;
+		switch (direction) {
+			case "prev": {
+				if (currentCueIndex === null) {
+					nextIndex = 0;
+				} else {
+					nextIndex = Math.max(0, currentCueIndex - 1);
+				}
+				break;
+			}
+			case "next": {
+				if (currentCueIndex === null) {
+					nextIndex = 0;
+				} else {
+					nextIndex = Math.min(cues.length - 1, currentCueIndex + 1);
+				}
+				break;
+			}
+			case "first": {
+				nextIndex = 0;
+				break;
+			}
+			case "last": {
+				nextIndex = cues.length - 1;
+				break;
+			}
+		}
+
+		if (target === "stage") {
+			set({ selectedCueIndex: nextIndex });
+		} else {
+			set({ liveCueIndex: nextIndex, isLiveClear: false });
+		}
+	},
+
+	selectPreviousCue: () => {
+		get().navigateCue("stage", "prev");
 	},
 
 	selectNextCue: () => {
+		get().navigateCue("stage", "next");
+	},
+
+	goLive: (itemId, cueIndex) => {
 		const { items, selectedItemId, selectedCueIndex } = get();
-		if (selectedItemId === null) return;
-		const currentItem = items.find((item) => item.id === selectedItemId);
-		if (!currentItem) return;
-		const cues = parseCues(currentItem.content);
-		if (cues.length === 0) {
-			set({ selectedCueIndex: null });
-			return;
+		const item = items.find((i) => i.id === itemId);
+		if (!item) return;
+
+		let targetCueIndex: number | null = null;
+		const cues = parseCues(item.content);
+		if (cues.length > 0) {
+			if (cueIndex !== undefined) {
+				targetCueIndex = Math.max(0, Math.min(cues.length - 1, cueIndex));
+			} else if (selectedItemId === itemId) {
+				targetCueIndex =
+					selectedCueIndex !== null
+						? Math.max(0, Math.min(cues.length - 1, selectedCueIndex))
+						: 0;
+			} else {
+				targetCueIndex = 0;
+			}
 		}
-		const currentIndex = selectedCueIndex ?? 0;
-		const nextIndex = Math.min(cues.length - 1, currentIndex + 1);
-		set({ selectedCueIndex: nextIndex });
+
+		set({
+			liveItemId: itemId,
+			liveCueIndex: targetCueIndex,
+			isLiveClear: false,
+		});
+	},
+
+	selectLiveCue: (index) => {
+		get().selectCue("live", index);
+	},
+
+	selectPreviousLiveCue: () => {
+		get().navigateCue("live", "prev");
+	},
+
+	selectNextLiveCue: () => {
+		get().navigateCue("live", "next");
+	},
+
+	clearLive: () => {
+		set({
+			liveItemId: null,
+			liveCueIndex: null,
+			isLiveClear: false,
+		});
+	},
+
+	toggleLiveClear: () => {
+		set((state) => ({
+			isLiveClear: !state.isLiveClear,
+		}));
+	},
+
+	setLiveClear: (cleared) => {
+		set({
+			isLiveClear: cleared,
+		});
+	},
+
+	toggleLiveBlackout: () => {
+		set((state) => ({
+			isLiveBlackout: !state.isLiveBlackout,
+		}));
+	},
+
+	setLiveBlackout: (blackout) => {
+		set({
+			isLiveBlackout: blackout,
+		});
 	},
 
 	addItem: (title = "(Untitled)", content = "") => {
@@ -318,10 +706,15 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 				}
 			}
 
+			const isDeletingLiveItem = state.liveItemId === id;
+
 			return {
 				items: newItems,
 				selectedItemId: nextSelectedId,
 				selectedCueIndex: nextSelectedCueIndex,
+				liveItemId: isDeletingLiveItem ? null : state.liveItemId,
+				liveCueIndex: isDeletingLiveItem ? null : state.liveCueIndex,
+				isLiveClear: isDeletingLiveItem ? false : state.isLiveClear,
 				editingItemId: state.editingItemId === id ? null : state.editingItemId,
 				activeConfirmDeleteId:
 					state.activeConfirmDeleteId === id
@@ -347,8 +740,10 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 			};
 
 			let nextSelectedCueIndex = state.selectedCueIndex;
+			let nextLiveCueIndex = state.liveCueIndex;
+			const updatedCues = parseCues(newItems[index].content);
+
 			if (state.selectedItemId === id) {
-				const updatedCues = parseCues(newItems[index].content);
 				if (updatedCues.length === 0) {
 					nextSelectedCueIndex = null;
 				} else {
@@ -357,9 +752,19 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 				}
 			}
 
+			if (state.liveItemId === id) {
+				if (updatedCues.length === 0) {
+					nextLiveCueIndex = null;
+				} else {
+					const currentIndex = state.liveCueIndex ?? 0;
+					nextLiveCueIndex = Math.min(currentIndex, updatedCues.length - 1);
+				}
+			}
+
 			return {
 				items: newItems,
 				selectedCueIndex: nextSelectedCueIndex,
+				liveCueIndex: nextLiveCueIndex,
 			};
 		});
 	},
@@ -367,8 +772,12 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 	openDeleteConfirm: (id) => set({ activeConfirmDeleteId: id }),
 
 	closeDeleteConfirm: () => set({ activeConfirmDeleteId: null }),
-
-	setPreviewDraft: (draft) => set({ previewDraft: draft }),
-
-	clearPreviewDraft: () => set({ previewDraft: null }),
 }));
+
+export type PlaylistStore = typeof usePlaylistStore;
+
+export const selectIsHydrated = (
+	s: PlaylistState | ReturnType<PlaylistStore["getState"]>,
+): boolean => s.hydrationStatus === "ready";
+
+export { useCueListCursor } from "./use-cue-list-cursor";

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CueListPanel } from "./cue-list-panel";
 import { usePlaylistStore } from "./store";
@@ -127,7 +127,9 @@ describe("CueListPanel", () => {
 		render(<CueListPanel />);
 
 		const rows = screen.getAllByRole("row");
-		rows[0].focus();
+		act(() => {
+			rows[0].focus();
+		});
 		expect(rows[0]).toHaveFocus();
 
 		await user.keyboard("{ArrowDown}");
@@ -183,5 +185,63 @@ describe("CueListPanel", () => {
 			screen.getByText("This playlist item has no content yet."),
 		).toBeInTheDocument();
 		expect(screen.queryByRole("grid")).not.toBeInTheDocument();
+	});
+
+	it("double-clicking a cue row triggers Go Live for that cue", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({
+			items: [
+				{
+					id: "item-1",
+					title: "Song",
+					content: "Cue 1\n\nCue 2\n\nCue 3",
+				},
+			],
+			selectedItemId: "item-1",
+			selectedCueIndex: 0,
+			liveItemId: null,
+			liveCueIndex: null,
+		});
+
+		render(<CueListPanel />);
+
+		const rows = screen.getAllByRole("row");
+		await user.dblClick(rows[1]);
+
+		expect(usePlaylistStore.getState().liveItemId).toBe("item-1");
+		expect(usePlaylistStore.getState().liveCueIndex).toBe(1);
+	});
+
+	it("pressing Enter on a cue row triggers Go Live for that cue", async () => {
+		const user = userEvent.setup();
+		usePlaylistStore.setState({
+			items: [
+				{
+					id: "item-1",
+					title: "Song",
+					content: "Cue 1\n\nCue 2\n\nCue 3",
+				},
+			],
+			selectedItemId: "item-1",
+			selectedCueIndex: 0,
+			liveItemId: null,
+			liveCueIndex: null,
+		});
+
+		render(<CueListPanel />);
+
+		const rows = screen.getAllByRole("row");
+		act(() => {
+			rows[0].focus();
+		});
+
+		// Move to cue 2
+		await user.keyboard("{ArrowDown}");
+		expect(usePlaylistStore.getState().selectedCueIndex).toBe(1);
+
+		// Press Enter to go live
+		await user.keyboard("{Enter}");
+		expect(usePlaylistStore.getState().liveItemId).toBe("item-1");
+		expect(usePlaylistStore.getState().liveCueIndex).toBe(1);
 	});
 });

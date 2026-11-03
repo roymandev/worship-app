@@ -1,24 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { LivePanel } from "@/features/playlist/live-panel";
 import { PlaylistPanel } from "@/features/playlist/panel";
-import { WorkspaceCenterPanel } from "@/features/workspace/center-panel";
 import { HotkeysCheatsheetDialog } from "@/features/workspace/hotkeys-cheatsheet-dialog";
 import { WorkspaceLayout } from "@/features/workspace/layout";
 import { WorkspaceMenubar } from "@/features/workspace/menubar";
+import { StagePanel } from "@/features/workspace/stage-panel";
 import { useWorkspaceStore } from "@/features/workspace/store";
 import { APP_VERSION } from "@/utils/version";
 
 export const Route = createFileRoute("/")({ component: WorkspaceRoute });
-
-function LiveScreenPanel() {
-	return (
-		<div className="flex h-full items-center justify-center">
-			<span className="text-2xl font-semibold text-muted-foreground">
-				Right
-			</span>
-		</div>
-	);
-}
 
 function WorkspaceRoute() {
 	const mode = useWorkspaceStore((state) => state.mode);
@@ -48,8 +39,8 @@ function WorkspaceRoute() {
 			</header>
 			<WorkspaceLayout
 				left={<PlaylistPanel />}
-				center={<WorkspaceCenterPanel />}
-				right={<LiveScreenPanel />}
+				center={<StagePanel />}
+				right={<LivePanel />}
 			/>
 			<HotkeysCheatsheetDialog />
 		</main>

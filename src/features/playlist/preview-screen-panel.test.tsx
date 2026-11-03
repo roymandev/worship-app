@@ -5,11 +5,13 @@ import { usePlaylistStore } from "./store";
 
 describe("PreviewScreenPanel", () => {
 	beforeEach(() => {
+		usePlaylistStore.getState().clearEditorDraft();
 		usePlaylistStore.setState(usePlaylistStore.getInitialState(), true);
 	});
 
 	afterEach(() => {
 		cleanup();
+		usePlaylistStore.getState().clearEditorDraft();
 	});
 
 	it("renders 'Preview' header with monitor icon and without counter badge or navigation buttons", () => {
@@ -33,7 +35,6 @@ describe("PreviewScreenPanel", () => {
 			],
 			selectedItemId: "item-1",
 			selectedCueIndex: 1,
-			previewDraft: null,
 		});
 
 		render(<PreviewScreenPanel />);
@@ -52,7 +53,6 @@ describe("PreviewScreenPanel", () => {
 			],
 			selectedItemId: "item-1",
 			selectedCueIndex: 0,
-			previewDraft: null,
 		});
 
 		render(<PreviewScreenPanel />);
@@ -66,7 +66,7 @@ describe("PreviewScreenPanel", () => {
 		expect(screen.getByText("Verse 2 line 1")).toBeInTheDocument();
 	});
 
-	it("updates preview when previewDraft is active, tracking caret position", () => {
+	it("updates preview when editor draft is active during item editing, tracking caret position", () => {
 		usePlaylistStore.setState({
 			items: [
 				{
@@ -77,11 +77,11 @@ describe("PreviewScreenPanel", () => {
 			],
 			selectedItemId: "item-1",
 			selectedCueIndex: 0,
-			previewDraft: {
-				content: "Draft Line 1\n\nDraft Line 2",
-				caretOffset: 15, // Inside second cue block
-			},
+			editingItemId: "item-1",
 		});
+		usePlaylistStore
+			.getState()
+			.setEditorDraft("Draft Line 1\n\nDraft Line 2", 15);
 
 		render(<PreviewScreenPanel />);
 
@@ -89,22 +89,22 @@ describe("PreviewScreenPanel", () => {
 		expect(screen.queryByText("Original Verse 1")).not.toBeInTheDocument();
 	});
 
-	it("renders blank canvas when no item is selected", () => {
+	it("renders blank screen indicator when no item is selected", () => {
 		usePlaylistStore.setState({
 			items: [],
 			selectedItemId: null,
 			selectedCueIndex: null,
-			previewDraft: null,
 		});
 
 		render(<PreviewScreenPanel />);
 
 		const canvas = screen.getByRole("region", { name: "Preview canvas" });
 		expect(canvas).toBeInTheDocument();
-		expect(canvas).toBeEmptyDOMElement();
+		expect(screen.getByText("Blank screen")).toBeInTheDocument();
+		expect(screen.queryByRole("paragraph")).not.toBeInTheDocument();
 	});
 
-	it("renders blank canvas when selected item content is empty", () => {
+	it("renders blank screen indicator when selected item content is empty", () => {
 		usePlaylistStore.setState({
 			items: [
 				{
@@ -115,17 +115,17 @@ describe("PreviewScreenPanel", () => {
 			],
 			selectedItemId: "empty-item",
 			selectedCueIndex: null,
-			previewDraft: null,
 		});
 
 		render(<PreviewScreenPanel />);
 
 		const canvas = screen.getByRole("region", { name: "Preview canvas" });
 		expect(canvas).toBeInTheDocument();
-		expect(canvas).toBeEmptyDOMElement();
+		expect(screen.getByText("Blank screen")).toBeInTheDocument();
+		expect(screen.queryByRole("paragraph")).not.toBeInTheDocument();
 	});
 
-	it("renders blank canvas when previewDraft has empty content", () => {
+	it("renders blank screen indicator when editor draft has empty content", () => {
 		usePlaylistStore.setState({
 			items: [
 				{
@@ -136,17 +136,16 @@ describe("PreviewScreenPanel", () => {
 			],
 			selectedItemId: "item-1",
 			selectedCueIndex: 0,
-			previewDraft: {
-				content: "   \n\n   ",
-				caretOffset: 0,
-			},
+			editingItemId: "item-1",
 		});
+		usePlaylistStore.getState().setEditorDraft("   \n\n   ", 0);
 
 		render(<PreviewScreenPanel />);
 
 		const canvas = screen.getByRole("region", { name: "Preview canvas" });
 		expect(canvas).toBeInTheDocument();
-		expect(canvas).toBeEmptyDOMElement();
+		expect(screen.getByText("Blank screen")).toBeInTheDocument();
+		expect(screen.queryByRole("paragraph")).not.toBeInTheDocument();
 	});
 
 	it("does not introduce interactive tab stops", () => {
@@ -174,7 +173,6 @@ describe("PreviewScreenPanel", () => {
 			],
 			selectedItemId: "item-1",
 			selectedCueIndex: 0,
-			previewDraft: null,
 		});
 
 		render(<PreviewScreenPanel />);

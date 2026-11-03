@@ -1,7 +1,29 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import "fake-indexeddb/auto";
 import packageJson from "../../package.json" with { type: "json" };
 
 GlobalRegistrator.register();
+
+// Ensure indexedDB globals from fake-indexeddb are also assigned to window/globalThis after HappyDOM registration
+if (
+	typeof globalThis.indexedDB !== "undefined" &&
+	typeof window !== "undefined"
+) {
+	// biome-ignore lint/suspicious/noExplicitAny: polyfill assignment to window
+	(window as any).indexedDB = globalThis.indexedDB;
+	// biome-ignore lint/suspicious/noExplicitAny: polyfill assignment to window
+	(window as any).IDBKeyRange = globalThis.IDBKeyRange;
+	// biome-ignore lint/suspicious/noExplicitAny: polyfill assignment to window
+	(window as any).IDBCursor = globalThis.IDBCursor;
+	// biome-ignore lint/suspicious/noExplicitAny: polyfill assignment to window
+	(window as any).IDBRequest = globalThis.IDBRequest;
+	// biome-ignore lint/suspicious/noExplicitAny: polyfill assignment to window
+	(window as any).IDBTransaction = globalThis.IDBTransaction;
+	// biome-ignore lint/suspicious/noExplicitAny: polyfill assignment to window
+	(window as any).IDBDatabase = globalThis.IDBDatabase;
+	// biome-ignore lint/suspicious/noExplicitAny: polyfill assignment to window
+	(window as any).IDBIndex = globalThis.IDBIndex;
+}
 
 // biome-ignore lint/suspicious/noExplicitAny: Global compile-time version injected into test runtime
 (globalThis as any).__APP_VERSION__ = packageJson.version;

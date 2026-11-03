@@ -1,11 +1,31 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import {
+	INITIAL_PLAYLIST_STATE,
+	usePlaylistStore,
+} from "@/features/playlist/store";
+import { appHotkeys } from "@/features/workspace/hotkeys";
 import { WorkspaceLayout } from "./layout";
 import { useWorkspaceStore } from "./store";
 
+function renderWithHotkeys(ui: React.ReactElement) {
+	return render(
+		<HotkeysProvider
+			appHotkeys={appHotkeys}
+			defaultOptions={{
+				hotkey: { ignoreInputs: "auto", platform: "mac" },
+			}}
+		>
+			{ui}
+		</HotkeysProvider>,
+	);
+}
+
 describe("WorkspaceLayout", () => {
 	beforeEach(() => {
+		usePlaylistStore.setState(INITIAL_PLAYLIST_STATE);
 		useWorkspaceStore.setState({
 			mode: "view",
 			isResetDialogOpen: false,
@@ -15,6 +35,7 @@ describe("WorkspaceLayout", () => {
 
 	afterEach(() => {
 		cleanup();
+		usePlaylistStore.setState(INITIAL_PLAYLIST_STATE);
 	});
 
 	it("renders panels properly", () => {
@@ -76,5 +97,43 @@ describe("WorkspaceLayout", () => {
 
 		expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 		expect(useWorkspaceStore.getState().isResetDialogOpen).toBe(false);
+	});
+
+	it("toggles isLiveClear in usePlaylistStore when pressing Mod+Shift+C", async () => {
+		const user = userEvent.setup();
+		renderWithHotkeys(
+			<WorkspaceLayout
+				left={<div>Left</div>}
+				center={<div>Center</div>}
+				right={<div>Right</div>}
+			/>,
+		);
+
+		expect(usePlaylistStore.getState().isLiveClear).toBe(false);
+
+		await user.keyboard("{Meta>}{Shift>}c{/Shift}{/Meta}");
+		expect(usePlaylistStore.getState().isLiveClear).toBe(true);
+
+		await user.keyboard("{Meta>}{Shift>}c{/Shift}{/Meta}");
+		expect(usePlaylistStore.getState().isLiveClear).toBe(false);
+	});
+
+	it("toggles isLiveBlackout in usePlaylistStore when pressing Mod+B", async () => {
+		const user = userEvent.setup();
+		renderWithHotkeys(
+			<WorkspaceLayout
+				left={<div>Left</div>}
+				center={<div>Center</div>}
+				right={<div>Right</div>}
+			/>,
+		);
+
+		expect(usePlaylistStore.getState().isLiveBlackout).toBe(false);
+
+		await user.keyboard("{Meta>}b{/Meta}");
+		expect(usePlaylistStore.getState().isLiveBlackout).toBe(true);
+
+		await user.keyboard("{Meta>}b{/Meta}");
+		expect(usePlaylistStore.getState().isLiveBlackout).toBe(false);
 	});
 });

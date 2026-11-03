@@ -1,6 +1,7 @@
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { usePlaylistPersistenceInit } from "@/features/playlist/use-persistence-init";
 import { appHotkeys } from "@/features/workspace/hotkeys";
 
 export const Route = createRootRoute({
@@ -11,6 +12,8 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
+	usePlaylistPersistenceInit();
+
 	return (
 		<HotkeysProvider
 			appHotkeys={appHotkeys}

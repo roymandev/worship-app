@@ -17,6 +17,7 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { usePlaylistStore } from "@/features/playlist/store";
 import { appHotkeys } from "@/features/workspace/hotkeys";
 import { useWorkspaceStore } from "@/features/workspace/store";
 
@@ -56,6 +57,18 @@ export function WorkspaceLayout({
 	useHotkey(appHotkeys["workspace.resetLayout"], () => openResetDialog(), {
 		ignoreInputs: "auto",
 	});
+
+	useHotkey(
+		appHotkeys["presentation.toggleClear"],
+		() => usePlaylistStore.getState().toggleLiveClear(),
+		{ ignoreInputs: "auto" },
+	);
+
+	useHotkey(
+		appHotkeys["presentation.toggleBlackout"],
+		() => usePlaylistStore.getState().toggleLiveBlackout(),
+		{ ignoreInputs: "auto" },
+	);
 
 	const isEditMode = mode === "edit";
 

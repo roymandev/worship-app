@@ -1,12 +1,9 @@
 import { IconDeviceTv } from "@tabler/icons-react";
 import { parseCues } from "@/features/playlist/cues";
-import {
-	selectDraftDisplayText,
-	useEditorDraftStore,
-} from "@/features/playlist/editor-draft-store";
 import { PreviewCanvas } from "@/features/playlist/preview-canvas";
 import {
 	type PlaylistState,
+	selectDraftDisplayText,
 	usePlaylistStore,
 } from "@/features/playlist/store";
 
@@ -26,8 +23,12 @@ export function selectPreviewDisplayText(state: PlaylistState): string | null {
 
 export function PreviewScreenPanel() {
 	const activeEditingItemId = usePlaylistStore((state) => state.editingItemId);
-	const draftContent = useEditorDraftStore((state) => state.draftContent);
-	const caretOffset = useEditorDraftStore((state) => state.caretOffset);
+	const draftContent = usePlaylistStore(
+		(state) => state.editorDraft.draftContent,
+	);
+	const caretOffset = usePlaylistStore(
+		(state) => state.editorDraft.caretOffset,
+	);
 	const activeCueText = usePlaylistStore(selectPreviewDisplayText);
 
 	const displayText =

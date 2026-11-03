@@ -44,6 +44,8 @@ describe("PlaylistItemRow", () => {
 		expect(row).toHaveAttribute("data-item-id", "item-1");
 		expect(row).toHaveAttribute("tabindex", "0");
 		expect(row).toHaveAttribute("aria-selected", "true");
+		expect(row.className).toContain("p-2");
+		expect(row.className).not.toContain("px-3");
 		expect(within(row).getByText("Amazing Grace")).toBeInTheDocument();
 
 		const gridcells = within(row).getAllByRole("gridcell");
@@ -79,6 +81,10 @@ describe("PlaylistItemRow", () => {
 			"Currently editing in item editor",
 		);
 		expect(editingIndicator).toHaveAttribute("data-editing-indicator", "true");
+		expect(editingIndicator.className).toContain("size-7");
+		const icon = editingIndicator.querySelector("svg");
+		expect(icon).toBeInTheDocument();
+		expect(icon?.getAttribute("class")).toContain("size-4");
 		expect(within(editingIndicator).getByText("(editing)")).toBeInTheDocument();
 	});
 
@@ -195,8 +201,10 @@ describe("PlaylistItemRow", () => {
 		const goLiveBtn = screen.getByRole("button", { name: "Go Live" });
 		expect(goLiveBtn).toBeInTheDocument();
 		expect(goLiveBtn).toHaveAttribute("tabindex", "-1");
+		expect(goLiveBtn.className).toContain("size-7");
 		const icon = goLiveBtn.querySelector("svg");
 		expect(icon).toBeInTheDocument();
+		expect(icon?.getAttribute("class")).toContain("size-4");
 		expect(screen.queryByRole("button", { name: "Move up" })).toBeNull();
 		expect(screen.queryByRole("button", { name: "Move down" })).toBeNull();
 		expect(screen.queryByRole("button", { name: "Edit item" })).toBeNull();
@@ -587,6 +595,10 @@ describe("PlaylistItemRow", () => {
 			"Currently live in presentation",
 		);
 		expect(liveIndicator).toHaveAttribute("data-live-indicator", "true");
+		expect(liveIndicator.className).toContain("size-7");
+		const icon = liveIndicator.querySelector("svg");
+		expect(icon).toBeInTheDocument();
+		expect(icon?.getAttribute("class")).toContain("size-4");
 		expect(within(liveIndicator).getByText("(live)")).toBeInTheDocument();
 
 		// Double clicking does not change or re-trigger
@@ -659,5 +671,137 @@ describe("PlaylistItemRow", () => {
 		// No interactive buttons in action cell when live
 		const buttons = within(actionCell as HTMLElement).queryAllByRole("button");
 		expect(buttons).toHaveLength(0);
+	});
+
+	it("renders background image thumbnail when item has background image", () => {
+		const itemWithBackground = {
+			...sampleItem,
+			background: {
+				type: "image" as const,
+				url: "https://example.com/worship-bg.jpg",
+				brightness: 100,
+			},
+		};
+
+		render(
+			<PlaylistItemRow
+				item={itemWithBackground}
+				index={0}
+				totalItems={3}
+				isSelected={false}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		const gridcells = within(row).getAllByRole("gridcell");
+		const titleCell = gridcells[0];
+
+		expect(titleCell.className).toContain("gap-2.5");
+		const img = titleCell.querySelector("img");
+		expect(img).toBeInTheDocument();
+		expect(img).toHaveAttribute("src", "https://example.com/worship-bg.jpg");
+		expect(img).toHaveAttribute("alt", "");
+		expect(img).toHaveAttribute("aria-hidden", "true");
+		expect(img?.className).toContain("object-cover");
+		expect(img?.className).toContain("h-10");
+		expect(img?.className).toContain("aspect-video");
+		expect(img?.className).toContain("rounded-sm");
+	});
+
+	it("renders solid color swatch when item has color background", () => {
+		const itemWithColorBackground = {
+			...sampleItem,
+			background: {
+				type: "color" as const,
+				color: "#1e3a8a",
+			},
+		};
+
+		render(
+			<PlaylistItemRow
+				item={itemWithColorBackground}
+				index={0}
+				totalItems={3}
+				isSelected={false}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		const gridcells = within(row).getAllByRole("gridcell");
+		const titleCell = gridcells[0];
+
+		expect(titleCell.className).toContain("gap-2.5");
+		expect(titleCell.querySelector("img")).toBeNull();
+
+		const swatch = titleCell.querySelector('div[aria-hidden="true"]');
+		expect(swatch).toBeInTheDocument();
+		expect(swatch?.className).toContain("h-10");
+		expect(swatch?.className).toContain("aspect-video");
+		expect(swatch?.className).toContain("rounded-sm");
+		expect(swatch).toHaveStyle({ backgroundColor: "#1e3a8a" });
+	});
+
+	it("renders placeholder icon container when item has no background image", () => {
+		const itemWithoutBackground = {
+			...sampleItem,
+			background: undefined,
+		};
+
+		render(
+			<PlaylistItemRow
+				item={itemWithoutBackground}
+				index={0}
+				totalItems={3}
+				isSelected={false}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		const gridcells = within(row).getAllByRole("gridcell");
+		const titleCell = gridcells[0];
+
+		// No img element rendered
+		expect(titleCell.querySelector("img")).toBeNull();
+
+		// Placeholder container is aria-hidden="true"
+		const placeholder = titleCell.querySelector('div[aria-hidden="true"]');
+		expect(placeholder).toBeInTheDocument();
+		expect(placeholder?.className).toContain("h-10");
+		expect(placeholder?.className).toContain("aspect-video");
+		expect(placeholder?.className).toContain("rounded-sm");
+		expect(placeholder?.className).toContain("flex");
+		const icon = placeholder?.querySelector("svg");
+		expect(icon).toBeInTheDocument();
+		expect(icon?.getAttribute("class")).toContain("size-4");
+	});
+
+	it("renders placeholder icon container when item background is null", () => {
+		const itemWithNullBackground = {
+			...sampleItem,
+			background: null,
+		};
+
+		render(
+			<PlaylistItemRow
+				item={itemWithNullBackground}
+				index={0}
+				totalItems={3}
+				isSelected={false}
+			/>,
+		);
+
+		const row = screen.getByRole("row");
+		const gridcells = within(row).getAllByRole("gridcell");
+		const titleCell = gridcells[0];
+
+		expect(titleCell.querySelector("img")).toBeNull();
+		const placeholder = titleCell.querySelector('div[aria-hidden="true"]');
+		expect(placeholder).toBeInTheDocument();
+		expect(placeholder?.className).toContain("h-10");
+		expect(placeholder?.className).toContain("aspect-video");
+		expect(placeholder?.className).toContain("rounded-sm");
+		const icon = placeholder?.querySelector("svg");
+		expect(icon).toBeInTheDocument();
+		expect(icon?.getAttribute("class")).toContain("size-4");
 	});
 });

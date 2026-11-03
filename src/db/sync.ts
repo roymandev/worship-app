@@ -12,6 +12,23 @@ export const playlistItemRecordSchema = z.object({
 	title: z.string().catch("(Untitled)"),
 	content: z.string().catch(""),
 	position: z.number().int().nonnegative().catch(0),
+	background: z
+		.discriminatedUnion("type", [
+			z.object({
+				type: z.literal("image"),
+				url: z.string().min(1),
+				brightness: z.number().min(0).max(100).default(100),
+				color: z.string().optional(),
+			}),
+			z.object({
+				type: z.literal("color"),
+				color: z.string().min(1),
+				brightness: z.number().min(0).max(100).optional(),
+			}),
+		])
+		.nullable()
+		.optional()
+		.catch(null),
 });
 
 export function parsePlaylistItemRecords(records: unknown[]): PlaylistItem[] {
@@ -21,8 +38,13 @@ export function parsePlaylistItemRecords(records: unknown[]): PlaylistItem[] {
 			if (!result.success) {
 				return null;
 			}
-			const { id, title, content } = result.data;
-			return { id, title, content };
+			const { id, title, content, background } = result.data;
+			return {
+				id,
+				title,
+				content,
+				...(background !== undefined ? { background } : {}),
+			};
 		})
 		.filter((item): item is PlaylistItem => item !== null);
 }

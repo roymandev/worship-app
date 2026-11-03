@@ -2,6 +2,7 @@ import {
 	IconArrowDown,
 	IconArrowUp,
 	IconPencil,
+	IconPhoto,
 	IconPlayerPlay,
 	IconPlus,
 	IconTrash,
@@ -238,7 +239,7 @@ export function PlaylistItemRow({
 						}}
 						onKeyDown={handleRowKeyDown}
 						className={cn(
-							"group flex items-center justify-between gap-2 rounded-md px-3 py-2 text-xs transition-colors",
+							"group flex items-center justify-between gap-2 rounded-md p-2 text-xs transition-colors",
 							"focus-ring-inset select-none",
 							isSelected
 								? "bg-accent text-accent-foreground font-medium"
@@ -251,9 +252,30 @@ export function PlaylistItemRow({
 				{/* biome-ignore lint/a11y/useFocusableInteractive: Row manages roving focus */}
 				<div
 					role="gridcell"
-					className="flex min-w-0 flex-1 items-center gap-1.5 truncate"
+					className="flex min-w-0 flex-1 items-center gap-2.5 truncate"
 				>
-					<span className="truncate">{item.title}</span>
+					{item.background?.type === "image" && item.background.url ? (
+						<img
+							src={item.background.url}
+							alt=""
+							aria-hidden="true"
+							className="h-10 aspect-video shrink-0 rounded-sm border border-border/50 object-cover"
+						/>
+					) : item.background?.type === "color" && item.background.color ? (
+						<div
+							aria-hidden="true"
+							style={{ backgroundColor: item.background.color }}
+							className="h-10 aspect-video shrink-0 rounded-sm border border-border/50"
+						/>
+					) : (
+						<div
+							aria-hidden="true"
+							className="flex h-10 aspect-video shrink-0 items-center justify-center rounded-sm border border-border/40 bg-muted/40 text-muted-foreground/40"
+						>
+							<IconPhoto className="size-4" />
+						</div>
+					)}
+					<span className="truncate font-medium">{item.title}</span>
 				</div>
 
 				{/* biome-ignore lint/a11y/useSemanticElements: APG Composite Grid Cell */}
@@ -275,9 +297,9 @@ export function PlaylistItemRow({
 							aria-label="Currently editing in item editor"
 							title="Currently editing in item editor"
 							data-editing-indicator="true"
-							className="flex size-5 items-center justify-center text-amber-500 dark:text-amber-400"
+							className="flex size-7 items-center justify-center text-amber-500 dark:text-amber-400"
 						>
-							<IconPencil className="size-3.5 shrink-0" />
+							<IconPencil className="size-4 shrink-0" />
 							<span className="sr-only">(editing)</span>
 						</span>
 					)}
@@ -289,22 +311,22 @@ export function PlaylistItemRow({
 							aria-label="Currently live in presentation"
 							title="Currently live in presentation"
 							data-live-indicator="true"
-							className="flex size-5 items-center justify-center text-destructive"
+							className="flex size-7 items-center justify-center text-destructive"
 						>
-							<IconVideo className="size-3.5 shrink-0" />
+							<IconVideo className="size-4 shrink-0" />
 							<span className="sr-only">(live)</span>
 						</span>
 					) : (
 						<Button
 							variant="ghost"
-							size="icon-xs"
+							size="icon"
 							tabIndex={-1}
 							title="Go Live"
 							aria-label="Go Live"
 							onClick={handleGoLive}
-							className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
+							className="size-7 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
 						>
-							<IconPlayerPlay className="size-3.5" />
+							<IconPlayerPlay className="size-4" />
 						</Button>
 					)}
 				</div>

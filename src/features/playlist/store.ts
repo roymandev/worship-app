@@ -1,14 +1,31 @@
 import { nanoid } from "nanoid";
 import { create } from "zustand";
-import { parseCues } from "./cues";
+import { findCueIndexAtCaret, parseCues } from "./cues";
+import type { RecentBackgroundImage } from "./recent-images";
+
+export type PlaylistItemBackground =
+	| { type: "image"; url: string; brightness: number; color?: string }
+	| { type: "color"; color: string; brightness?: number }
+	| null;
 
 export type PlaylistItem = {
 	id: string;
 	title: string;
 	content: string;
+	background?: PlaylistItemBackground;
 };
 
-export type PlaylistItemDraft = Pick<PlaylistItem, "title" | "content">;
+export type PlaylistItemDraft = Pick<PlaylistItem, "title" | "content"> & {
+	background?: PlaylistItemBackground;
+};
+
+export type EditorDraftState = {
+	activeItemId: string | null;
+	draft: PlaylistItemDraft | null;
+	isDirty: boolean;
+	draftContent: string | null;
+	caretOffset: number;
+};
 
 export const INITIAL_PLAYLIST_ITEMS: PlaylistItem[] = [
 	{
@@ -79,6 +96,26 @@ Ten thousand reasons for my heart to find`,
 
 export type HydrationStatus = "idle" | "hydrating" | "ready" | "error";
 
+export const INITIAL_EDITOR_DRAFT_STATE: EditorDraftState = {
+	activeItemId: null,
+	draft: null,
+	isDirty: false,
+	draftContent: null,
+	caretOffset: 0,
+};
+
+export function selectDraftDisplayText(
+	draftContent: string | null,
+	caretOffset: number,
+): string | null {
+	if (draftContent === null) {
+		return null;
+	}
+	const cues = parseCues(draftContent);
+	const activeCueIndex = findCueIndexAtCaret(draftContent, caretOffset);
+	return cues[activeCueIndex] ?? null;
+}
+
 export const INITIAL_PLAYLIST_STATE = {
 	items: INITIAL_PLAYLIST_ITEMS,
 	selectedItemId: INITIAL_PLAYLIST_ITEMS[0]?.id ?? null,
@@ -90,7 +127,9 @@ export const INITIAL_PLAYLIST_STATE = {
 	editingItemId: null,
 	activeConfirmDeleteId: null,
 	hydrationStatus: "idle" as HydrationStatus,
-} as const;
+	editorDraft: INITIAL_EDITOR_DRAFT_STATE,
+	backgroundGallery: [] as RecentBackgroundImage[],
+};
 
 export type PlaylistState = {
 	items: PlaylistItem[];
@@ -103,8 +142,27 @@ export type PlaylistState = {
 	editingItemId: string | null;
 	activeConfirmDeleteId: string | null;
 	hydrationStatus: HydrationStatus;
+	editorDraft: EditorDraftState;
+	backgroundGallery: RecentBackgroundImage[];
 	setHydrationStatus: (status: HydrationStatus) => void;
 	setHydratedItems: (items: PlaylistItem[]) => void;
+	setEditorDraft: (
+		updates:
+			| {
+					activeItemId?: string | null;
+					draft?: PlaylistItemDraft | null;
+					isDirty?: boolean;
+					draftContent?: string | null;
+					caretOffset?: number;
+			  }
+			| string,
+		caretOffset?: number,
+	) => void;
+	updateEditorDraft: (updates: Partial<PlaylistItemDraft>) => void;
+	clearEditorDraft: () => void;
+	setBackgroundGallery: (images: RecentBackgroundImage[]) => void;
+	addGalleryImage: (image: RecentBackgroundImage) => void;
+	removeGalleryImage: (id: string) => void;
 	selectItem: (id: string | null) => void;
 	selectPrevious: () => void;
 	selectNext: () => void;
@@ -145,6 +203,88 @@ export type PlaylistState = {
 
 export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
 	...INITIAL_PLAYLIST_STATE,
+
+	setEditorDraft: (updates, caretOffset = 0) => {
+		if (typeof updates === "string") {
+			set((state) => ({
+				editorDraft: {
+					...state.editorDraft,
+					draftContent: updates,
+					caretOffset,
+					draft: state.editorDraft.draft
+						? { ...state.editorDraft.draft, content: updates }
+						: null,
+				},
+			}));
+			return;
+		}
+
+		set((state) => ({
+			editorDraft: {
+				...state.editorDraft,
+				...updates,
+				draftContent:
+					updates.draftContent !== undefined
+						? updates.draftContent
+						: updates.draft?.content !== undefined
+							? updates.draft.content
+							: state.editorDraft.draftContent,
+				caretOffset:
+					updates.caretOffset !== undefined
+						? updates.caretOffset
+						: state.editorDraft.caretOffset,
+			},
+		}));
+	},
+
+	updateEditorDraft: (updates) => {
+		set((state) => {
+			const currentDraft = state.editorDraft.draft;
+			const nextDraft = currentDraft
+				? { ...currentDraft, ...updates }
+				: (updates as PlaylistItemDraft);
+			return {
+				editorDraft: {
+					...state.editorDraft,
+					draft: nextDraft,
+					isDirty: true,
+					draftContent:
+						updates.content !== undefined
+							? updates.content
+							: state.editorDraft.draftContent,
+				},
+			};
+		});
+	},
+
+	clearEditorDraft: () => {
+		set({
+			editorDraft: INITIAL_EDITOR_DRAFT_STATE,
+		});
+	},
+
+	setBackgroundGallery: (images) => {
+		set({ backgroundGallery: images });
+	},
+
+	addGalleryImage: (image) => {
+		set((state) => {
+			const filtered = state.backgroundGallery.filter(
+				(item) => item.url !== image.url,
+			);
+			return {
+				backgroundGallery: [image, ...filtered].slice(0, 8),
+			};
+		});
+	},
+
+	removeGalleryImage: (id) => {
+		set((state) => ({
+			backgroundGallery: state.backgroundGallery.filter(
+				(item) => item.id !== id,
+			),
+		}));
+	},
 
 	setHydrationStatus: (status) =>
 		set({

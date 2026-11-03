@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "bun:test";
+import type { RecentBackgroundImage } from "./recent-images";
 import {
 	INITIAL_PLAYLIST_ITEMS,
 	INITIAL_PLAYLIST_STATE,
@@ -285,6 +286,74 @@ Ten thousand reasons for my heart to find`,
 				content: "The Lord is my shepherd; I lack nothing.",
 			});
 			expect(items[2]).toEqual(INITIAL_PLAYLIST_ITEMS[2]);
+		});
+
+		it("updateItem updates background for the specified item and can clear it", () => {
+			usePlaylistStore.getState().updateItem("item-2", {
+				title: "Psalm 23 (Updated)",
+				content: "The Lord is my shepherd; I lack nothing.",
+				background: {
+					type: "image",
+					url: "https://example.com/worship-bg.jpg",
+					brightness: 100,
+				},
+			});
+
+			let item = usePlaylistStore
+				.getState()
+				.items.find((i) => i.id === "item-2");
+			expect(item?.background).toEqual({
+				type: "image",
+				url: "https://example.com/worship-bg.jpg",
+				brightness: 100,
+			});
+
+			// Image background can also have an optional fallback color
+			usePlaylistStore.getState().updateItem("item-2", {
+				title: "Psalm 23 (Updated)",
+				content: "The Lord is my shepherd; I lack nothing.",
+				background: {
+					type: "image",
+					url: "https://example.com/worship-bg.jpg",
+					brightness: 90,
+					color: "#123456",
+				},
+			});
+
+			item = usePlaylistStore.getState().items.find((i) => i.id === "item-2");
+			expect(item?.background).toEqual({
+				type: "image",
+				url: "https://example.com/worship-bg.jpg",
+				brightness: 90,
+				color: "#123456",
+			});
+
+			// Also supports solid color background
+			usePlaylistStore.getState().updateItem("item-2", {
+				title: "Psalm 23 (Updated)",
+				content: "The Lord is my shepherd; I lack nothing.",
+				background: {
+					type: "color",
+					color: "#3b82f6",
+					brightness: 80,
+				},
+			});
+
+			item = usePlaylistStore.getState().items.find((i) => i.id === "item-2");
+			expect(item?.background).toEqual({
+				type: "color",
+				color: "#3b82f6",
+				brightness: 80,
+			});
+
+			usePlaylistStore.getState().updateItem("item-2", {
+				title: "Psalm 23 (Updated)",
+				content: "The Lord is my shepherd; I lack nothing.",
+				background: null,
+			});
+
+			item = usePlaylistStore.getState().items.find((i) => i.id === "item-2");
+			expect(item?.background).toBeNull();
 		});
 
 		it("updateItem does nothing when id is not found", () => {
@@ -935,6 +1004,112 @@ Ten thousand reasons for my heart to find`,
 				usePlaylistStore.getState().goLive("item-live-2", 0);
 				expect(usePlaylistStore.getState().isLiveBlackout).toBe(true);
 			});
+		});
+	});
+
+	describe("editorDraft and backgroundGallery state & actions", () => {
+		it("initializes with default editorDraft and empty backgroundGallery", () => {
+			const state = usePlaylistStore.getState();
+			expect(state.editorDraft).toEqual({
+				activeItemId: null,
+				draft: null,
+				isDirty: false,
+				draftContent: null,
+				caretOffset: 0,
+			});
+			expect(state.backgroundGallery).toEqual([]);
+		});
+
+		it("setEditorDraft sets draft state with string overload", () => {
+			usePlaylistStore.getState().setEditorDraft("New draft content", 5);
+			const { editorDraft } = usePlaylistStore.getState();
+			expect(editorDraft.draftContent).toBe("New draft content");
+			expect(editorDraft.caretOffset).toBe(5);
+		});
+
+		it("setEditorDraft sets draft state with object updates", () => {
+			usePlaylistStore.getState().setEditorDraft({
+				activeItemId: "item-1",
+				draft: { title: "Title Draft", content: "Content Draft" },
+				isDirty: true,
+				draftContent: "Content Draft",
+				caretOffset: 12,
+			});
+			const { editorDraft } = usePlaylistStore.getState();
+			expect(editorDraft.activeItemId).toBe("item-1");
+			expect(editorDraft.draft?.title).toBe("Title Draft");
+			expect(editorDraft.isDirty).toBe(true);
+			expect(editorDraft.draftContent).toBe("Content Draft");
+			expect(editorDraft.caretOffset).toBe(12);
+		});
+
+		it("updateEditorDraft updates draft fields and marks isDirty", () => {
+			usePlaylistStore.getState().setEditorDraft({
+				activeItemId: "item-1",
+				draft: { title: "Old Title", content: "Old Content" },
+				isDirty: false,
+			});
+
+			usePlaylistStore.getState().updateEditorDraft({
+				title: "Updated Title",
+				content: "Updated Content",
+			});
+
+			const { editorDraft } = usePlaylistStore.getState();
+			expect(editorDraft.draft?.title).toBe("Updated Title");
+			expect(editorDraft.draft?.content).toBe("Updated Content");
+			expect(editorDraft.draftContent).toBe("Updated Content");
+			expect(editorDraft.isDirty).toBe(true);
+		});
+
+		it("clearEditorDraft resets editorDraft to default", () => {
+			usePlaylistStore.getState().setEditorDraft({
+				activeItemId: "item-1",
+				draft: { title: "Draft", content: "Draft" },
+				isDirty: true,
+				draftContent: "Draft",
+				caretOffset: 4,
+			});
+
+			usePlaylistStore.getState().clearEditorDraft();
+
+			expect(usePlaylistStore.getState().editorDraft).toEqual({
+				activeItemId: null,
+				draft: null,
+				isDirty: false,
+				draftContent: null,
+				caretOffset: 0,
+			});
+		});
+
+		it("backgroundGallery pure actions update in-memory gallery state", () => {
+			const initialGallery: RecentBackgroundImage[] = [
+				{
+					id: "img-1",
+					url: "https://example.com/first.jpg",
+					addedAt: 1000,
+				},
+			];
+
+			usePlaylistStore.getState().setBackgroundGallery(initialGallery);
+			expect(usePlaylistStore.getState().backgroundGallery).toEqual(
+				initialGallery,
+			);
+
+			const newImage: RecentBackgroundImage = {
+				id: "img-2",
+				url: "https://example.com/second.jpg",
+				addedAt: 2000,
+			};
+
+			usePlaylistStore.getState().addGalleryImage(newImage);
+			expect(usePlaylistStore.getState().backgroundGallery).toEqual([
+				newImage,
+				initialGallery[0],
+			]);
+
+			usePlaylistStore.getState().removeGalleryImage("img-1");
+			expect(usePlaylistStore.getState().backgroundGallery).toEqual([newImage]);
 		});
 	});
 });

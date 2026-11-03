@@ -67,4 +67,53 @@ describe("EmptyState component", () => {
 		expect(screen.getByText("Rich Title")).toBeInTheDocument();
 		expect(screen.getByText("Rich Description")).toBeInTheDocument();
 	});
+
+	it("renders inline variant with compact horizontal layout, icon, title, description, and action", () => {
+		render(
+			<EmptyState
+				variant="inline"
+				className="custom-inline"
+				icon={<span data-testid="inline-icon">Icon</span>}
+				title="No images in gallery"
+				description="Add images to reuse across items"
+				action={<button type="button">Add Image</button>}
+			/>,
+		);
+
+		const root = screen
+			.getByText("No images in gallery")
+			.closest('[data-slot="empty"]');
+		expect(root).toBeInTheDocument();
+		expect(root).toHaveAttribute("data-variant", "inline");
+		expect(root).toHaveClass("custom-inline");
+
+		const icon = screen.getByTestId("inline-icon");
+		expect(icon).toBeInTheDocument();
+
+		const heading = screen.getByRole("heading", {
+			level: 3,
+			name: "No images in gallery",
+		});
+		expect(heading).toBeInTheDocument();
+		expect(heading).toHaveAttribute("data-slot", "empty-title");
+
+		const description = screen.getByText("Add images to reuse across items");
+		expect(description).toBeInTheDocument();
+		expect(description).toHaveAttribute("data-slot", "empty-description");
+
+		const actionBtn = screen.getByRole("button", { name: "Add Image" });
+		expect(actionBtn).toBeInTheDocument();
+	});
+
+	it("renders inline variant minimally without optional elements", () => {
+		render(<EmptyState variant="inline" title="Inline Title" />);
+
+		const heading = screen.getByRole("heading", {
+			level: 3,
+			name: "Inline Title",
+		});
+		expect(heading).toBeInTheDocument();
+		expect(screen.queryByTestId("inline-icon")).toBeNull();
+		expect(screen.queryByRole("button")).toBeNull();
+	});
 });

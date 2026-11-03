@@ -181,4 +181,92 @@ describe("PlaylistPersistenceCoordinator", () => {
 		const record = await testDb.playlistItems.get(initialItem.id);
 		expect(record?.title).toBe("BeforeUnload Flushed Title");
 	});
+
+	it("persists background configuration through IndexedDB", async () => {
+		coordinator = createPlaylistPersistenceCoordinator(
+			usePlaylistStore,
+			testDb,
+			{
+				debounceMs: 50,
+			},
+		);
+		await coordinator.init();
+
+		const initialItem = usePlaylistStore.getState().items[0];
+
+		usePlaylistStore.getState().updateItem(initialItem.id, {
+			title: initialItem.title,
+			content: initialItem.content,
+			background: {
+				type: "image",
+				url: "https://example.com/test-bg.jpg",
+				brightness: 100,
+			},
+		});
+
+		await coordinator.flush();
+
+		const recordWithBg = await testDb.playlistItems.get(initialItem.id);
+		expect(recordWithBg?.background).toEqual({
+			type: "image",
+			url: "https://example.com/test-bg.jpg",
+			brightness: 100,
+		});
+
+		// Persist image background with fallback color
+		usePlaylistStore.getState().updateItem(initialItem.id, {
+			title: initialItem.title,
+			content: initialItem.content,
+			background: {
+				type: "image",
+				url: "https://example.com/test-bg.jpg",
+				brightness: 90,
+				color: "#2e1065",
+			},
+		});
+
+		await coordinator.flush();
+
+		const recordWithImageColorBg = await testDb.playlistItems.get(
+			initialItem.id,
+		);
+		expect(recordWithImageColorBg?.background).toEqual({
+			type: "image",
+			url: "https://example.com/test-bg.jpg",
+			brightness: 90,
+			color: "#2e1065",
+		});
+
+		// Persist color background
+		usePlaylistStore.getState().updateItem(initialItem.id, {
+			title: initialItem.title,
+			content: initialItem.content,
+			background: {
+				type: "color",
+				color: "#10b981",
+				brightness: 75,
+			},
+		});
+
+		await coordinator.flush();
+
+		const recordWithColorBg = await testDb.playlistItems.get(initialItem.id);
+		expect(recordWithColorBg?.background).toEqual({
+			type: "color",
+			color: "#10b981",
+			brightness: 75,
+		});
+
+		// Now clear background
+		usePlaylistStore.getState().updateItem(initialItem.id, {
+			title: initialItem.title,
+			content: initialItem.content,
+			background: null,
+		});
+
+		await coordinator.flush();
+
+		const recordClearedBg = await testDb.playlistItems.get(initialItem.id);
+		expect(recordClearedBg?.background).toBeNull();
+	});
 });

@@ -1,18 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { act, cleanup, render, screen } from "@testing-library/react";
-import { useEditorDraftStore } from "./editor-draft-store";
 import { PreviewScreenPanel } from "./preview-screen-panel";
 import { usePlaylistStore } from "./store";
 
 describe("PreviewScreenPanel", () => {
 	beforeEach(() => {
-		useEditorDraftStore.getState().clearDraft();
+		usePlaylistStore.getState().clearEditorDraft();
 		usePlaylistStore.setState(usePlaylistStore.getInitialState(), true);
 	});
 
 	afterEach(() => {
 		cleanup();
-		useEditorDraftStore.getState().clearDraft();
+		usePlaylistStore.getState().clearEditorDraft();
 	});
 
 	it("renders 'Preview' header with monitor icon and without counter badge or navigation buttons", () => {
@@ -80,7 +79,9 @@ describe("PreviewScreenPanel", () => {
 			selectedCueIndex: 0,
 			editingItemId: "item-1",
 		});
-		useEditorDraftStore.getState().setDraft("Draft Line 1\n\nDraft Line 2", 15);
+		usePlaylistStore
+			.getState()
+			.setEditorDraft("Draft Line 1\n\nDraft Line 2", 15);
 
 		render(<PreviewScreenPanel />);
 
@@ -137,7 +138,7 @@ describe("PreviewScreenPanel", () => {
 			selectedCueIndex: 0,
 			editingItemId: "item-1",
 		});
-		useEditorDraftStore.getState().setDraft("   \n\n   ", 0);
+		usePlaylistStore.getState().setEditorDraft("   \n\n   ", 0);
 
 		render(<PreviewScreenPanel />);
 
